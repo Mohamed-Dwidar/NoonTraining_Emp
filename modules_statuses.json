@@ -1,0 +1,6 @@
+{
+    "AdminModule": true,
+    "LayoutModule": true,
+    "PermissionModule": true,
+    "UserModule": true
+}
