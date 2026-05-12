@@ -3,20 +3,21 @@
 namespace Modules\UserModule\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Permission;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Modules\UserModule\App\Http\Models\User;
 
 class UserModuleDatabaseSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * @return void
      */
-    public function run(): void
+    public function run()
     {
-        // $this->call([]);
-
-        Permission::create(['name' => 'show reports']);
-
+        Model::unguard();
+        //DB::table('users')->truncate();
 
     }
 }

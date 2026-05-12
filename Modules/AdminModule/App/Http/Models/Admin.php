@@ -3,15 +3,16 @@
 namespace Modules\AdminModule\App\Http\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Modules\LogModule\app\Http\Models\Log;
+use Modules\UserModule\App\Http\Models\User;
 
-class Admin extends Authenticatable
-{
+class Admin extends Authenticatable {
 
     protected $guard = 'admin';
-
     protected $guarded = [];
 
+    public function user() {
+        return $this->morphMany(User::class, 'userable');
+    }
 
     /**
      * Check if the user has a specific role.
@@ -19,8 +20,7 @@ class Admin extends Authenticatable
      * @param string $role
      * @return bool
      */
-    public function hasRole($role)
-    {
+    public function hasRole($role) {
         return $this->roles()->where('name', $role)->exists();
     }
 
@@ -30,8 +30,7 @@ class Admin extends Authenticatable
      * @param string $permission
      * @return bool
      */
-    public function hasPermission($permission)
-    {
+    public function hasPermission($permission) {
         return $this->permissions()->where('name', $permission)->exists();
     }
 
@@ -40,8 +39,7 @@ class Admin extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles()
-    {
+    public function roles() {
         return $this->belongsToMany(
             'Modules\PermissionModule\Entities\Role',
             'model_has_roles',
@@ -55,8 +53,7 @@ class Admin extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function permissions()
-    {
+    public function permissions() {
         return $this->belongsToMany(
             'Modules\PermissionModule\Entities\Permission',
             'model_has_permissions',
@@ -73,8 +70,7 @@ class Admin extends Authenticatable
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getAllPermissions()
-    {
+    public function getAllPermissions() {
         // Direct permissions assigned to the user
         $directPermissions = $this->permissions;
 

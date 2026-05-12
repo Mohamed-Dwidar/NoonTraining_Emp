@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Modules\AdminModule\app\Http\Models\Admin;
+use Modules\UserModule\App\Http\Models\User;
 
 class AdminModuleDatabaseSeeder extends Seeder
 {
@@ -20,10 +21,16 @@ class AdminModuleDatabaseSeeder extends Seeder
 
 
         DB::table('admins')->truncate();
-        $admin = Admin::create([
+        Admin::create([
             'name' => "admin",
-            'email' => 'admin@noontraining.com',
-            'password' => bcrypt('admin'),
         ]);
+
+        User::create([
+            'email' => "superAdmin@noontraining.com",
+            'password' => bcrypt('123456'),
+            'userable_type' => 'Modules\AdminModule\Models\Admin',
+            'userable_id' => 1,
+        ]);
+
     }
 }

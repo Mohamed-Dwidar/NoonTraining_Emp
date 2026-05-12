@@ -2,20 +2,22 @@
 
 namespace Modules\UserModule\App\Http\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use Spatie\Permission\Models\Permission;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
-
-class User extends Authenticatable
-{
-    use Notifiable, HasApiTokens;
+// use Spatie\Permission\Models\Permission;
+// use Illuminate\Notifications\Notifiable;
+// use Illuminate\Database\Eloquent\Relations\MorphToMany;
+class User extends Authenticatable {
+    use HasFactory, HasApiTokens, SoftDeletes;
 
     protected $fillable = ['name', 'email', 'password'];
 
+    public function userable() {
+        return $this->morphTo();
+    }
 
     /**
      * Check if the user has a specific role.
@@ -23,8 +25,7 @@ class User extends Authenticatable
      * @param string $role
      * @return bool
      */
-    public function hasRole($role)
-    {
+    public function hasRole($role) {
         return $this->roles()->where('name', $role)->exists();
     }
 
@@ -34,8 +35,7 @@ class User extends Authenticatable
      * @param string $permission
      * @return bool
      */
-    public function hasPermission($permission)
-    {
+    public function hasPermission($permission) {
         return $this->permissions()->where('name', $permission)->exists();
     }
 
@@ -44,8 +44,7 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function roles()
-    {
+    public function roles() {
         return $this->belongsToMany(
             'Modules\PermissionModule\Entities\Role',
             'model_has_roles',
@@ -59,8 +58,7 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
-    public function permissions()
-    {
+    public function permissions() {
         return $this->belongsToMany(
             'Modules\PermissionModule\Entities\Permission',
             'model_has_permissions',
@@ -77,8 +75,7 @@ class User extends Authenticatable
      *
      * @return \Illuminate\Support\Collection
      */
-    public function getAllPermissions()
-    {
+    public function getAllPermissions() {
         // Direct permissions assigned to the user
         $directPermissions = $this->permissions;
 
