@@ -1,4 +1,4 @@
-@extends('layoutmodule::layouts.main')
+@extends('layoutmodule::layouts.layout_main')
 
 @section('title')
     لوحة تحكم الأختبارات
@@ -13,7 +13,7 @@
             <div class="row">
 
                 <!-- Total Exams -->
-                <div class="col-xl-3 col-lg-6 col-xs-12">
+                {{-- <div class="col-xl-3 col-lg-6 col-xs-12">
                     <div class="card">
                         <div class="card-body">
                             <div class="card-block">
@@ -83,7 +83,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
             </div>
 

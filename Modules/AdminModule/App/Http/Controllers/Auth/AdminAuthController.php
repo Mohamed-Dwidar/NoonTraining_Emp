@@ -28,22 +28,22 @@ class AdminAuthController extends Controller
         }
     }
 
-    public function login(Request $request)
-    {
-        $rememberme = $request->has('rememberme') ? 1 : 0;
+    // public function login(Request $request)
+    // {
+    //     $rememberme = $request->has('rememberme') ? 1 : 0;
 
-        if (auth('admin')->attempt(
-            [
-                'email' => $request->email,
-                'password' => $request->password
-            ],
-            $rememberme
-        )) {
-            return redirect()->intended('admin');
-        }
+    //     if (auth('admin')->attempt(
+    //         [
+    //             'email' => $request->email,
+    //             'password' => $request->password
+    //         ],
+    //         $rememberme
+    //     )) {
+    //         return redirect()->intended('admin');
+    //     }
 
-        return redirect()->back()->withErrors(['error' => 'البريد الأليكتروني او كلمة المرور ']);
-    }
+    //     return redirect()->back()->withErrors(['error' => 'البريد الأليكتروني او كلمة المرور ']);
+    // }
 
     public function changePassword()
     {

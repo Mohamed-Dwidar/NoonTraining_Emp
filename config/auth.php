@@ -42,16 +42,12 @@ return [
         ],
         'admin' => [
             'driver' => 'session',
-            'provider' => 'admins'
-        ],
-        'user' => [
-            'driver' => 'session',
             'provider' => 'users',
         ],
-        'student' => [
+        'employee' => [
             'driver' => 'session',
-            'provider' => 'students',
-        ],
+            'provider' => 'users',
+        ]
     ],
 
     /*
@@ -72,18 +68,10 @@ return [
     */
 
     'providers' => [
-        'admins' => [
-            'driver' => 'eloquent',
-            'model' => \Modules\AdminModule\app\Http\Models\Admin::class,
-        ],
         'users' => [
             'driver' => 'eloquent',
-            'model' => \Modules\UserModule\app\Http\Models\User::class,
-        ],
-        'students' => [
-            'driver' => 'eloquent',
-            'model' => \Modules\StudentModule\app\Http\Models\Student::class,
-        ],
+            'model' => \Modules\UserModule\App\Http\Models\User::class,
+        ]
     ],
 
     /*

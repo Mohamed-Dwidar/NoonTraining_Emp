@@ -1,17 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Modules\AdminModule\App\Http\Controllers\AdminModuleController;
+use Modules\UserModule\App\Http\Controllers\Auth\UserAuthController;
 
 Route::prefix('admin')->group(function () {
-    Route::get('/', 'Auth\AdminAuthController@index')->name('admin.login');
-    Route::get('login', 'Auth\AdminAuthController@index');
-    Route::post('login', 'Auth\AdminAuthController@login')->name('admin.loginpost');
+    Route::get('/', 'AdminModuleController@dsashboard')->name('admin.dashboard');
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin']], function () {
-    Route::get('dashboard', 'AdminModuleController@dashboard')->name('admin.dashboard');
-    Route::get('logout', 'Auth\AdminAuthController@logout')->name('admin.logout');
-    Route::get('changePassword', 'Auth\AdminAuthController@changePassword')->name('admin.changePassword');
-    Route::post('updatePassword', 'Auth\AdminAuthController@updatePassword')->name('admin.updatePassword');
+    Route::get('/', [AdminModuleController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('dashboard', [AdminModuleController::class, 'dashboard'])->name('admin.admin_dashboard');
+    Route::get('logout', [UserAuthController::class, 'logout'])->name('admin.logout');
+    Route::get('changePassword', [UserAuthController::class, 'updatePassword'])->name('admin.changePassword');
+    Route::get('updatePassword', [UserAuthController::class, 'updatePassword'])->name('admin.updatePassword');
 });

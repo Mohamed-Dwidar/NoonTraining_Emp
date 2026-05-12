@@ -57,10 +57,8 @@
 
     @if (Auth::guard('admin')->check())
         @include('layoutmodule::admin.nav')
-    @elseif (Auth::guard('student')->check())
+    @elseif (Auth::guard('employee')->check())
         @include('layoutmodule::student.nav')
-    @else
-        @include('layoutmodule::user.nav')
     @endif
 
     <div class="app-content content container-fluid">

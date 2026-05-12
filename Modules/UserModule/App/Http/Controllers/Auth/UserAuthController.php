@@ -7,37 +7,20 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Modules\ExamModule\Services\ExamService;
-use Modules\QuestionModule\Services\QuestionService;
-use Modules\StudentModule\Services\StudentExamService;
-use Modules\StudentModule\Services\StudentService;
+use Modules\AdminModule\App\Http\Models\Admin;
 use Modules\UserModule\Services\UserService;
 
 class UserAuthController extends Controller {
-    private $userService;
-    private $studentExamService;
-    private $questionService;
-    private $studentService;
+    protected $userService;
 
-    public function __construct(UserService $userService, StudentExamService $studentExamService, ExamService $examService, QuestionService $questionService, StudentService $studentService) {
+    public function __construct(UserService $userService) {
         $this->userService = $userService;
-        $this->studentExamService = $studentExamService;
-        $this->questionService = $questionService;
-        $this->studentService = $studentService;
     }
 
     public function dashboard() {
         if (Auth::guard('user')->check()) {
-            $studentExams = $this->studentExamService->findAll();
-            $totalQuestions = $this->questionService->findAll()->count();
-            $totalStudents = $this->studentService->findAll()->count();
 
-            $data = [
-                'totalStudentExams' => $studentExams->count(),
-                'totalCompletedExams' => $studentExams->whereNotNull('completed_at')->count(),
-                'totalQuestions' => $totalQuestions,
-                'totalStudents' => $totalStudents,
-            ];
+            $data = [];
 
             return view('usermodule::user.dashboard', $data);
         } else {
@@ -46,27 +29,43 @@ class UserAuthController extends Controller {
     }
 
     public function loginForm() {
-        if (Auth::guard('user')->check()) {
-            return redirect()->route('user.dashboard');
-        } else {
-            return view('usermodule::login');
-        }
+        return view('usermodule::login');
     }
 
     public function login(Request $request) {
-        $rememberme = $request->has('rememberme') ? true : false;
-
-        if (auth('user')->attempt(
+        $validator = Validator::make(
+            $request->all(),
             [
-                'email' => $request->email,
-                'password' => $request->password
+                'password' => 'required',
+                'email' => 'required',
             ],
-            $rememberme
-        )) {
-            return redirect()->intended('user/dashboard');
+            [
+                'email.required' => 'البريد الإلكتروني مطلوب',
+                'password.required' =>  'كلمة المرور مطلوبه',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        return redirect()->back()->withErrors(['error' => 'البريد الأليكتروني او كلمة المرور غير صحيحة']);
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::validate($credentials)) {
+            $user = Auth::getProvider()->retrieveByCredentials(['email' => $credentials['email']]);
+            // dd($user->userable_type,Admin::class);
+            if ($user->userable_type === Admin::class) {
+                Auth::guard('admin')->login($user);
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->userable_type === 'App\Models\Employee') {
+                Auth::guard('employee')->login($user);
+                return redirect()->route('employee.dashboard');
+            }
+        }
+
+        return redirect('/')->with('error', 'البريد الإلكتروني او كلمة المرور غير صحيحة');
     }
 
     public function changePassword() {
@@ -105,10 +104,13 @@ class UserAuthController extends Controller {
     }
 
     public function logout(Request $request) {
-        Auth::guard('user')->logout();
+
+        Auth::guard('admin')->logout();
+        Auth::guard('employee')->logout();
+
         $request->session()->flush();
         $request->session()->regenerate();
 
-        return redirect()->to('user');
+        return redirect()->to('/');
     }
 }

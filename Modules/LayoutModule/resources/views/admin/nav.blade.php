@@ -4,6 +4,22 @@
             <ul class="top-menu menu-eff text-right">
 
                 <li class="nav-item">
+                    <a href="#"
+                        class="@if (Request::segment(2) == 'branches') active @endif">
+                        <i class="fa fa-building"></i>
+                        <span data-i18n="nav.dash.main" class="menu-title">الفروع</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#"
+                        class="@if (Request::segment(2) == 'employees') active @endif">
+                        <i class="fa fa-users"></i>
+                        <span data-i18n="nav.dash.main" class="menu-title">الموظفين</span>
+                    </a>
+                </li>
+
+                {{-- <li class="nav-item">
                     <a href="{{ route(Auth::getDefaultDriver() . '.users.list') }}"
                         class="@if (Request::segment(2) == 'users') active @endif">
                         <i class="fa fa-users"></i>
@@ -33,21 +49,12 @@
                         <span data-i18n="nav.dash.main" class="menu-title">بنك الأسئلة</span>
                     </a>
                 </li>
-
-                {{-- <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.students.index') }}"
-                        class="@if (Request::segment(2) == 'student') active @endif">
-                        <i class="fa fa-graduation-cap"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الطلاب</span>
-                    </a>
-                </li> --}}
-
                 <li class="nav-item">
                     <a href="{{ route(Auth::getDefaultDriver() . '.students.index') }}" class="@if (Request::segment(2) == 'students' && in_array(Request::segment(3), ['', 'add', 'edit', 'view'])) active @endif">
                         <i class="fa fa-graduation-cap"></i>
                         <span data-i18n="nav.dash.main" class="menu-title">الطلاب</span>
                     </a>
-                </li>
+                </li> --}}
 
             </ul>
         </nav>

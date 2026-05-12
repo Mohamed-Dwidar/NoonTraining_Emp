@@ -5,7 +5,7 @@
         {{-- <div class="navbar-header"> --}}
         <div class="row">
             <div class="col-xl-3 col-lg-2 col-xs-0">
-                @if (Auth::guard('user')->check())
+                @if (Auth::guard('employee')->check())
                     <div class="col-xl-12 col-lg-12 col-xs-12 header-branch">
                         <span>
                             موقع الأختبارت
@@ -16,7 +16,7 @@
                 @elseif(Auth::guard('admin')->check())
                     <div class="col-xl-12 col-lg-12 col-xs-12 header-branch">
                         <span>
-                            موقع الأختبارت
+                            موقع الموظفين
                             &nbsp; - &nbsp;
                             مدير النظام
                         </span>
@@ -32,7 +32,7 @@
                 <ul class="nav navbar-nav float-xs-right" style="margin-left: 63px">
                     <li class="dropdown dropdown-user nav-item header-user">
                         <a href="#" data-toggle="dropdown" class="dropdown-toggle nav-link dropdown-user-link">
-                            <span class="user-name">{{ auth()->user()->name }} </span>
+                            <span class="user-name">{{ (Auth::guard('admin')->check() ? Auth::guard('admin')->user() : Auth::guard('employee')->user())?->userable?->name }}</span>
                             <i class="fa fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu arrow dropdown-menu-left">
