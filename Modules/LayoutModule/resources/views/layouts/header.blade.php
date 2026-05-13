@@ -36,11 +36,11 @@
                             <i class="fa fa-caret-down"></i>
                         </a>
                         <div class="dropdown-menu arrow dropdown-menu-left">
-                            <a href="{{ route(Auth::getDefaultDriver() . '.changePassword') }}" class="dropdown-item">
+                            <a href="{{ (Auth::guard('admin')->check() ? route('admin.changePassword') : route('employee.changePassword')) }}" class="dropdown-item">
                                 <i class="icon-key4"></i>
                                 تغيير كلمة المرور
                             </a>
-                            <a href="{{ route(Auth::getDefaultDriver() . '.logout') }}" class="dropdown-item">
+                            <a href="{{ Auth::guard('admin')->check() ? route('admin.logout') : route('employee.logout') }}" class="dropdown-item">
                                 <i class="icon-power3"></i>
                                 خروج
                             </a>

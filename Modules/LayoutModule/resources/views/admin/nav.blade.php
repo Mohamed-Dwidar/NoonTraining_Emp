@@ -4,7 +4,7 @@
             <ul class="top-menu menu-eff text-right">
 
                 <li class="nav-item">
-                    <a href="#"
+                    <a href="{{ route('admin.branches.index') }}"
                         class="@if (Request::segment(2) == 'branches') active @endif">
                         <i class="fa fa-building"></i>
                         <span data-i18n="nav.dash.main" class="menu-title">الفروع</span>

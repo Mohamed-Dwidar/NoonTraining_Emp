@@ -2,5 +2,6 @@
     "AdminModule": true,
     "LayoutModule": true,
     "PermissionModule": true,
-    "UserModule": true
+    "UserModule": true,
+    "BranchModule": true
 }

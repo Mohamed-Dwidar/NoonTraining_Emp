@@ -74,6 +74,11 @@ a {
 .btn i[class*=' icon-'] {
     line-height: 1.25rem;
 }
+.btn-primary {
+    border-color: #1b4922;
+    background-color: #1b4922;
+    color: #FFFFFF;
+}
 
 code[class*='language-'],
 pre[class*='language-'] {
