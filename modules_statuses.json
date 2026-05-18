@@ -3,5 +3,6 @@
     "LayoutModule": true,
     "PermissionModule": true,
     "UserModule": true,
-    "BranchModule": true
+    "BranchModule": true,
+    "DepartmentModule": true
 }

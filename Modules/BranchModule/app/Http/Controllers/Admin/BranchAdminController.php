@@ -83,6 +83,6 @@ class BranchAdminController extends Controller {
 
     public function destroy($id) {
         $this->branchService->deleteBranch($id);
-        return redirect()->route('admin.branches.index')->with('success', 'The branch has been deleted successfully!');
+        return redirect()->route('admin.branches.index')->with('success', 'تم حذف الفرع بنجاح');
     }
 }

@@ -12,12 +12,6 @@ class Branch extends Model
 
     protected $guarded = [];
 
-    // Relationship with User (MorphMany)
-    public function user()
-    {
-        return $this->morphMany(User::class, 'userable');
-    }
-
     public function scopeFilter($query, $request = [])
     {
         // Filter by branch name

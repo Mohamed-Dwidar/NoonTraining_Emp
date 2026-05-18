@@ -4,16 +4,22 @@
             <ul class="top-menu menu-eff text-right">
 
                 <li class="nav-item">
-                    <a href="{{ route('admin.branches.index') }}"
-                        class="@if (Request::segment(2) == 'branches') active @endif">
-                        <i class="fa fa-building"></i>
+                    <a href="{{ route('admin.branches.index') }}" class="@if (Request::segment(2) == 'branches') active @endif">
+                        <i class="fa fa-building-o"></i>
                         <span data-i18n="nav.dash.main" class="menu-title">الفروع</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a href="#"
-                        class="@if (Request::segment(2) == 'employees') active @endif">
+                    <a href="{{ route('admin.departments.index') }}"
+                        class="@if (Request::segment(2) == 'departments') active @endif">
+                        <i class="fa fa-building"></i>
+                        <span data-i18n="nav.dash.main" class="menu-title">الأقسام</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="@if (Request::segment(2) == 'employees') active @endif">
                         <i class="fa fa-users"></i>
                         <span data-i18n="nav.dash.main" class="menu-title">الموظفين</span>
                     </a>
