@@ -69,7 +69,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('admin.bonuses.index') }}" class="@if (Request::segment(2) == 'bonus') active @endif">
                                 <i class="fa fa-gift"></i> المكافآت
                             </a>
                         </li>

@@ -1,0 +1,11 @@
+{
+    "name": "BonuseModule",
+    "alias": "bonusemodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BonuseModule\\app\\Providers\\BonuseModuleServiceProvider"
+    ],
+    "files": []
+}

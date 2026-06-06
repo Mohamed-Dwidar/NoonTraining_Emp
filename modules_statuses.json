@@ -7,5 +7,6 @@
     "DepartmentModule": true,
     "EmployeeModule": true,
     "AttendanceModule": true,
-    "LeaveModule": true
+    "LeaveModule": true,
+    "BonuseModule": true
 }
