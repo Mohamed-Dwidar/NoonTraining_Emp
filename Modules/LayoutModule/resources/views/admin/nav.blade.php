@@ -19,7 +19,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a href="#" class="@if (Request::segment(2) == 'employees') active @endif">
+                    <a href="{{ route('admin.employees.index') }}" class="@if (Request::segment(2) == 'employees') active @endif">
                         <i class="fa fa-users"></i>
                         <span data-i18n="nav.dash.main" class="menu-title">الموظفين</span>
                     </a>

@@ -4,5 +4,6 @@
     "PermissionModule": true,
     "UserModule": true,
     "BranchModule": true,
-    "DepartmentModule": true
+    "DepartmentModule": true,
+    "EmployeeModule": true
 }
