@@ -50,7 +50,12 @@
                     <ul class="dropdown">
                         <li>
                             <a href="{{ route('admin.attendances.index') }}" class="@if (Request::segment(2) == 'attendance') active @endif">
-                                <i class="fa fa-clock-o"></i> الحضور والإجازات
+                                <i class="fa fa-clock-o"></i> الحضور
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.leaves.index') }}" class="@if (Request::segment(2) == 'leave') active @endif">
+                                <i class="fa fa-ban"></i> الإجازات
                             </a>
                         </li>
                         <li>

@@ -6,5 +6,6 @@
     "BranchModule": true,
     "DepartmentModule": true,
     "EmployeeModule": true,
-    "AttendanceModule": true
+    "AttendanceModule": true,
+    "LeaveModule": true
 }
