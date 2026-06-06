@@ -25,7 +25,7 @@
                             <div class="row">
                                 <div class="col-lg-12 col-12">
                                     <form class="card-form side-form" method="POST"
-                                        action="{{ route(Auth::getDefaultDriver() . '.employees.store') }}"
+                                        action="{{ route(Auth::getDefaultDriver() . '.attendances.store') }}"
                                         enctype="multipart/form-data">
                                         @csrf
                                         <div class="row">
@@ -36,19 +36,6 @@
                                                         class="form-control @error('name') is-invalid @enderror"
                                                         id="name" name="name" value="{{ old('name') }}">
                                                     @error('name')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
-                                                <label for="email">البريد الإلكتروني</label>
-                                                <div class="form-group">
-                                                    <input type="email"
-                                                        class="form-control @error('email') is-invalid @enderror"
-                                                        id="email" name="email" value="{{ old('email') }}">
-                                                    @error('email')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -142,7 +129,7 @@
                                         </div>
 
                                         <div class="col-12 mt-1">
-                                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}"
+                                            <a href="{{ route(Auth::getDefaultDriver() . '.attendances.index') }}"
                                                 class="btn btn-secondary">إلغاء</a>
                                             <button type="submit" class="btn btn-primary">حفظ</button>
                                         </div>
@@ -163,7 +150,7 @@
     const branchSelect     = document.getElementById('branch_id');
     const deptSelect       = document.getElementById('department_id');
     const deptLoading      = document.getElementById('dept-loading');
-    const deptsByBranchBase = "{{ url('admin/employee/departments-by-branch') }}";
+    const deptsByBranchBase = "{{ url('admin/attendance/departments-by-branch') }}";
     const oldDeptId         = "{{ old('department_id') }}";
 
     function loadDepartments(branchId, selectedId) {

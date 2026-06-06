@@ -1,7 +1,7 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    إنشاء موظف جديد
+    تعديل الموظف
 @endsection
 
 @section('content')
@@ -9,8 +9,8 @@
         <div class="content-header">
             <div class="content-header-left mb-2 breadcrumb-new col">
                 <h3>
-                    <i class="fa fa-plus-circle"></i>
-                    إنشاء موظف جديد
+                    <i class="fa fa-edit"></i>
+                    تعديل الموظف
                 </h3>
             </div>
         </div>
@@ -25,30 +25,20 @@
                             <div class="row">
                                 <div class="col-lg-12 col-12">
                                     <form class="card-form side-form" method="POST"
-                                        action="{{ route(Auth::getDefaultDriver() . '.employees.store') }}"
+                                        action="{{ route(Auth::getDefaultDriver() . '.attendances.update') }}"
                                         enctype="multipart/form-data">
                                         @csrf
+                                        @method('POST')
+                                        <input type="hidden" name="id" value="{{ $attendance->id }}">
+
                                         <div class="row">
                                             <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
                                                 <label for="name">اسم الموظف</label>
                                                 <div class="form-group">
                                                     <input type="text"
                                                         class="form-control @error('name') is-invalid @enderror"
-                                                        id="name" name="name" value="{{ old('name') }}">
+                                                        id="name" name="name" value="{{ old('name', $attendance->name) }}">
                                                     @error('name')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
-                                                <label for="email">البريد الإلكتروني</label>
-                                                <div class="form-group">
-                                                    <input type="email"
-                                                        class="form-control @error('email') is-invalid @enderror"
-                                                        id="email" name="email" value="{{ old('email') }}">
-                                                    @error('email')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -60,7 +50,7 @@
                                                 <div class="form-group">
                                                     <input type="text"
                                                         class="form-control @error('job') is-invalid @enderror"
-                                                        id="job" name="job" value="{{ old('job') }}">
+                                                        id="job" name="job" value="{{ old('job', $attendance->job) }}">
                                                     @error('job')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -75,7 +65,7 @@
                                                         id="branch_id" name="branch_id">
                                                         <option value="">اختر الفرع</option>
                                                         @foreach($branches as $branch)
-                                                            <option value="{{ $branch->id }}" {{ old('branch_id') == $branch->id ? 'selected' : '' }}>
+                                                            <option value="{{ $branch->id }}" {{ old('branch_id', $attendance->branch_id) == $branch->id ? 'selected' : '' }}>
                                                                 {{ $branch->name }}
                                                             </option>
                                                         @endforeach
@@ -90,7 +80,7 @@
                                                 <div class="form-group position-relative">
                                                     <select class="form-control @error('department_id') is-invalid @enderror"
                                                         id="department_id" name="department_id" disabled>
-                                                        <option value="">اختر الفرع أولاً</option>
+                                                        <option value="">جاري التحميل...</option>
                                                     </select>
                                                     <span id="dept-loading" class="position-absolute"
                                                         style="top:8px; left:10px; display:none;">
@@ -108,7 +98,7 @@
                                                 <div class="form-group">
                                                     <input type="number" step="0.01" min="0"
                                                         class="form-control @error('basic_salary') is-invalid @enderror"
-                                                        id="basic_salary" name="basic_salary" value="{{ old('basic_salary') }}">
+                                                        id="basic_salary" name="basic_salary" value="{{ old('basic_salary', $attendance->basic_salary) }}">
                                                     @error('basic_salary')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -121,7 +111,7 @@
                                                 <div class="form-group">
                                                     <input type="number" min="1" max="31"
                                                         class="form-control @error('monthly_working_days') is-invalid @enderror"
-                                                        id="monthly_working_days" name="monthly_working_days" value="{{ old('monthly_working_days') }}">
+                                                        id="monthly_working_days" name="monthly_working_days" value="{{ old('monthly_working_days', $attendance->monthly_working_days) }}">
                                                     @error('monthly_working_days')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -133,7 +123,7 @@
                                                 <div class="form-group">
                                                     <input type="number" min="1" max="24"
                                                         class="form-control @error('daily_working_hours') is-invalid @enderror"
-                                                        id="daily_working_hours" name="daily_working_hours" value="{{ old('daily_working_hours') }}">
+                                                        id="daily_working_hours" name="daily_working_hours" value="{{ old('daily_working_hours', $attendance->daily_working_hours) }}">
                                                     @error('daily_working_hours')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -142,7 +132,7 @@
                                         </div>
 
                                         <div class="col-12 mt-1">
-                                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}"
+                                            <a href="{{ route(Auth::getDefaultDriver() . '.attendances.index') }}"
                                                 class="btn btn-secondary">إلغاء</a>
                                             <button type="submit" class="btn btn-primary">حفظ</button>
                                         </div>
@@ -163,13 +153,13 @@
     const branchSelect     = document.getElementById('branch_id');
     const deptSelect       = document.getElementById('department_id');
     const deptLoading      = document.getElementById('dept-loading');
-    const deptsByBranchBase = "{{ url('admin/employee/departments-by-branch') }}";
-    const oldDeptId         = "{{ old('department_id') }}";
+    const deptsByBranchBase = "{{ url('admin/attendance/departments-by-branch') }}";
+    const currentDeptId     = "{{ old('department_id', $attendance->department_id) }}";
 
     function loadDepartments(branchId, selectedId) {
         deptSelect.disabled = true;
-        deptSelect.innerHTML = '<option value="">جاري التحميل...</option>';
         deptLoading.style.display = 'inline';
+        deptSelect.innerHTML = '<option value="">جاري التحميل...</option>';
 
         fetch(deptsByBranchBase + '/' + branchId, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -204,9 +194,11 @@
         loadDepartments(this.value, '');
     });
 
-    // Restore state after validation failure
+    // Load departments for the pre-selected branch on page load
     if (branchSelect.value) {
-        loadDepartments(branchSelect.value, oldDeptId);
+        loadDepartments(branchSelect.value, currentDeptId);
+    } else {
+        deptSelect.innerHTML = '<option value="">اختر الفرع أولاً</option>';
     }
 })();
 </script>

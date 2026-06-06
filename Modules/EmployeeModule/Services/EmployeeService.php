@@ -2,13 +2,12 @@
 
 namespace Modules\EmployeeModule\Services;
 
-use App\Helpers\UploaderHelper;
+use Modules\EmployeeModule\App\Http\Models\Employee;
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 
 class EmployeeService {
 
-    protected $employeeRepository;
-    use UploaderHelper;
+    protected EmployeeRepository $employeeRepository;
 
     public function __construct(EmployeeRepository $employeeRepository) {
         $this->employeeRepository = $employeeRepository;
@@ -31,7 +30,7 @@ class EmployeeService {
     }
 
     public function create($data) {
-        $employeeData = [
+        $employee = $this->employeeRepository->create([
             'branch_id'            => $data['branch_id'],
             'department_id'        => $data['department_id'],
             'name'                 => $data['name'],
@@ -39,19 +38,22 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary'],
             'monthly_working_days' => $data['monthly_working_days'],
             'daily_working_hours'  => $data['daily_working_hours'],
-        ];
+        ]);
 
-        return $this->employeeRepository->create($employeeData);
+        $employee->user()->create([
+            'email'    => $data['email'],
+            'password' => bcrypt('123456'),
+        ]);
+
+        return $employee;
     }
 
     public function update($data) {
-        $id = $data['id'];
+        $id       = $data['id'];
         $employee = $this->employeeRepository->find($id);
-        if (!$employee) {
-            return null;
-        }
+        if (!$employee) return null;
 
-        $employeeData = [
+        $this->employeeRepository->update([
             'branch_id'            => $data['branch_id'],
             'department_id'        => $data['department_id'],
             'name'                 => $data['name']                 ?? $employee->name,
@@ -59,9 +61,11 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary']         ?? $employee->basic_salary,
             'monthly_working_days' => $data['monthly_working_days'] ?? $employee->monthly_working_days,
             'daily_working_hours'  => $data['daily_working_hours']  ?? $employee->daily_working_hours,
-        ];
+        ], $id);
 
-        $this->employeeRepository->update($employeeData, $id);
+        if (!empty($data['email'])) {
+            $employee->user()->update(['email' => $data['email']]);
+        }
 
         return $employee;
     }

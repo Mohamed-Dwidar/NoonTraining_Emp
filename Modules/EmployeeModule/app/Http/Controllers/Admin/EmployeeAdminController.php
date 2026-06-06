@@ -42,6 +42,7 @@ class EmployeeAdminController extends Controller {
             $request->all(),
             [
                 'name'                 => 'required|string|max:255',
+                'email'                => 'required|email|unique:users,email',
                 'job'                  => 'required|string|max:255',
                 'branch_id'            => 'required|exists:branches,id',
                 'department_id'        => 'required|exists:departments,id',
@@ -51,6 +52,9 @@ class EmployeeAdminController extends Controller {
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
+                'email.required'                => 'البريد الإلكتروني مطلوب',
+                'email.email'                   => 'البريد الإلكتروني غير صحيح',
+                'email.unique'                  => 'البريد الإلكتروني مستخدم من قبل',
                 'job.required'                  => 'الوظيفة مطلوبة',
                 'branch_id.required'            => 'الفرع مطلوب',
                 'branch_id.exists'              => 'الفرع غير موجود',
@@ -83,10 +87,12 @@ class EmployeeAdminController extends Controller {
     }
 
     public function update(Request $request) {
+        $employeeId = $request->input('id');
         $validator = Validator::make(
             $request->all(),
             [
                 'name'                 => 'required|string|max:255',
+                'email'                => 'required|email|unique:users,email,' . $employeeId . ',userable_id,userable_type,' . \Modules\EmployeeModule\App\Http\Models\Employee::class,
                 'job'                  => 'required|string|max:255',
                 'branch_id'            => 'required|exists:branches,id',
                 'department_id'        => 'required|exists:departments,id',
@@ -96,6 +102,9 @@ class EmployeeAdminController extends Controller {
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
+                'email.required'                => 'البريد الإلكتروني مطلوب',
+                'email.email'                   => 'البريد الإلكتروني غير صحيح',
+                'email.unique'                  => 'البريد الإلكتروني مستخدم من قبل',
                 'job.required'                  => 'الوظيفة مطلوبة',
                 'branch_id.required'            => 'الفرع مطلوب',
                 'branch_id.exists'              => 'الفرع غير موجود',

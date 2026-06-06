@@ -44,6 +44,19 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
+                                                <label for="email">البريد الإلكتروني</label>
+                                                <div class="form-group">
+                                                    <input type="email"
+                                                        class="form-control @error('email') is-invalid @enderror"
+                                                        id="email" name="email" value="{{ old('email', $employee->user->first()?->email) }}">
+                                                    @error('email')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
                                          <div class="row">
                                             <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
                                                 <label for="job">الوظيفة</label>

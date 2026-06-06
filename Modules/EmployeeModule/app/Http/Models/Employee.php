@@ -4,13 +4,19 @@ namespace Modules\EmployeeModule\App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\BranchModule\App\Http\Models\Branch;
 use Modules\DepartmentModule\App\Http\Models\Department;
+use Modules\UserModule\App\Http\Models\User;
 
 class Employee extends Model {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = [];
+
+    public function user() {
+        return $this->morphMany(User::class, 'userable');
+    }
 
     public function branch() {
         return $this->belongsTo(Branch::class, 'branch_id');

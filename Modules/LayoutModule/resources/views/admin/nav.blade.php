@@ -3,67 +3,130 @@
         <nav id="primary-menu">
             <ul class="top-menu menu-eff text-right">
 
+                {{-- 1. الإعدادات --}}
                 <li class="nav-item">
-                    <a href="{{ route('admin.branches.index') }}" class="@if (Request::segment(2) == 'branches') active @endif">
-                        <i class="fa fa-building-o"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الفروع</span>
+                    <a href="#">
+                        <i class="fa fa-cog"></i>
+                        <span class="menu-title">الإعدادات</span>
                     </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="{{ route('admin.branches.index') }}" class="@if (Request::segment(2) == 'branch') active @endif">
+                                <i class="fa fa-code-fork"></i> الفروع
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.departments.index') }}" class="@if (Request::segment(2) == 'department') active @endif">
+                                <i class="fa fa-sitemap"></i> الأقسام
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-exclamation-triangle"></i> أنواع المخالفات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-file-text-o"></i> اللائحة
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
+                {{-- 2. الموظفون - single link --}}
                 <li class="nav-item">
-                    <a href="{{ route('admin.departments.index') }}"
-                        class="@if (Request::segment(2) == 'departments') active @endif">
-                        <i class="fa fa-building"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الأقسام</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a href="{{ route('admin.employees.index') }}" class="@if (Request::segment(2) == 'employees') active @endif">
+                    <a href="{{ route('admin.employees.index') }}" class="@if (Request::segment(2) == 'employee') active @endif">
                         <i class="fa fa-users"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الموظفين</span>
+                        <span class="menu-title">الموظفون</span>
                     </a>
                 </li>
 
-                {{-- <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.users.list') }}"
-                        class="@if (Request::segment(2) == 'users') active @endif">
-                        <i class="fa fa-users"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">المستخدمون</span>
+                {{-- 3. العمليات الشهرية --}}
+                <li class="nav-item">
+                    <a href="#" class="nav-monthly-ops">
+                        <i class="fa fa-calendar-check-o"></i>
+                        <span class="menu-title">العمليات الشهرية</span>
                     </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="{{ route('admin.attendances.index') }}" class="@if (Request::segment(2) == 'attendance') active @endif">
+                                <i class="fa fa-clock-o"></i> الحضور والإجازات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-ban"></i> المخالفات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-minus-circle"></i> الخصومات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-gift"></i> المكافآت
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-money"></i> الرواتب
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
+                {{-- 4. الأداء والمتابعة --}}
                 <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.exam.index') }}"
-                        class="@if (Request::segment(2) == 'exam') active @endif">
-                        <i class="fa fa-book"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الأختبارات</span>
+                    <a href="#">
+                        <i class="fa fa-line-chart"></i>
+                        <span class="menu-title">الأداء والمتابعة</span>
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.categories.index') }}"
-                        class="@if (Request::segment(2) == 'category') active @endif">
-                        <i class="fa fa-list"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">تصنيفات الأسئلة</span>
-                    </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-tasks"></i> المهام
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-star-o"></i> تقييم الأداء
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-graduation-cap"></i> الطلاب <small class="text-muted">(للمعهد)</small>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
+                {{-- 5. التقارير --}}
                 <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.questions.index') }}"
-                        class="@if (Request::segment(2) == 'question') active @endif">
-                        <i class="fa fa-question-circle fa-fw"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">بنك الأسئلة</span>
+                    <a href="#">
+                        <i class="fa fa-bar-chart"></i>
+                        <span class="menu-title">التقارير</span>
                     </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-money"></i> تقارير الرواتب
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-user"></i> تقارير الموظفين
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#">
+                                <i class="fa fa-graduation-cap"></i> تقارير الطلاب
+                            </a>
+                        </li>
+                    </ul>
                 </li>
-                <li class="nav-item">
-                    <a href="{{ route(Auth::getDefaultDriver() . '.students.index') }}" class="@if (Request::segment(2) == 'students' && in_array(Request::segment(3), ['', 'add', 'edit', 'view'])) active @endif">
-                        <i class="fa fa-graduation-cap"></i>
-                        <span data-i18n="nav.dash.main" class="menu-title">الطلاب</span>
-                    </a>
-                </li> --}}
 
             </ul>
         </nav>
     </div>
-
 </div>
