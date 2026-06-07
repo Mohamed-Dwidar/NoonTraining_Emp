@@ -11,8 +11,7 @@ use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
 
-class LeaveAdminController extends Controller
-{
+class LeaveAdminController extends Controller {
     protected LeaveService $leaveService;
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
@@ -30,8 +29,7 @@ class LeaveAdminController extends Controller
         $this->employeeService   = $employeeService;
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
 
@@ -41,19 +39,19 @@ class LeaveAdminController extends Controller
 
         session(['leave_month' => $month, 'leave_branch_id' => $branchId]);
 
-        $leaves = $this->leaveService->getLeaves(
-            $month,
-            $branchId ? (int) $branchId : null,
-            $deptId   ? (int) $deptId   : null
-        );
+        $leaves = $this->leaveService->filter($request)->paginate(20);
 
         return view('leavemodule::Admin.index', compact(
-            'leaves', 'branches', 'departments', 'month', 'branchId', 'deptId'
+            'leaves',
+            'branches',
+            'departments',
+            'month',
+            'branchId',
+            'deptId'
         ));
     }
 
-    public function create(Request $request)
-    {
+    public function create(Request $request) {
         $month       = $request->input('month', session('leave_month', now()->format('Y-m')));
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
@@ -61,12 +59,15 @@ class LeaveAdminController extends Controller
         $types       = Leave::TYPES;
 
         return view('leavemodule::Admin.create', compact(
-            'month', 'branches', 'departments', 'employees', 'types'
+            'month',
+            'branches',
+            'departments',
+            'employees',
+            'types'
         ));
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $validator = Validator::make(
             $request->all(),
             [
@@ -92,7 +93,7 @@ class LeaveAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->leaveService->createLeave(
+        $this->leaveService->create(
             $request->only('employee_id', 'type', 'start_date', 'end_date', 'reason')
         );
 
@@ -101,9 +102,8 @@ class LeaveAdminController extends Controller
         ])->with('success', 'تم إضافة الإجازة بنجاح');
     }
 
-    public function edit(int $id)
-    {
-        $leave       = $this->leaveService->findLeave($id);
+    public function edit(int $id) {
+        $leave       = $this->leaveService->find($id);
         $month       = $leave->month;
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
@@ -111,12 +111,16 @@ class LeaveAdminController extends Controller
         $types       = Leave::TYPES;
 
         return view('leavemodule::Admin.edit', compact(
-            'leave', 'month', 'branches', 'departments', 'employees', 'types'
+            'leave',
+            'month',
+            'branches',
+            'departments',
+            'employees',
+            'types'
         ));
     }
 
-    public function update(Request $request, int $id)
-    {
+    public function update(Request $request, int $id) {
         $validator = Validator::make(
             $request->all(),
             [
@@ -142,9 +146,8 @@ class LeaveAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->leaveService->updateLeave(
-            $id,
-            $request->only('employee_id', 'type', 'start_date', 'end_date', 'reason')
+        $this->leaveService->update(
+            $request->only('employee_id', 'type', 'start_date', 'end_date', 'reason') + ['id' => $id]
         );
 
         return redirect()->route('admin.leaves.index', [
@@ -152,11 +155,10 @@ class LeaveAdminController extends Controller
         ])->with('success', 'تم تحديث الإجازة بنجاح');
     }
 
-    public function destroy(int $id)
-    {
-        $leave = $this->leaveService->findLeave($id);
+    public function destroy(int $id) {
+        $leave = $this->leaveService->find($id);
         $month = $leave->month;
-        $this->leaveService->deleteLeave($id);
+        $this->leaveService->delete($id);
 
         return redirect()->route('admin.leaves.index', ['month' => $month])
             ->with('success', 'تم حذف الإجازة بنجاح');

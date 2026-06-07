@@ -14,28 +14,40 @@ class LeaveService {
         $this->leaveRepository = $leaveRepository;
     }
 
-    public function getLeaves(string $month, ?int $branchId = null, ?int $deptId = null): Collection {
-        return $this->leaveRepository->getByMonth($month, $branchId, $deptId);
+    public function filter($request) {
+        return $this->leaveRepository->filter($request);
     }
 
-    public function findLeave(int $id) {
-        return $this->leaveRepository->findLeave($id);
+    public function find(int $id) {
+        return $this->leaveRepository->find($id);
     }
 
-    public function createLeave(array $data) {
-        $data['month'] = substr($data['start_date'], 0, 7);
-        $data['days']  = $this->calcDays($data['start_date'], $data['end_date']);
-        return $this->leaveRepository->createLeave($data);
+    public function create(array $data) {
+        return $this->leaveRepository->create([
+            'employee_id' => $data['employee_id'],
+            'type'        => $data['type'],
+            'start_date'  => $data['start_date'],
+            'end_date'    => $data['end_date'],
+            'month'       => substr($data['start_date'], 0, 7),
+            'days'        => $this->calcDays($data['start_date'], $data['end_date']),
+            'reason'      => $data['reason'],
+        ]);
     }
 
-    public function updateLeave(int $id, array $data) {
-        $data['month'] = substr($data['start_date'], 0, 7);
-        $data['days']  = $this->calcDays($data['start_date'], $data['end_date']);
-        return $this->leaveRepository->updateLeave($id, $data);
+    public function update(array $data) {
+        return $this->leaveRepository->update([
+            'employee_id' => $data['employee_id'],
+            'type'        => $data['type'],
+            'start_date'  => $data['start_date'],
+            'end_date'    => $data['end_date'],
+            'month'       => substr($data['start_date'], 0, 7),
+            'days'        => $this->calcDays($data['start_date'], $data['end_date']),
+            'reason'      => $data['reason'],
+        ], $data['id']);
     }
 
-    public function deleteLeave(int $id): void {
-        $this->leaveRepository->deleteLeave($id);
+    public function delete(int $id): void {
+        $this->leaveRepository->delete($id);
     }
 
     private function calcDays(string $start, string $end): int {

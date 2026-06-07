@@ -27,4 +27,20 @@ class Leave extends Model {
     public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
+
+    public function scopeFilter($query, $request) {
+        if ($request->filled('month')) {
+            $query->where('month', $request->input('month'));
+        }
+
+        if ($request->filled('branch_id')) {
+            $query->whereHas('employee', fn($q) => $q->where('branch_id', $request->input('branch_id')));
+        }
+
+        if ($request->filled('department_id')) {
+            $query->whereHas('employee', fn($q) => $q->where('department_id', $request->input('department_id')));
+        }
+
+        return $query;
+    }
 }

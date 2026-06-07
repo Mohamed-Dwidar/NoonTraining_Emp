@@ -121,6 +121,9 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="mt-3">
+                        {{ $bonuses->appends(request()->query())->links('pagination::bootstrap-4') }}
+                    </div>
                 @endif
             </div>
         </div>

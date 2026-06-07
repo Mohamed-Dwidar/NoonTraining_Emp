@@ -13,23 +13,61 @@ class BonuseService {
         $this->bonuseRepository = $bonuseRepository;
     }
 
-    public function getBonuses(string $month, ?int $branchId = null, ?int $deptId = null): Collection {
-        return $this->bonuseRepository->getByMonth($month, $branchId, $deptId);
+    /**
+     * Get all students
+     */
+    public function findAll() {
+        return $this->bonuseRepository->all();
     }
 
-    public function findBonuse(int $id) {
-        return $this->bonuseRepository->findBonuse($id);
+    public function paginate($perPage = 15) {
+        return $this->bonuseRepository->paginate($perPage);
     }
 
-    public function createBonuse(array $data) {
-        return $this->bonuseRepository->createBonuse($data);
+    public function filter($request = []) {
+        return $this->bonuseRepository->filter($request);
     }
 
-    public function updateBonuse(int $id, array $data) {
-        return $this->bonuseRepository->updateBonuse($id, $data);
+    /**
+     * Get a single student
+     */
+    public function find($id) {
+        return $this->bonuseRepository->find($id);
     }
 
-    public function deleteBonuse(int $id): void {
-        $this->bonuseRepository->deleteBonuse($id);
+    public function findByNationalId($nationalId) {
+        return $this->bonuseRepository->findByNationalId($nationalId);
+    }
+
+    /**
+     * Create new student
+     */
+    public function create(array $data) {
+        return $this->bonuseRepository->create([
+            'employee_id' => $data['employee_id'],
+            'month'       => $data['month'],
+            'amount'      => $data['amount'],
+            'reason'      => $data['reason'] ?? null,
+        ]);
+    }
+
+    /**
+     * Update student
+     */
+    public function update(array $data) {
+        $updateData = [
+            'employee_id' => $data['employee_id'],
+            'month'       => $data['month'],
+            'amount'      => $data['amount'],
+            'reason'      => $data['reason'] ?? null,
+        ];
+        return $this->bonuseRepository->update($updateData, $data['id']);
+    }
+
+    /**
+     * Delete student
+     */
+    public function delete($id) {
+        return $this->bonuseRepository->delete($id);
     }
 }

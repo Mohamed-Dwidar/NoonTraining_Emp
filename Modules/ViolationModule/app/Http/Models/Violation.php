@@ -15,4 +15,12 @@ class Violation extends Model
     {
         return $this->hasMany(ViolationRepeat::class)->orderBy('repeat_number');
     }
+
+    public function scopeFilter($query, $request = []){
+        if (!empty($request['name'])) {
+            $query->where('name', 'like', '%' . $request['name'] . '%');
+        }
+
+        return $query;
+    }
 }

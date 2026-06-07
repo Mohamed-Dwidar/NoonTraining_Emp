@@ -71,7 +71,6 @@
                         <table class="table mb-0">
                             <thead>
                                 <tr class="head">
-                                    <th>#</th>
                                     <th>الموظف</th>
                                     <th>نوع الإجازة</th>
                                     <th>من</th>
@@ -85,7 +84,6 @@
                                 @foreach ($leaves as $i => $leave)
                                     @php $emp = $leave->employee; @endphp
                                     <tr>
-                                        <td>{{ $i + 1 }}</td>
                                         <td>
                                             <div class="strong">{{ $emp->name ?? '—' }}</div>
                                             <small class="text-muted">
@@ -124,6 +122,9 @@
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-3">
+                        {{ $leaves->appends(request()->query())->links('pagination::bootstrap-4') }}
                     </div>
                 @endif
             </div>

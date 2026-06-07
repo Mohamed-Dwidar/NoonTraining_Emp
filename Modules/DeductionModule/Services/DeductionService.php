@@ -14,28 +14,60 @@ class DeductionService {
         $this->deductionRepository = $deductionRepository;
     }
 
-    public function getDeductions(string $month, ?int $branchId = null, ?int $deptId = null): Collection {
-        return $this->deductionRepository->getByMonth($month, $branchId, $deptId);
+    /**
+     * Get all deductions
+     */
+    public function findAll() {
+        return $this->deductionRepository->all();
     }
 
-    public function findDeduction(int $id) {
-        return $this->deductionRepository->findDeduction($id);
+    public function paginate($perPage = 15) {
+        return $this->deductionRepository->paginate($perPage);
     }
 
-    public function createDeduction(array $data) {
-        return $this->deductionRepository->createDeduction($data);
+    public function filter($request = []) {
+        return $this->deductionRepository->filter($request);
     }
 
-    public function updateDeduction(int $id, array $data) {
-        return $this->deductionRepository->updateDeduction($id, $data);
+    /**
+     * Get a single deduction
+     */
+    public function find($id) {
+        return $this->deductionRepository->find($id);
     }
 
-    public function deleteDeduction(int $id): void {
-        $this->deductionRepository->deleteDeduction($id);
+    public function create(array $data) {
+        return $this->deductionRepository->create([
+            'type'         => $data['type'] ?? 'general',
+            'employee_id' => $data['employee_id'],
+            'month'        => $data['month'],
+            'violation_id' => $data['violation_id'] ?? null,
+            'violation_repeat_number' => $data['violation_repeat_number'] ?? null,
+            'amount'       => $data['amount'],
+            'reason'       => $data['reason'] ?? null,
+        ]);
     }
 
-    public function resolveViolationDeduction(int $employeeId, int $violationId, string $month, ?int $excludeId = null): array
-    {
+    public function update(array $data) {
+        $updateData = [
+            'type'         => $data['type'] ?? 'general',
+            'employee_id' => $data['employee_id'],
+            'month'        => $data['month'],
+            'violation_id' => $data['violation_id'] ?? null,
+            'violation_repeat_number' => $data['violation_repeat_number'] ?? null,
+            'amount'       => $data['amount'],
+            'reason'       => $data['reason'] ?? null,
+         ];
+        return $this->deductionRepository->update(
+            $updateData,
+            $data['id']
+        );
+    }
+    public function delete(int $id): void {
+        $this->deductionRepository->delete($id);
+    }
+
+    public function resolveViolationDeduction(int $employeeId, int $violationId, string $month, ?int $excludeId = null): array {
         $count        = $this->deductionRepository->countViolationRepeats($employeeId, $violationId, $month, $excludeId);
         $repeatNumber = $count + 1;
 

@@ -16,9 +16,9 @@ class ViolationAdminController extends Controller
         $this->violationService = $violationService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $violations = $this->violationService->getAllViolations();
+        $violations = $this->violationService->filter($request->all())->paginate(50);
         return view('violationmodules::Admin.index', compact('violations'));
     }
 
@@ -52,7 +52,7 @@ class ViolationAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->violationService->createViolation(
+        $this->violationService->create(
             $request->only('name', 'description'),
             $request->input('repeats', [])
         );
@@ -63,7 +63,7 @@ class ViolationAdminController extends Controller
 
     public function edit(int $id)
     {
-        $violation = $this->violationService->findViolation($id);
+        $violation = $this->violationService->find($id);
         return view('violationmodules::Admin.edit', compact('violation'));
     }
 
@@ -91,11 +91,9 @@ class ViolationAdminController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        $this->violationService->updateViolation(
-            $id,
-            $request->only('name', 'description'),
-            $request->input('repeats', [])
+        $this->violationService->update(
+            $request->all(),
+            $id
         );
 
         return redirect()->route('admin.violations.index')
@@ -104,7 +102,7 @@ class ViolationAdminController extends Controller
 
     public function destroy(int $id)
     {
-        $this->violationService->deleteViolation($id);
+        $this->violationService->delete($id);
         return redirect()->route('admin.violations.index')
             ->with('success', 'تم حذف المخالفة بنجاح');
     }

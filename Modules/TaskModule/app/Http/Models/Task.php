@@ -30,18 +30,37 @@ class Task extends Model {
         'late'        => 'danger',
     ];
 
-    public function statusLabel(): string
-    {
+    public function statusLabel(): string {
         return self::STATUSES[$this->status] ?? $this->status;
     }
 
-    public function statusColor(): string
-    {
+    public function statusColor(): string {
         return self::STATUS_COLORS[$this->status] ?? 'secondary';
     }
 
-    public function employee()
-    {
+    public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function scopeFilter($query, $request) {
+         if (isset($request['month'])) {
+            $query->where('month', $request['month']);
+        }
+
+        if (isset($request['branch_id'])) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('branch_id', $request['branch_id']);
+            });
+        }
+
+        if (isset($request['department_id'])) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('department_id', $request['department_id']);
+            });
+        }
+        if (isset($request['status'])) {
+            $query->where('status', $request['status']);
+        }
+        return $query;
     }
 }

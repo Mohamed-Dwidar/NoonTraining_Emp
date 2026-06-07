@@ -13,20 +13,24 @@ class ViolationRepository extends BaseRepository
         return Violation::class;
     }
 
-    public function getAllViolations()
-    {
-        return Violation::with('repeats')->orderBy('name')->get();
+    function filter($request) {
+        return Violation::filter($request);
     }
 
-    public function findViolation(int $id): Violation
-    {
-        return Violation::with('repeats')->findOrFail($id);
-    }
+    // public function getAllViolations()
+    // {
+    //     return Violation::with('repeats')->orderBy('name')->get();
+    // }
 
-    public function createViolation(array $data): Violation
-    {
-        return Violation::create($data);
-    }
+    // public function findViolation(int $id): Violation
+    // {
+    //     return Violation::with('repeats')->findOrFail($id);
+    // }
+
+    // public function createViolation(array $data): Violation
+    // {
+    //     return Violation::create($data);
+    // }
 
     public function syncRepeats(int $violationId, array $repeats): void
     {
@@ -41,15 +45,15 @@ class ViolationRepository extends BaseRepository
         }
     }
 
-    public function updateViolation(int $id, array $data): Violation
-    {
-        $violation = Violation::findOrFail($id);
-        $violation->update($data);
-        return $violation->fresh();
-    }
+    // public function updateViolation(int $id, array $data): Violation
+    // {
+    //     $violation = Violation::findOrFail($id);
+    //     $violation->update($data);
+    //     return $violation->fresh();
+    // }
 
-    public function deleteViolation(int $id): void
-    {
-        Violation::findOrFail($id)->delete();
-    }
+    // public function deleteViolation(int $id): void
+    // {
+    //     Violation::findOrFail($id)->delete();
+    // }
 }

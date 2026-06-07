@@ -40,11 +40,11 @@ class BonuseAdminController extends Controller
 
         session(['bonuse_month' => $month, 'bonuse_branch_id' => $branchId]);
 
-        $bonuses = $this->bonuseService->getBonuses(
-            $month,
-            $branchId ? (int) $branchId : null,
-            $deptId   ? (int) $deptId   : null
-        );
+        $bonuses = $this->bonuseService->filter([
+            'month'         => $month,
+            'branch_id'     => $branchId,
+            'department_id' => $deptId,
+        ])->paginate(15);
 
         return view('bonusemodule::Admin.index', compact(
             'bonuses', 'branches', 'departments', 'month', 'branchId', 'deptId'
@@ -89,7 +89,7 @@ class BonuseAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->bonuseService->createBonuse(
+        $this->bonuseService->create(
             $request->only('employee_id', 'month', 'amount', 'reason')
         );
 
@@ -99,7 +99,7 @@ class BonuseAdminController extends Controller
 
     public function edit(int $id)
     {
-        $bonuse      = $this->bonuseService->findBonuse($id);
+        $bonuse      = $this->bonuseService->find($id);
         $month       = $bonuse->month;
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
@@ -136,9 +136,8 @@ class BonuseAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->bonuseService->updateBonuse(
-            $id,
-            $request->only('employee_id', 'month', 'amount', 'reason')
+        $this->bonuseService->update(
+            $request->only('employee_id', 'month', 'amount', 'reason') + ['id' => $id]
         );
 
         return redirect()->route('admin.bonuses.index', ['month' => $request->month])
@@ -147,9 +146,9 @@ class BonuseAdminController extends Controller
 
     public function destroy(int $id)
     {
-        $bonuse = $this->bonuseService->findBonuse($id);
+        $bonuse = $this->bonuseService->find($id);
         $month  = $bonuse->month;
-        $this->bonuseService->deleteBonuse($id);
+        $this->bonuseService->delete($id);
 
         return redirect()->route('admin.bonuses.index', ['month' => $month])
             ->with('success', 'تم حذف المكافأة بنجاح');

@@ -13,27 +13,50 @@ class TaskService {
         $this->taskRepository = $taskRepository;
     }
 
-    public function getTasks(?int $branchId = null, ?int $deptId = null, ?string $status = null): Collection {
-        return $this->taskRepository->getAll($branchId, $deptId, $status);
+    public function find($id) {
+        return $this->taskRepository->findWhere(['id' => $id])->first();
     }
 
-    public function findTask(int $id) {
-        return $this->taskRepository->findTask($id);
+    public function create($data) {
+        return $this->taskRepository->create([
+            'employee_id' => $data['employee_id'],
+            'title'       => $data['title'],
+            'details'     => $data['details'] ?? null,
+            'status'      => $data['status'] ?? 'new',
+            'start_date'  => $data['start_date'] ?? null,
+            'end_date'    => $data['end_date'] ?? null,
+        ]);
     }
 
-    public function createTask(array $data) {
-        return $this->taskRepository->createTask($data);
+    public function update($data) {
+        $updateData = [
+            'employee_id' => $data['employee_id'],
+            'title'       => $data['title'],
+            'details'     => $data['details'] ?? null,
+            'status'      => $data['status'] ?? 'new',
+            'start_date'  => $data['start_date'] ?? null,
+            'end_date'    => $data['end_date'] ?? null,
+        ];
+
+        return $this->taskRepository->update(
+             $updateData,
+             $data['id']
+         );
     }
 
-    public function updateTask(int $id, array $data) {
-        return $this->taskRepository->updateTask($id, $data);
+
+    public function updateStatus($id, $status) {
+        return $this->taskRepository->update(
+             ['status' => $status],
+             $id
+         );
     }
 
-    public function updateStatus(int $id, string $status): void {
-        $this->taskRepository->updateStatus($id, $status);
+    public function delete($id) {
+        return $this->taskRepository->delete($id);
     }
 
-    public function deleteTask(int $id): void {
-        $this->taskRepository->deleteTask($id);
+    public function filter($data = []) {
+        return $this->taskRepository->filter($data);
     }
 }

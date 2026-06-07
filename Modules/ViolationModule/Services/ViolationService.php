@@ -6,28 +6,31 @@ use Illuminate\Support\Collection;
 use Modules\ViolationModule\App\Http\Models\Violation;
 use Modules\ViolationModule\Repository\ViolationRepository;
 
-class ViolationService
-{
+class ViolationService {
     protected ViolationRepository $violationRepository;
 
-    public function __construct(ViolationRepository $violationRepository)
-    {
+    public function __construct(ViolationRepository $violationRepository) {
         $this->violationRepository = $violationRepository;
     }
 
-    public function getAllViolations(): Collection
-    {
-        return $this->violationRepository->getAllViolations();
+    public function findAll() {
+        return $this->violationRepository->all();
     }
 
-    public function findViolation(int $id): Violation
-    {
-        return $this->violationRepository->findViolation($id);
+    public function paginate($perPage = 15) {
+        return $this->violationRepository->paginate($perPage);
     }
 
-    public function createViolation(array $data, array $repeats): Violation
-    {
-        $violation = $this->violationRepository->createViolation([
+    public function filter($request = []) {
+        return $this->violationRepository->filter($request);
+    }
+
+    public function find(int $id): Violation {
+        return $this->violationRepository->find($id);
+    }
+
+    public function create(array $data, array $repeats): Violation {
+        $violation = $this->violationRepository->create([
             'name'        => $data['name'],
             'description' => $data['description'] ?? null,
         ]);
@@ -37,20 +40,21 @@ class ViolationService
         return $violation;
     }
 
-    public function updateViolation(int $id, array $data, array $repeats): Violation
-    {
-        $violation = $this->violationRepository->updateViolation($id, [
-            'name'        => $data['name'],
+    public function update(array $data, $id) {
+        $updateData = [
+            'name'       => $data['name'],
             'description' => $data['description'] ?? null,
-        ]);
+        ];
+        $violation = $this->violationRepository->update($updateData, $id);
+
+        $repeats = $data['repeats'] ?? [];
 
         $this->violationRepository->syncRepeats($violation->id, $repeats);
 
         return $violation;
     }
 
-    public function deleteViolation(int $id): void
-    {
-        $this->violationRepository->deleteViolation($id);
+    public function delete(int $id): void {
+        $this->violationRepository->delete($id);
     }
 }

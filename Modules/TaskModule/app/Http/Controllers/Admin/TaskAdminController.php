@@ -11,8 +11,7 @@ use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
 
-class TaskAdminController extends Controller
-{
+class TaskAdminController extends Controller {
     protected TaskService $taskService;
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
@@ -30,8 +29,7 @@ class TaskAdminController extends Controller
         $this->employeeService   = $employeeService;
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
 
@@ -41,32 +39,35 @@ class TaskAdminController extends Controller
 
         session(['task_branch_id' => $branchId]);
 
-        $tasks    = $this->taskService->getTasks(
-            $branchId ? (int) $branchId : null,
-            $deptId   ? (int) $deptId   : null,
-            $status   ?: null
-        );
+        $tasks    = $this->taskService->filter($request->all())->paginate(15);
         $statuses = Task::STATUSES;
 
         return view('taskmodule::Admin.index', compact(
-            'tasks', 'branches', 'departments', 'branchId', 'deptId', 'status', 'statuses'
+            'tasks',
+            'branches',
+            'departments',
+            'branchId',
+            'deptId',
+            'status',
+            'statuses'
         ));
     }
 
-    public function create()
-    {
+    public function create() {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $employees   = $this->employeeService->getAllEmployees();
         $statuses    = Task::STATUSES;
 
         return view('taskmodule::Admin.create', compact(
-            'branches', 'departments', 'employees', 'statuses'
+            'branches',
+            'departments',
+            'employees',
+            'statuses'
         ));
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $validator = Validator::make(
             $request->all(),
             [
@@ -90,28 +91,30 @@ class TaskAdminController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->taskService->createTask(
+        $this->taskService->create(
             $request->only('employee_id', 'title', 'details', 'start_date', 'end_date', 'status')
         );
 
         return redirect()->route('admin.tasks.index')->with('success', 'تم إضافة المهمة بنجاح');
     }
 
-    public function edit(int $id)
-    {
-        $task        = $this->taskService->findTask($id);
+    public function edit(int $id) {
+        $task        = $this->taskService->find($id);
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $employees   = $this->employeeService->getAllEmployees();
         $statuses    = Task::STATUSES;
 
         return view('taskmodule::Admin.edit', compact(
-            'task', 'branches', 'departments', 'employees', 'statuses'
+            'task',
+            'branches',
+            'departments',
+            'employees',
+            'statuses'
         ));
     }
 
-    public function update(Request $request, int $id)
-    {
+     public function update(Request $request, int $id){
         $validator = Validator::make(
             $request->all(),
             [
@@ -136,17 +139,14 @@ class TaskAdminController extends Controller
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();
         }
-
-        $this->taskService->updateTask(
-            $id,
-            $request->only('employee_id', 'title', 'details', 'start_date', 'end_date', 'status')
+        $this->taskService->update(
+            $request->only('employee_id', 'title', 'details', 'start_date', 'end_date', 'status') + ['id' => $id]
         );
 
         return redirect()->route('admin.tasks.index')->with('success', 'تم تحديث المهمة بنجاح');
     }
 
-    public function updateStatus(Request $request, int $id)
-    {
+    public function updateStatus(Request $request, int $id) {
         $validator = Validator::make($request->all(), [
             'status' => 'required|in:new,in_progress,completed,late',
         ]);
@@ -160,9 +160,8 @@ class TaskAdminController extends Controller
         return redirect()->back()->with('success', 'تم تحديث حالة المهمة');
     }
 
-    public function destroy(int $id)
-    {
-        $this->taskService->deleteTask($id);
+    public function destroy(int $id) {
+        $this->taskService->delete($id);
         return redirect()->route('admin.tasks.index')->with('success', 'تم حذف المهمة بنجاح');
     }
 }

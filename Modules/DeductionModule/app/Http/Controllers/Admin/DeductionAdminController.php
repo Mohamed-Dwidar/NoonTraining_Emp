@@ -45,11 +45,11 @@ class DeductionAdminController extends Controller
 
         session(['deduction_month' => $month, 'deduction_branch_id' => $branchId]);
 
-        $deductions = $this->deductionService->getDeductions(
-            $month,
-            $branchId ? (int) $branchId : null,
-            $deptId   ? (int) $deptId   : null
-        );
+        $deductions = $this->deductionService->filter([
+            'month'         => $month,
+            'branch_id'     => $branchId,
+            'department_id' => $deptId,
+        ])->paginate(15);
 
         return view('deductionmodules::Admin.index', compact(
             'deductions', 'branches', 'departments', 'month', 'branchId', 'deptId'
@@ -62,7 +62,7 @@ class DeductionAdminController extends Controller
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $employees   = $this->employeeService->getAllEmployees();
-        $violations  = $this->violationService->getAllViolations();
+        $violations  = $this->violationService->filter()->get();
 
         return view('deductionmodules::Admin.create', compact(
             'month', 'branches', 'departments', 'employees', 'violations'
@@ -132,8 +132,7 @@ class DeductionAdminController extends Controller
                 'reason'                  => $request->reason,
             ];
         }
-
-        $this->deductionService->createDeduction($data);
+        $this->deductionService->create($data);
 
         return redirect()->route('admin.deductions.index', ['month' => $request->month])
             ->with('success', 'تم إضافة الخصم بنجاح');
@@ -141,19 +140,19 @@ class DeductionAdminController extends Controller
 
     public function edit(int $id)
     {
-        $deduction   = $this->deductionService->findDeduction($id);
+        $deduction   = $this->deductionService->find($id);
         $month       = $deduction->month;
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $employees   = $this->employeeService->getAllEmployees();
-        $violations  = $this->violationService->getAllViolations();
+        $violations  = $this->violationService->filter()->get();
 
         return view('deductionmodules::Admin.edit', compact(
             'deduction', 'month', 'branches', 'departments', 'employees', 'violations'
         ));
     }
 
-    public function update(Request $request, int $id)
+    public function update(Request $request)
     {
         $type = $request->input('type', 'custom');
 
@@ -195,9 +194,10 @@ class DeductionAdminController extends Controller
                 (int) $request->employee_id,
                 (int) $request->violation_id,
                 $request->month,
-                $id
+                (int) $request->input('id')
             );
             $data = [
+                'id'                      => $request->id,
                 'employee_id'             => $request->employee_id,
                 'month'                   => $request->month,
                 'type'                    => 'violation',
@@ -208,6 +208,7 @@ class DeductionAdminController extends Controller
             ];
         } else {
             $data = [
+                'id'                      => $request->id,
                 'employee_id'             => $request->employee_id,
                 'month'                   => $request->month,
                 'type'                    => 'custom',
@@ -218,7 +219,7 @@ class DeductionAdminController extends Controller
             ];
         }
 
-        $this->deductionService->updateDeduction($id, $data);
+        $this->deductionService->update($data);
 
         return redirect()->route('admin.deductions.index', ['month' => $request->month])
             ->with('success', 'تم تحديث الخصم بنجاح');
@@ -226,9 +227,9 @@ class DeductionAdminController extends Controller
 
     public function destroy(int $id)
     {
-        $deduction = $this->deductionService->findDeduction($id);
+        $deduction = $this->deductionService->find($id);
         $month     = $deduction->month;
-        $this->deductionService->deleteDeduction($id);
+        $this->deductionService->delete($id);
 
         return redirect()->route('admin.deductions.index', ['month' => $month])
             ->with('success', 'تم حذف الخصم بنجاح');

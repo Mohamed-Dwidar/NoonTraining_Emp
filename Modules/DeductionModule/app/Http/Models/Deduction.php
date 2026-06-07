@@ -23,4 +23,24 @@ class Deduction extends Model {
     public function violation() {
         return $this->belongsTo(Violation::class, 'violation_id');
     }
+
+    public function scopeFilter($query, $request) {
+        if (isset($request['month'])) {
+            $query->where('month', $request['month']);
+        }
+
+        if (isset($request['branch_id'])) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('branch_id', $request['branch_id']);
+            });
+        }
+
+        if (isset($request['department_id'])) {
+            $query->whereHas('employee', function ($q) use ($request) {
+                $q->where('department_id', $request['department_id']);
+            });
+        }
+
+        return $query;
+    }
 }
