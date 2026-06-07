@@ -64,7 +64,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="{{ route('admin.deductions.index') }}" class="@if (Request::segment(2) == 'discount') active @endif">
                                 <i class="fa fa-minus-circle"></i> الخصومات
                             </a>
                         </li>

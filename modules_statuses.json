@@ -8,5 +8,6 @@
     "EmployeeModule": true,
     "AttendanceModule": true,
     "LeaveModule": true,
-    "BonuseModule": true
+    "BonuseModule": true,
+    "DeductionModule": true
 }

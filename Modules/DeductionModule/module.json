@@ -1,0 +1,11 @@
+{
+    "name": "DeductionModule",
+    "alias": "deductionmodules",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\DeductionModule\\app\\Providers\\DeductionModuleServiceProvider"
+    ],
+    "files": []
+}
