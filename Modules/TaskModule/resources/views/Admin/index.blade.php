@@ -1,29 +1,25 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    الجزاءات والخصومات
+    المهام
 @endsection
 
 @section('content')
     <div class="content-wrapper container-fluid">
 
         <div class="content-header mb-2">
-            <div class="d-flex align-items-center justify-content-between">
-                <h3><i class="fa fa-minus-circle"></i> &nbsp; الجزاءات والخصومات</h3>
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <h3><i class="fa fa-tasks"></i> &nbsp; المهام</h3>
             </div>
         </div>
 
         @include('layoutmodule::layouts.flash')
 
-        {{-- ─── Filter bar ─── --}}
+        {{-- Filter --}}
         <div class="card mb-2">
             <div class="card-body py-2 px-2">
-                <form method="GET" action="{{ route('admin.deductions.index') }}" id="filterForm">
+                <form method="GET" action="{{ route('admin.tasks.index') }}">
                     <div class="row align-items-end">
-                        <div class="col-md-3">
-                            <label class="d-block mb-1"><strong>الشهر</strong></label>
-                            <input type="month" name="month" class="form-control" value="{{ $month }}" required>
-                        </div>
                         <div class="col-md-3">
                             <label class="d-block mb-1"><strong>الفرع</strong></label>
                             <select name="branch_id" id="branchSelect" class="form-control">
@@ -41,6 +37,17 @@
                                 <option value="">-- كل الأقسام --</option>
                             </select>
                         </div>
+                        <div class="col-md-3">
+                            <label class="d-block mb-1"><strong>الحالة</strong></label>
+                            <select name="status" class="form-control">
+                                <option value="">-- كل الحالات --</option>
+                                @foreach ($statuses as $val => $label)
+                                    <option value="{{ $val }}" {{ $status === $val ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div class="col-md-1">
                             <label class="d-block mb-1">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">
@@ -52,39 +59,38 @@
             </div>
         </div>
 
-        {{-- ─── Deductions table ─── --}}
+        {{-- Tasks table --}}
         <div class="card">
             <div class="card-header">
                 <div class="row">
                     <div class="col-lg-12" style="text-align: left;">
-                        <a class="btn btn-success round btn-min-width mr-1 mb-1"
-                            href="{{ route('admin.deductions.create', ['month' => $month]) }}" role="button">تسجيل خصم
-                            جديد</a>
+                        <a class="btn btn-success round btn-min-width mr-1 mb-1" href="{{ route('admin.tasks.create') }}">
+                            <i class="fa fa-plus"></i> إضافة مهمة
+                        </a>
+
                     </div>
                 </div>
             </div>
-            <div class="card-body">
-                @if ($deductions->isEmpty())
-                    <p class="text-center py-4 mt-2 text-muted">لا توجد خصومات لهذا الشهر</p>
+            <div class="card-body p-0">
+                @if ($tasks->isEmpty())
+                    <p class="text-center py-4 mt-2 text-muted">لا توجد مهام</p>
                 @else
                     <div class="table-responsive">
                         <table class="table mb-0">
                             <thead>
                                 <tr class="head">
-                                    <th>#</th>
                                     <th>الموظف</th>
-                                    <th>الشهر</th>
-                                    <th>النوع</th>
-                                    <th>المبلغ</th>
-                                    <th>السبب / المخالفة</th>
+                                    <th>المهمة</th>
+                                    <th>من</th>
+                                    <th>إلى</th>
+                                    <th>الحالة</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($deductions as $i => $deduction)
-                                    @php $emp = $deduction->employee; @endphp
+                                @foreach ($tasks as $i => $task)
+                                    @php $emp = $task->employee; @endphp
                                     <tr>
-                                        <td>{{ $i + 1 }}</td>
                                         <td>
                                             <div class="strong">{{ $emp->name ?? '—' }}</div>
                                             <small class="text-muted">
@@ -94,47 +100,40 @@
                                                 @endif
                                             </small>
                                         </td>
-                                        <td>{{ $deduction->month }}</td>
                                         <td>
-                                            @if ($deduction->type === 'violation')
-                                                <span class="badge badge-danger">
-                                                    <i class="fa fa-exclamation-triangle"></i> مخالفة
-                                                </span>
-                                            @else
-                                                <span class="badge badge-secondary">
-                                                    <i class="fa fa-pencil"></i> مخصص
-                                                </span>
+                                            <strong>{{ $task->title }}</strong>
+                                            @if ($task->details)
+                                                <br><small class="text-muted">{{ Str::limit($task->details, 60) }}</small>
                                             @endif
                                         </td>
-                                        <td>
-                                            <span class="badge badge-success">
-                                                {{ number_format($deduction->amount, 2) }} ر.س
-                                                @if ($deduction->violation_repeat_number)
-                                                    <br><small class="badge badge-info-red mr-1 px-1">المرة
-                                                        {{ $deduction->violation_repeat_number ?? 1 }}</small>
-                                                @endif
-                                            </span>
-
+                                        <td>{{ $task->start_date->format('Y-m-d') }}</td>
+                                        <td>{{ $task->end_date->format('Y-m-d') }}</td>
+                                        <td style="width: 150px;">
+                                            {{-- Quick status change --}}
+                                            <form method="POST"
+                                                action="{{ route('admin.tasks.update-status', $task->id) }}"
+                                                class="d-inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <select name="status"
+                                                    class="form-control form-control-sm status-select status-{{ $task->status }}"
+                                                    onchange="this.form.submit()" style="min-width:130px;">
+                                                    @foreach ($statuses as $val => $label)
+                                                        <option value="{{ $val }}"
+                                                            {{ $task->status === $val ? 'selected' : '' }}>
+                                                            {{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </form>
                                         </td>
-                                        <td style="max-width:220px; white-space:normal;">
-                                            @if ($deduction->type === 'violation' && $deduction->violation)
-                                                <strong>{{ $deduction->violation->name }}</strong>
-
-                                                @if ($deduction->reason)
-                                                    <br><small class="text-muted">{{ $deduction->reason }}</small>
-                                                @endif
-                                            @else
-                                                {{ $deduction->reason ?? '—' }}
-                                            @endif
-                                        </td>
                                         <td>
-                                            <a href="{{ route('admin.deductions.edit', $deduction->id) }}"
+                                            <a href="{{ route('admin.tasks.edit', $task->id) }}"
                                                 class="btn btn-sm btn-warning">
                                                 <i class="fa fa-edit"></i>
                                             </a>
-                                            <form method="POST"
-                                                action="{{ route('admin.deductions.destroy', $deduction->id) }}"
-                                                class="d-inline" onsubmit="return confirm('هل تريد حذف هذه الخصم؟')">
+                                            <form method="POST" action="{{ route('admin.tasks.destroy', $task->id) }}"
+                                                class="d-inline" onsubmit="return confirm('هل تريد حذف هذه المهمة؟')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger">
@@ -153,6 +152,47 @@
 
     </div>
 @endsection
+
+@push('styles')
+    <style>
+        .status-select {
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .status-new {
+            background-color: #6c757d;
+            color: #fff;
+            border-color: #6c757d;
+        }
+
+        .status-in_progress {
+            background-color: #ffc107;
+            color: #212529;
+            border-color: #ffc107;
+        }
+
+        .status-completed {
+            background-color: #28a745;
+            color: #fff;
+            border-color: #28a745;
+        }
+
+        .status-late {
+            background-color: #dc3545;
+            color: #fff;
+            border-color: #dc3545;
+        }
+
+        .status-select option {
+            background: #fff;
+            color: #212529;
+        }
+    </style>
+@endpush
 
 @push('scripts')
     <script>

@@ -39,7 +39,7 @@
                             <option value="">-- كل الأقسام --</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-1">
                         <label class="d-block mb-1">&nbsp;</label>
                         <button type="submit" class="btn btn-primary w-100">
                             <i class="fa fa-search"></i> عرض

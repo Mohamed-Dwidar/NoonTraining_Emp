@@ -1,0 +1,11 @@
+{
+    "name": "TaskModule",
+    "alias": "taskmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TaskModule\\app\\Providers\\TaskModuleServiceProvider"
+    ],
+    "files": []
+}

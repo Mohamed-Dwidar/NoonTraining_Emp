@@ -3,35 +3,6 @@
         <nav id="primary-menu">
             <ul class="top-menu menu-eff text-right">
 
-                {{-- 1. الإعدادات --}}
-                <li class="nav-item">
-                    <a href="#">
-                        <i class="fa fa-cog"></i>
-                        <span class="menu-title">الإعدادات</span>
-                    </a>
-                    <ul class="dropdown">
-                        <li>
-                            <a href="{{ route('admin.branches.index') }}" class="@if (Request::segment(2) == 'branch') active @endif">
-                                <i class="fa fa-code-fork"></i> الفروع
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.departments.index') }}" class="@if (Request::segment(2) == 'department') active @endif">
-                                <i class="fa fa-sitemap"></i> الأقسام
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.violations.index') }}" class="@if (Request::segment(2) == 'violation') active @endif">
-                                <i class="fa fa-exclamation-triangle"></i> المخالفات
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('admin.branches.work-regulations.list') }}" class="@if (Request::segment(2) == 'branches' && Request::segment(3) == 'work-regulations') active @endif">
-                                <i class="fa fa-file-text-o"></i> لائحة العمل الداخلية
-                            </a>
-                        </li>
-                    </ul>
-                </li>
 
                 {{-- 2. الموظفون - single link --}}
                 <li class="nav-item">
@@ -79,7 +50,7 @@
                     </a>
                     <ul class="dropdown">
                         <li>
-                            <a href="#">
+                            <a href="{{ route('admin.tasks.index') }}" class="@if (Request::segment(2) == 'task') active @endif">
                                 <i class="fa fa-tasks"></i> المهام
                             </a>
                         </li>
@@ -116,6 +87,36 @@
                         <li>
                             <a href="#">
                                 <i class="fa fa-graduation-cap"></i> تقارير الطلاب
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                {{-- 1. الإعدادات --}}
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fa fa-cog"></i>
+                        <span class="menu-title">الإعدادات</span>
+                    </a>
+                    <ul class="dropdown">
+                        <li>
+                            <a href="{{ route('admin.branches.index') }}" class="@if (Request::segment(2) == 'branch') active @endif">
+                                <i class="fa fa-code-fork"></i> الفروع
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.departments.index') }}" class="@if (Request::segment(2) == 'department') active @endif">
+                                <i class="fa fa-sitemap"></i> الأقسام
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.violations.index') }}" class="@if (Request::segment(2) == 'violation') active @endif">
+                                <i class="fa fa-exclamation-triangle"></i> المخالفات
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.branches.work-regulations.list') }}" class="@if (Request::segment(2) == 'branches' && Request::segment(3) == 'work-regulations') active @endif">
+                                <i class="fa fa-file-text-o"></i> لائحة العمل الداخلية
                             </a>
                         </li>
                     </ul>
