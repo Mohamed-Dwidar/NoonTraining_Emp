@@ -10,5 +10,7 @@
     "LeaveModule": true,
     "BonuseModule": true,
     "DeductionModule": true,
-    "ViolationModule": true
+    "ViolationModule": true,
+    "TaskModule": true,
+    "StudentModule": true
 }
