@@ -24,10 +24,11 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col-lg-8"></div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-12" style="text-align: left;">
                                     <a class="btn btn-success round btn-min-width mr-1 mb-1"
-                                        href="{{ route(Auth::getDefaultDriver() . '.employees.create') }}" role="button">إنشاء موظف جديد</a>
+                                        href="{{ route(Auth::getDefaultDriver() . '.employees.create') }}"
+                                        role="button">تسجيل موظف
+                                        جديد</a>
                                 </div>
                             </div>
                         </div>
@@ -46,11 +47,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($employees->count())
-                                            @foreach($employees as $employee)
+                                        @if ($employees->count())
+                                            @foreach ($employees as $employee)
                                                 <tr>
                                                     <td class="strong">
-                                                        <a href="{{ route(Auth::getDefaultDriver() . '.employees.show', $employee->id) }}">
+                                                        <a
+                                                            href="{{ route(Auth::getDefaultDriver() . '.employees.show', $employee->id) }}">
                                                             {{ $employee->name }}
                                                         </a>
                                                     </td>
@@ -68,7 +70,8 @@
                                                             href="{{ route(Auth::getDefaultDriver() . '.employees.edit', $employee->id) }}"
                                                             role="button">تعديل</a>
 
-                                                        <form action="{{ route(Auth::getDefaultDriver() . '.employees.destroy', $employee->id) }}"
+                                                        <form
+                                                            action="{{ route(Auth::getDefaultDriver() . '.employees.destroy', $employee->id) }}"
                                                             method="POST" style="display:inline;">
                                                             @csrf
                                                             @method('POST')
@@ -79,7 +82,9 @@
                                                 </tr>
                                             @endforeach
                                         @else
-                                            <tr><td colspan="7" class="text-center">لا يوجد موظفون</td></tr>
+                                            <tr>
+                                                <td colspan="7" class="text-center">لا يوجد موظفون</td>
+                                            </tr>
                                         @endif
                                     </tbody>
                                 </table>

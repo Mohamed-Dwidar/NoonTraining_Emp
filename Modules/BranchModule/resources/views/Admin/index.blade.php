@@ -24,10 +24,11 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col-lg-8"></div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-12" style="text-align: left;">
                                     <a class="btn btn-success round btn-min-width mr-1 mb-1"
-                                        href="{{ route(Auth::getDefaultDriver() . '.branches.create') }}" role="button">إنشاء فرع جديد</a>
+                                        href="{{ route(Auth::getDefaultDriver() . '.branches.create') }}"
+                                        role="button">تسجيل فرع
+                                        جديد</a>
                                 </div>
                             </div>
                         </div>
@@ -42,8 +43,8 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($branches->count())
-                                            @foreach($branches as $branch)
+                                        @if ($branches->count())
+                                            @foreach ($branches as $branch)
                                                 <tr>
                                                     <td class="strong">{{ $branch->name }}</td>
                                                     <td>{{ $branch->type == 'normal' ? 'فرع عام' : 'معهد تدريب' }}</td>
@@ -52,7 +53,8 @@
                                                             href="{{ route(Auth::getDefaultDriver() . '.branches.edit', $branch->id) }}"
                                                             role="button">تعديل</a>
 
-                                                        <form action="{{ route(Auth::getDefaultDriver() . '.branches.destroy', $branch->id) }}"
+                                                        <form
+                                                            action="{{ route(Auth::getDefaultDriver() . '.branches.destroy', $branch->id) }}"
                                                             method="POST" style="display:inline;">
                                                             @csrf
                                                             @method('POST')
@@ -63,7 +65,9 @@
                                                 </tr>
                                             @endforeach
                                         @else
-                                            <tr><td colspan="2" class="text-center">لا توجد فروع</td></tr>
+                                            <tr>
+                                                <td colspan="2" class="text-center">لا توجد فروع</td>
+                                            </tr>
                                         @endif
                                     </tbody>
                                 </table>

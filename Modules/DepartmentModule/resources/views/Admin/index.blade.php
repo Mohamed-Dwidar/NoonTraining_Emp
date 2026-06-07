@@ -24,10 +24,11 @@
                     <div class="card">
                         <div class="card-header">
                             <div class="row">
-                                <div class="col-lg-8"></div>
-                                <div class="col-lg-4">
+                                <div class="col-lg-12" style="text-align: left;">
                                     <a class="btn btn-success round btn-min-width mr-1 mb-1"
-                                        href="{{ route(Auth::getDefaultDriver() . '.departments.create') }}" role="button">إنشاء قسم جديد</a>
+                                        href="{{ route(Auth::getDefaultDriver() . '.departments.create') }}"
+                                        role="button">تسجيل قسم
+                                        جديد</a>
                                 </div>
                             </div>
                         </div>
@@ -42,17 +43,19 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @if($departments->count())
-                                            @foreach($departments as $department)
+                                        @if ($departments->count())
+                                            @foreach ($departments as $department)
                                                 <tr>
                                                     <td class="strong">{{ $department->name }}</td>
-                                                    <td>{{ $department->branch ? $department->branch->name : 'لا يوجد فرع' }}</td>
+                                                    <td>{{ $department->branch ? $department->branch->name : 'لا يوجد فرع' }}
+                                                    </td>
                                                     <td>
                                                         <a class="btn btn-warning"
                                                             href="{{ route(Auth::getDefaultDriver() . '.departments.edit', $department->id) }}"
                                                             role="button">تعديل</a>
 
-                                                        <form action="{{ route(Auth::getDefaultDriver() . '.departments.destroy', $department->id) }}"
+                                                        <form
+                                                            action="{{ route(Auth::getDefaultDriver() . '.departments.destroy', $department->id) }}"
                                                             method="POST" style="display:inline;">
                                                             @csrf
                                                             @method('POST')
@@ -63,7 +66,9 @@
                                                 </tr>
                                             @endforeach
                                         @else
-                                            <tr><td colspan="3" class="text-center">لا توجد أقسام</td></tr>
+                                            <tr>
+                                                <td colspan="3" class="text-center">لا توجد أقسام</td>
+                                            </tr>
                                         @endif
                                     </tbody>
                                 </table>
@@ -73,5 +78,4 @@
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection

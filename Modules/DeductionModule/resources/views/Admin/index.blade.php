@@ -1,7 +1,7 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    الخصومات
+    الجزاءات والخصومات
 @endsection
 
 @section('content')
@@ -9,10 +9,7 @@
 
         <div class="content-header mb-2">
             <div class="d-flex align-items-center justify-content-between">
-                <h3><i class="fa fa-minus-circle"></i> &nbsp; الخصومات</h3>
-                <a href="{{ route('admin.deductions.create', ['month' => $month]) }}" class="btn btn-primary">
-                    <i class="fa fa-plus"></i> &nbsp; إضافة خصم
-                </a>
+                <h3><i class="fa fa-minus-circle"></i> &nbsp; الجزاءات والخصومات</h3>
             </div>
         </div>
 
@@ -57,7 +54,16 @@
 
         {{-- ─── Deductions table ─── --}}
         <div class="card">
-            <div class="card-body p-0">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col-lg-12" style="text-align: left;">
+                        <a class="btn btn-success round btn-min-width mr-1 mb-1"
+                            href="{{ route('admin.deductions.create', ['month' => $month]) }}" role="button">تسجيل خصم
+                            جديد</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
                 @if ($deductions->isEmpty())
                     <p class="text-center py-4 mt-2 text-muted">لا توجد خصومات لهذا الشهر</p>
                 @else
