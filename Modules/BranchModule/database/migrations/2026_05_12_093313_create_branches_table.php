@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['normal', 'training'])->default('normal');
             $table->string('address')->nullable();
+            $table->longText('work_regulations')->nullable();
 
             $table->timestamps();
         });

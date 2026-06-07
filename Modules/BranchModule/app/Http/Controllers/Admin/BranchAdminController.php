@@ -25,7 +25,6 @@ class BranchAdminController extends Controller {
         return view('branchmodule::Admin.show', compact('branch'));
     }
 
-
     public function create() {
         return view('branchmodule::Admin.create');
     }
@@ -85,4 +84,23 @@ class BranchAdminController extends Controller {
         $this->branchService->deleteBranch($id);
         return redirect()->route('admin.branches.index')->with('success', 'تم حذف الفرع بنجاح');
     }
+
+    public function workRegulationsList(Request $request) {
+        $branches = $this->branchService->filter($request->all())->get();
+        return view('branchmodule::Admin.work_regulations_list', compact('branches'));
+    }
+
+    public function workRegulations(int $id)
+    {
+        $branch = $this->branchService->findOne($id);
+        return view('branchmodule::Admin.work_regulations', compact('branch'));
+    }
+
+    public function updateWorkRegulations(Request $request, int $id)
+    {
+        $this->branchService->updateWorkRegulations($id, $request->input('work_regulations'));
+        return redirect()->route('admin.branches.work-regulations', $id)
+            ->with('success', 'تم حفظ لائحة العمل بنجاح');
+    }
+
 }

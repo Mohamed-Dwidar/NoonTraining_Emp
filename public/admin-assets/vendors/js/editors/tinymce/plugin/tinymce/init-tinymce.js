@@ -2,7 +2,11 @@ tinymce.init({
     /* replace textarea having class .tinymce with tinymce editor */
     selector: "textarea.tinymce",
     forced_root_block : 'div',
-    
+
+    /* RTL defaults */
+    directionality: 'rtl',
+    content_style: 'body { direction: rtl; text-align: right; }',
+
     /* theme of the editor */
     theme: "modern",
     skin: "lightgray",
@@ -20,9 +24,9 @@ tinymce.init({
         "save table contextmenu directionality emoticons template textcolor paste textcolor colorpicker textpattern filemanager"
     ],
 
-    toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustifyt | forecolor backcolor | styleselect formatselect fontselect fontsizeselec",
-    toolbar2: "cut copy paste | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media",
-    toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | ltr rtl | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft | code preview | save ",
+    toolbar1: "bold italic underline strikethrough | alignleft aligncenter alignright alignjustifyt | bullist numlist outdent indent | ltr rtl | fontsizeselect hr",
+    // toolbar2: "cut copy paste | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media",
+    // toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | spellchecker | visualchars visualblocks nonbreaking template pagebreak restoredraft | code preview | save ",
 
    image_advtab: true,
     /* style */

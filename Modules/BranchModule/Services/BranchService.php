@@ -64,6 +64,11 @@ class BranchService {
         return $this->branchRepository->delete($id);
     }
 
+    public function updateWorkRegulations(int $id, ?string $content): void
+    {
+        $this->branchRepository->update(['work_regulations' => $content], $id);
+    }
+
     public function filter($data = []) {
         return $this->branchRepository->filter($data);
     }

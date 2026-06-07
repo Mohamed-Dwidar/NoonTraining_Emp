@@ -26,8 +26,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="fa fa-file-text-o"></i> اللائحة
+                            <a href="{{ route('admin.branches.work-regulations.list') }}" class="@if (Request::segment(2) == 'branches' && Request::segment(3) == 'work-regulations') active @endif">
+                                <i class="fa fa-file-text-o"></i> لائحة العمل الداخلية
                             </a>
                         </li>
                     </ul>
@@ -59,13 +59,13 @@
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.deductions.index') }}" class="@if (Request::segment(2) == 'discount') active @endif">
-                                <i class="fa fa-minus-circle"></i> الجزاءات والخصومات
+                            <a href="{{ route('admin.bonuses.index') }}" class="@if (Request::segment(2) == 'bonus') active @endif">
+                                <i class="fa fa-gift"></i> المكافآت
                             </a>
                         </li>
                         <li>
-                            <a href="{{ route('admin.bonuses.index') }}" class="@if (Request::segment(2) == 'bonus') active @endif">
-                                <i class="fa fa-gift"></i> المكافآت
+                            <a href="{{ route('admin.deductions.index') }}" class="@if (Request::segment(2) == 'discount') active @endif">
+                                <i class="fa fa-minus-circle"></i> الجزاءات والخصومات
                             </a>
                         </li>
                     </ul>

@@ -1,7 +1,7 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    الفروع
+    لائحة العمل الداخلية
 @endsection
 
 @section('content')
@@ -11,7 +11,7 @@
                 <h3>
                     <i class="fa fa-building"></i>
                     &nbsp;
-                    الفروع
+                    لائحة العمل الداخلية
                 </h3>
             </div>
         </div>
@@ -22,23 +22,12 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-lg-12" style="text-align: left;">
-                                    <a class="btn btn-success round btn-min-width mr-1 mb-1"
-                                        href="{{ route(Auth::getDefaultDriver() . '.branches.create') }}"
-                                        role="button">تسجيل فرع
-                                        جديد</a>
-                                </div>
-                            </div>
-                        </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table mb-0">
                                     <thead>
                                         <tr class="head">
-                                            <th>اسم الفرع</th>
-                                            <th>نوع الفرع</th>
+                                            <th>الفرع</th>
                                             <th>&nbsp;</th>
                                         </tr>
                                     </thead>
@@ -47,26 +36,12 @@
                                             @foreach ($branches as $branch)
                                                 <tr>
                                                     <td class="strong">{{ $branch->name }}</td>
-                                                    <td>{{ $branch->type == 'normal' ? 'فرع عام' : 'معهد تدريب' }}</td>
                                                     <td>
-
                                                         <a class="btn btn-info"
                                                             href="{{ route(Auth::getDefaultDriver() . '.branches.work-regulations', $branch->id) }}"
                                                             role="button">
-                                                            <i class="fa fa-file-text-o"></i> لائحة العمل
+                                                            <i class="fa fa-file-text-o"></i> عرض لائحة العمل الداخلية
                                                         </a>
-                                                        <a class="btn btn-warning"
-                                                            href="{{ route(Auth::getDefaultDriver() . '.branches.edit', $branch->id) }}"
-                                                            role="button">تعديل</a>
-
-                                                        <form
-                                                            action="{{ route(Auth::getDefaultDriver() . '.branches.destroy', $branch->id) }}"
-                                                            method="POST" style="display:inline;">
-                                                            @csrf
-                                                            @method('POST')
-                                                            <button type="submit" class="btn btn-danger"
-                                                                onclick="return confirm('هل انت متأكد انك تريد حذف هذا الفرع ؟')">حذف</button>
-                                                        </form>
                                                     </td>
                                                 </tr>
                                             @endforeach
