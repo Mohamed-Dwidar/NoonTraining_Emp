@@ -1,0 +1,11 @@
+{
+    "name": "ViolationModule",
+    "alias": "violationmodules",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\ViolationModule\\app\\Providers\\ViolationModuleServiceProvider"
+    ],
+    "files": []
+}

@@ -9,5 +9,6 @@
     "AttendanceModule": true,
     "LeaveModule": true,
     "BonuseModule": true,
-    "DeductionModule": true
+    "DeductionModule": true,
+    "ViolationModule": true
 }

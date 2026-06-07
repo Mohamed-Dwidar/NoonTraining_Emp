@@ -21,8 +21,8 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="fa fa-exclamation-triangle"></i> أنواع المخالفات
+                            <a href="{{ route('admin.violations.index') }}" class="@if (Request::segment(2) == 'violation') active @endif">
+                                <i class="fa fa-exclamation-triangle"></i> المخالفات
                             </a>
                         </li>
                         <li>
@@ -48,34 +48,24 @@
                         <span class="menu-title">العمليات الشهرية</span>
                     </a>
                     <ul class="dropdown">
-                        <li>
+                        {{-- <li>
                             <a href="{{ route('admin.attendances.index') }}" class="@if (Request::segment(2) == 'attendance') active @endif">
                                 <i class="fa fa-clock-o"></i> الحضور
                             </a>
-                        </li>
+                        </li> --}}
                         <li>
                             <a href="{{ route('admin.leaves.index') }}" class="@if (Request::segment(2) == 'leave') active @endif">
                                 <i class="fa fa-ban"></i> الإجازات
                             </a>
                         </li>
                         <li>
-                            <a href="#">
-                                <i class="fa fa-ban"></i> المخالفات
-                            </a>
-                        </li>
-                        <li>
                             <a href="{{ route('admin.deductions.index') }}" class="@if (Request::segment(2) == 'discount') active @endif">
-                                <i class="fa fa-minus-circle"></i> الخصومات
+                                <i class="fa fa-minus-circle"></i> الجزاءات والخصومات
                             </a>
                         </li>
                         <li>
                             <a href="{{ route('admin.bonuses.index') }}" class="@if (Request::segment(2) == 'bonus') active @endif">
                                 <i class="fa fa-gift"></i> المكافآت
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="fa fa-money"></i> الرواتب
                             </a>
                         </li>
                     </ul>
