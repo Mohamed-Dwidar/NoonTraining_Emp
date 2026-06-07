@@ -952,3 +952,9 @@ nav.pagination-nav {
 .top-menu li ul.dropdown li + li {
     border-top: 1px solid #f2f2f2;
 }
+.badge-info-red {
+    background-color: #e74a3b;
+    color: #fff;
+    border-radius: 12px;
+
+}

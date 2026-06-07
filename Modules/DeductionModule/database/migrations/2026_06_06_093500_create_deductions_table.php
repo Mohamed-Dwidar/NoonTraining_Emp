@@ -15,8 +15,11 @@ return new class extends Migration
     {
         Schema::create('deductions', function (Blueprint $table) {
             $table->id();
+            $table->string('type', 20)->default('custom'); // 'custom' or 'violation'
             $table->bigInteger('employee_id');
             $table->string('month', 7);           // e.g. 2026-06
+            $table->bigInteger('violation_id')->nullable();
+            $table->tinyInteger('violation_repeat_number')->nullable();
             $table->decimal('amount', 10, 2);   // e.g. 1500.00
             $table->string('reason');            // e.g. 'performance', 'attendance', etc.
 

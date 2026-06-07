@@ -5,6 +5,7 @@ namespace Modules\DeductionModule\App\Http\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\EmployeeModule\App\Http\Models\Employee;
+use Modules\ViolationModule\App\Http\Models\Violation;
 
 class Deduction extends Model {
     use HasFactory;
@@ -17,5 +18,9 @@ class Deduction extends Model {
 
     public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    public function violation() {
+        return $this->belongsTo(Violation::class, 'violation_id');
     }
 }

@@ -14,7 +14,7 @@ class DeductionRepository extends BaseRepository
 
     public function getByMonth(string $month, ?int $branchId = null, ?int $deptId = null)
     {
-        $query = Deduction::with(['employee.branch', 'employee.department'])
+        $query = Deduction::with(['employee.branch', 'employee.department', 'violation'])
             ->where('month', $month);
 
         if ($branchId) {
@@ -47,6 +47,20 @@ class DeductionRepository extends BaseRepository
 
     public function findDeduction(int $id): Deduction
     {
-        return Deduction::with(['employee.branch', 'employee.department'])->findOrFail($id);
+        return Deduction::with(['employee.branch', 'employee.department', 'violation'])->findOrFail($id);
+    }
+
+    public function countViolationRepeats(int $employeeId, int $violationId, string $month, ?int $excludeId = null): int
+    {
+        $query = Deduction::where('employee_id', $employeeId)
+            ->where('violation_id', $violationId)
+            ->where('month', $month)
+            ->where('type', 'violation');
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        return $query->count();
     }
 }

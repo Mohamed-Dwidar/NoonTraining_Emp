@@ -4,6 +4,7 @@ namespace Modules\DeductionModule\Services;
 
 use Illuminate\Support\Collection;
 use Modules\DeductionModule\Repository\DeductionRepository;
+use Modules\ViolationModule\App\Http\Models\ViolationRepeat;
 
 class DeductionService {
 
@@ -31,5 +32,24 @@ class DeductionService {
 
     public function deleteDeduction(int $id): void {
         $this->deductionRepository->deleteDeduction($id);
+    }
+
+    public function resolveViolationDeduction(int $employeeId, int $violationId, string $month, ?int $excludeId = null): array
+    {
+        $count        = $this->deductionRepository->countViolationRepeats($employeeId, $violationId, $month, $excludeId);
+        $repeatNumber = $count + 1;
+
+        $tiers  = ViolationRepeat::where('violation_id', $violationId)->orderBy('repeat_number')->get();
+        $amount = 0;
+
+        if ($tiers->isNotEmpty()) {
+            $tier   = $tiers->firstWhere('repeat_number', $repeatNumber) ?? $tiers->last();
+            $amount = $tier->deduction_amount;
+        }
+
+        return [
+            'repeat_number' => $repeatNumber,
+            'amount'        => $amount,
+        ];
     }
 }
