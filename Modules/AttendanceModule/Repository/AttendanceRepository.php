@@ -40,4 +40,9 @@ class AttendanceRepository extends BaseRepository
             $data
         );
     }
+
+    public function filter($request)
+    {
+        return Attendance::filter($request);
+    }
 }

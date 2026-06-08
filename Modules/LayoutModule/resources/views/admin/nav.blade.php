@@ -2,9 +2,7 @@
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 col nav-links">
         <nav id="primary-menu">
             <ul class="top-menu menu-eff text-right">
-
-
-                {{-- 2. الموظفون - single link --}}
+                {{--  الموظفون - single link --}}
                 <li class="nav-item">
                     <a href="{{ route('admin.employees.index') }}" class="@if (Request::segment(2) == 'employee') active @endif">
                         <i class="fa fa-users"></i>
@@ -12,7 +10,7 @@
                     </a>
                 </li>
 
-                {{-- 3. العمليات الشهرية --}}
+                {{--  العمليات الشهرية --}}
                 <li class="nav-item">
                     <a href="#" class="nav-monthly-ops">
                         <i class="fa fa-calendar-check-o"></i>
@@ -42,7 +40,7 @@
                     </ul>
                 </li>
 
-                {{-- 4. الأداء والمتابعة --}}
+                {{-- الأداء والمتابعة --}}
                 <li class="nav-item">
                     <a href="#">
                         <i class="fa fa-line-chart"></i>
@@ -67,7 +65,7 @@
                     </ul>
                 </li>
 
-                {{-- 5. التقارير --}}
+                {{--  التقارير --}}
                 <li class="nav-item">
                     <a href="#">
                         <i class="fa fa-bar-chart"></i>
@@ -75,7 +73,7 @@
                     </a>
                     <ul class="dropdown">
                         <li>
-                            <a href="#">
+                            <a href="{{ route('admin.reports.salary-report') }}">
                                 <i class="fa fa-money"></i> تقارير الرواتب
                             </a>
                         </li>
@@ -92,7 +90,7 @@
                     </ul>
                 </li>
 
-                {{-- 1. الإعدادات --}}
+                {{-- الإعدادات --}}
                 <li class="nav-item">
                     <a href="#">
                         <i class="fa fa-cog"></i>

@@ -13,6 +13,10 @@ class AttendanceService {
         $this->attendanceRepository = $attendanceRepository;
     }
 
+     public function filter($request = []) {
+         return $this->attendanceRepository->filter($request);
+     }
+
     /**
      * For each employee ensure a record exists for the given month.
      * Does nothing if the record already exists.

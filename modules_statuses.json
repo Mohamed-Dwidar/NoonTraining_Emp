@@ -12,5 +12,6 @@
     "DeductionModule": true,
     "ViolationModule": true,
     "TaskModule": true,
-    "StudentModule": true
+    "StudentModule": true,
+    "ReportModule": true
 }
