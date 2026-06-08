@@ -23,6 +23,7 @@ return new class extends Migration
             $table->tinyInteger('monthly_working_days');
             $table->tinyInteger('daily_working_hours');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

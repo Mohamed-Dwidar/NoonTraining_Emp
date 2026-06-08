@@ -4,13 +4,16 @@ namespace Modules\BonuseModule\Services;
 
 use Illuminate\Support\Collection;
 use Modules\BonuseModule\Repository\BonuseRepository;
+use Modules\PayrollModule\Repository\PayrollRepository;
 
 class BonuseService {
 
     protected BonuseRepository $bonuseRepository;
+    protected PayrollRepository $payrollRepository;
 
-    public function __construct(BonuseRepository $bonuseRepository) {
+    public function __construct(BonuseRepository $bonuseRepository, PayrollRepository $payrollRepository) {
         $this->bonuseRepository = $bonuseRepository;
+        $this->payrollRepository = $payrollRepository;
     }
 
     /**
@@ -43,12 +46,17 @@ class BonuseService {
      * Create new student
      */
     public function create(array $data) {
-        return $this->bonuseRepository->create([
+        $bonuse = $this->bonuseRepository->create([
             'employee_id' => $data['employee_id'],
             'month'       => $data['month'],
             'amount'      => $data['amount'],
             'reason'      => $data['reason'] ?? null,
         ]);
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($data['employee_id'], $data['month']);
+
+        return $bonuse;
     }
 
     /**
@@ -61,13 +69,25 @@ class BonuseService {
             'amount'      => $data['amount'],
             'reason'      => $data['reason'] ?? null,
         ];
-        return $this->bonuseRepository->update($updateData, $data['id']);
+
+        $bounuse = $this->bonuseRepository->update($updateData, $data['id']);
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($data['employee_id'], $data['month']);
+
+        return $bounuse;
     }
 
     /**
      * Delete student
      */
     public function delete($id) {
-        return $this->bonuseRepository->delete($id);
+        $oldBonuse = $this->find($id);
+        $delete = $this->bonuseRepository->delete($id);
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($oldBonuse->employee_id, $oldBonuse->month);
+
+        return $delete;
     }
 }

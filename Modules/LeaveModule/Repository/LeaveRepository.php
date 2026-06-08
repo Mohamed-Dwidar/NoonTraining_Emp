@@ -16,4 +16,11 @@ class LeaveRepository extends BaseRepository
     {
         return Leave::filter($request);
     }
+
+    public function sumDaysByEmployeeAndMonth(int $employeeId, string $month): int
+    {
+        return (int) Leave::where('employee_id', $employeeId)
+                          ->where('month', $month)
+                          ->sum('days');
+    }
 }

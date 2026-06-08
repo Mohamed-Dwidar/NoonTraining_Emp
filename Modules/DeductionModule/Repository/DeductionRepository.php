@@ -16,6 +16,13 @@ class DeductionRepository extends BaseRepository
         return Deduction::filter($request);
     }
 
+    public function sumByEmployeeAndMonth(int $employeeId, string $month): float
+    {
+        return (float) Deduction::where('employee_id', $employeeId)
+                                ->where('month', $month)
+                                ->sum('amount');
+    }
+
     public function countViolationRepeats(int $employeeId, int $violationId, string $month, ?int $excludeId = null): int
     {
         $query = Deduction::where('employee_id', $employeeId)

@@ -9,28 +9,30 @@ use Modules\BonuseModule\Services\BonuseService;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
+use Modules\PayrollModule\Services\PayrollService;
 
-class BonuseAdminController extends Controller
-{
+class BonuseAdminController extends Controller {
     protected BonuseService $bonuseService;
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
     protected EmployeeService $employeeService;
+    protected PayrollService $payrollService;
 
     public function __construct(
         BonuseService $bonuseService,
         BranchService $branchService,
         DepartmentService $departmentService,
-        EmployeeService $employeeService
+        EmployeeService $employeeService,
+        PayrollService $payrollService
     ) {
         $this->bonuseService     = $bonuseService;
         $this->branchService     = $branchService;
         $this->departmentService = $departmentService;
         $this->employeeService   = $employeeService;
+        $this->payrollService    = $payrollService;
     }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
 
@@ -47,24 +49,30 @@ class BonuseAdminController extends Controller
         ])->paginate(15);
 
         return view('bonusemodule::Admin.index', compact(
-            'bonuses', 'branches', 'departments', 'month', 'branchId', 'deptId'
+            'bonuses',
+            'branches',
+            'departments',
+            'month',
+            'branchId',
+            'deptId'
         ));
     }
 
-    public function create(Request $request)
-    {
+    public function create(Request $request) {
         $month       = $request->input('month', session('bonuse_month', now()->format('Y-m')));
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $employees   = $this->employeeService->getAllEmployees();
 
         return view('bonusemodule::Admin.create', compact(
-            'month', 'branches', 'departments', 'employees'
+            'month',
+            'branches',
+            'departments',
+            'employees'
         ));
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $validator = Validator::make(
             $request->all(),
             [
@@ -97,8 +105,7 @@ class BonuseAdminController extends Controller
             ->with('success', 'تم إضافة المكافأة بنجاح');
     }
 
-    public function edit(int $id)
-    {
+    public function edit(int $id) {
         $bonuse      = $this->bonuseService->find($id);
         $month       = $bonuse->month;
         $branches    = $this->branchService->getAllBranches();
@@ -106,12 +113,15 @@ class BonuseAdminController extends Controller
         $employees   = $this->employeeService->getAllEmployees();
 
         return view('bonusemodule::Admin.edit', compact(
-            'bonuse', 'month', 'branches', 'departments', 'employees'
+            'bonuse',
+            'month',
+            'branches',
+            'departments',
+            'employees'
         ));
     }
 
-    public function update(Request $request, int $id)
-    {
+    public function update(Request $request, int $id) {
         $validator = Validator::make(
             $request->all(),
             [
@@ -144,8 +154,7 @@ class BonuseAdminController extends Controller
             ->with('success', 'تم تحديث المكافأة بنجاح');
     }
 
-    public function destroy(int $id)
-    {
+    public function destroy(int $id) {
         $bonuse = $this->bonuseService->find($id);
         $month  = $bonuse->month;
         $this->bonuseService->delete($id);

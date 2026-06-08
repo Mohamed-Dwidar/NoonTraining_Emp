@@ -13,5 +13,6 @@
     "ViolationModule": true,
     "TaskModule": true,
     "StudentModule": true,
-    "ReportModule": true
+    "ReportModule": true,
+    "PayrollModule": true
 }

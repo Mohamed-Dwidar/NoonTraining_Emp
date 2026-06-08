@@ -5,13 +5,16 @@ namespace Modules\DeductionModule\Services;
 use Illuminate\Support\Collection;
 use Modules\DeductionModule\Repository\DeductionRepository;
 use Modules\ViolationModule\App\Http\Models\ViolationRepeat;
+use Modules\PayrollModule\Repository\PayrollRepository;
 
 class DeductionService {
 
     protected DeductionRepository $deductionRepository;
+    protected PayrollRepository $payrollRepository;
 
-    public function __construct(DeductionRepository $deductionRepository) {
+    public function __construct(DeductionRepository $deductionRepository, PayrollRepository $payrollRepository) {
         $this->deductionRepository = $deductionRepository;
+        $this->payrollRepository = $payrollRepository;
     }
 
     /**
@@ -37,7 +40,7 @@ class DeductionService {
     }
 
     public function create(array $data) {
-        return $this->deductionRepository->create([
+        $deduction = $this->deductionRepository->create([
             'type'         => $data['type'] ?? 'general',
             'employee_id' => $data['employee_id'],
             'month'        => $data['month'],
@@ -46,6 +49,11 @@ class DeductionService {
             'amount'       => $data['amount'],
             'reason'       => $data['reason'] ?? null,
         ]);
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($data['employee_id'], $data['month']);
+
+        return $deduction;
     }
 
     public function update(array $data) {
@@ -57,14 +65,23 @@ class DeductionService {
             'violation_repeat_number' => $data['violation_repeat_number'] ?? null,
             'amount'       => $data['amount'],
             'reason'       => $data['reason'] ?? null,
-         ];
-        return $this->deductionRepository->update(
+        ];
+        $deduction = $this->deductionRepository->update(
             $updateData,
             $data['id']
         );
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($data['employee_id'], $data['month']);
+
+        return $deduction;
     }
     public function delete(int $id): void {
-        $this->deductionRepository->delete($id);
+        $oldDeduction = $this->find($id);
+        $delete = $this->deductionRepository->delete($id);
+
+        // Recalculate the payroll for the employee
+        $this->payrollRepository->recalculateForEmployee($oldDeduction->employee_id, $oldDeduction->month);
     }
 
     public function resolveViolationDeduction(int $employeeId, int $violationId, string $month, ?int $excludeId = null): array {

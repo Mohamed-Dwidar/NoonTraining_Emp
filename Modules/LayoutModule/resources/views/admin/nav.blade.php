@@ -73,7 +73,7 @@
                     </a>
                     <ul class="dropdown">
                         <li>
-                            <a href="{{ route('admin.reports.salary-report') }}">
+                            <a href="{{ route('admin.payrolls.index') }}">
                                 <i class="fa fa-money"></i> تقارير الرواتب
                             </a>
                         </li>

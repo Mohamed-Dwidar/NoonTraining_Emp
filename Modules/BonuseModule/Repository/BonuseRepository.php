@@ -16,5 +16,10 @@ class BonuseRepository extends BaseRepository
         return Bonuse::filter($request);
     }
 
-
+    public function sumByEmployeeAndMonth(int $employeeId, string $month): float
+    {
+        return (float) Bonuse::where('employee_id', $employeeId)
+                             ->where('month', $month)
+                             ->sum('amount');
+    }
 }
