@@ -31,7 +31,7 @@ class Employee extends Model {
     }
 
     public function getDailySalaryAttribute() {
-        return $this->basic_salary / $this->total_working_hours;
+        return $this->basic_salary / $this->monthly_working_days;
     }
 
      public function getHourlySalaryAttribute() {
@@ -39,13 +39,20 @@ class Employee extends Model {
     }
 
     public function scopeFilter($query, $request = []) {
-        if (isset($request['name'])) {
-            $query->where('name', 'like', '%' . $request['name'] . '%');
+        if (!empty($request['search'])) {
+            $term = $request['search'];
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', '%' . $term . '%')
+                  ->orWhere('job', 'like', '%' . $term . '%')
+                  ->orWhereHas('user', function ($q2) use ($term) {
+                      $q2->where('email', 'like', '%' . $term . '%');
+                  });
+            });
         }
-        if (isset($request['branch_id'])) {
+        if (!empty($request['branch_id'])) {
             $query->where('branch_id', $request['branch_id']);
         }
-        if (isset($request['department_id'])) {
+        if (!empty($request['department_id'])) {
             $query->where('department_id', $request['department_id']);
         }
         return $query;

@@ -46,7 +46,7 @@
                         <div class="col-md-1">
                             <label class="d-block mb-1">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fa fa-search"></i> عرض
+                                <i class="fa fa-search"></i> بحث
                             </button>
                         </div>
                     </div>

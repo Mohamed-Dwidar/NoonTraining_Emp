@@ -1,7 +1,7 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    المهام
+    التكليمات و المهام
 @endsection
 
 @section('content')
@@ -9,7 +9,7 @@
 
         <div class="content-header mb-2">
             <div class="d-flex align-items-center justify-content-between w-100">
-                <h3><i class="fa fa-tasks"></i> &nbsp; المهام</h3>
+                <h3><i class="fa fa-tasks"></i> &nbsp; التكليمات و المهام</h3>
             </div>
         </div>
 
@@ -51,7 +51,7 @@
                         <div class="col-md-1">
                             <label class="d-block mb-1">&nbsp;</label>
                             <button type="submit" class="btn btn-primary w-100">
-                                <i class="fa fa-search"></i> عرض
+                                <i class="fa fa-search"></i> بحث
                             </button>
                         </div>
                     </div>

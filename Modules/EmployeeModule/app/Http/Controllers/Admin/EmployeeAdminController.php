@@ -22,8 +22,10 @@ class EmployeeAdminController extends Controller {
     }
 
     public function index(Request $request) {
-        $employees = $this->employeeService->filter($request->all())->get();
-        return view('employeemodule::Admin.index', compact('employees'));
+        $employees   = $this->employeeService->filter($request->all())->paginate(10);
+        $branches    = $this->branchService->getAllBranches();
+        $departments = $this->departmentService->getAllDepartments();
+        return view('employeemodule::Admin.index', compact('employees', 'branches', 'departments'));
     }
 
     public function show($id) {

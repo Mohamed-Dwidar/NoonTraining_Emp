@@ -51,7 +51,7 @@
                     <ul class="dropdown">
                         <li>
                             <a href="{{ route('admin.tasks.index') }}" class="@if (Request::segment(2) == 'task') active @endif">
-                                <i class="fa fa-tasks"></i> المهام
+                                <i class="fa fa-tasks"></i> التكليفات و المهام
                             </a>
                         </li>
                         <li>
