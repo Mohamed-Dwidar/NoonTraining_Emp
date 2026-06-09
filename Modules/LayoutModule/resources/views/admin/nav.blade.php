@@ -117,6 +117,11 @@
                                 <i class="fa fa-file-text-o"></i> لائحة العمل الداخلية
                             </a>
                         </li>
+                        <li>
+                            <a href="{{ route('admin.settings.index') }}" class="@if (Request::segment(2) == 'branches' && Request::segment(3) == 'work-regulations') active @endif">
+                                <i class="fa fa-cogs"></i> اعدادات النظام العامة
+                            </a>
+                        </li>
                     </ul>
                 </li>
 

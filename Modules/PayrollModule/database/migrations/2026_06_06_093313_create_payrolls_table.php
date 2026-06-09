@@ -24,6 +24,7 @@ return new class extends Migration
             $table->decimal('basic_salary', 10, 2);
             $table->decimal('deductions', 10, 2);
             $table->decimal('bonuses', 10, 2);
+            $table->decimal('students_commission', 10, 2)->default(0);
             $table->decimal('total_salary', 10, 2);
 
             $table->timestamps();

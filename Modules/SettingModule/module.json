@@ -1,0 +1,11 @@
+{
+    "name": "SettingModule",
+    "alias": "settingmodule",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SettingModule\\Providers\\SettingModuleServiceProvider"
+    ],
+    "files": []
+}

@@ -1,5 +1,12 @@
 @extends('layoutmodule::layouts.layout_main')
 
+@php
+    $settings = \Modules\SettingModule\app\Models\Setting::all();
+    $emp_monthly_working_days = $settings->where('key', 'emp_monthly_working_days')->first()->value ?? 24;
+    $emp_daily_working_hours = $settings->where('key', 'emp_daily_working_hours')->first()->value ?? 8;
+    $base_student_commision = $settings->where('key', 'base_student_commision')->first()->value ?? 10;
+@endphp
+
 @section('title')
     إنشاء موظف جديد
 @endsection
@@ -121,7 +128,7 @@
                                                 <div class="form-group">
                                                     <input type="number" min="1" max="31"
                                                         class="form-control @error('monthly_working_days') is-invalid @enderror"
-                                                        id="monthly_working_days" name="monthly_working_days" value="{{ old('monthly_working_days') }}">
+                                                        id="monthly_working_days" name="monthly_working_days" value="{{ old('monthly_working_days', $emp_monthly_working_days) }}">
                                                     @error('monthly_working_days')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -133,7 +140,7 @@
                                                 <div class="form-group">
                                                     <input type="number" min="1" max="24"
                                                         class="form-control @error('daily_working_hours') is-invalid @enderror"
-                                                        id="daily_working_hours" name="daily_working_hours" value="{{ old('daily_working_hours') }}">
+                                                        id="daily_working_hours" name="daily_working_hours" value="{{ old('daily_working_hours', $emp_daily_working_hours) }}">
                                                     @error('daily_working_hours')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -143,11 +150,11 @@
 
                                         <div class="row" id="commission-row" style="display:none;">
                                             <div class="col-lg-2 col-sm-12 col-xs-12 col-6">
-                                                <label for="stu_commission">عمولة الطلاب</label>
+                                                <label for="stu_commission">عمولة تسجيل الطلاب</label>
                                                 <div class="form-group">
                                                     <input type="number" step="0.01" min="0"
                                                         class="form-control @error('stu_commission') is-invalid @enderror"
-                                                        id="stu_commission" name="stu_commission" value="{{ old('stu_commission', 0) }}">
+                                                        id="stu_commission" name="stu_commission" value="{{ old('stu_commission', $base_student_commision) }}">
                                                     @error('stu_commission')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror

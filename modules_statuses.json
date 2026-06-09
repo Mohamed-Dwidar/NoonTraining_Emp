@@ -14,5 +14,6 @@
     "TaskModule": true,
     "StudentModule": true,
     "ReportModule": true,
-    "PayrollModule": true
+    "PayrollModule": true,
+    "SettingModule": true
 }

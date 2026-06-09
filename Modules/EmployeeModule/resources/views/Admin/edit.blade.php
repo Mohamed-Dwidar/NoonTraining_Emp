@@ -146,7 +146,7 @@
 
                                         <div class="row" id="commission-row" style="display:none;">
                                             <div class="col-lg-2 col-sm-12 col-xs-12 col-6">
-                                                <label for="stu_commission">عمولة الطلاب</label>
+                                                <label for="stu_commission"> عمولة تسجيل الطلاب</label>
                                                 <div class="form-group">
                                                     <input type="number" step="0.01" min="0"
                                                         class="form-control @error('stu_commission') is-invalid @enderror"
