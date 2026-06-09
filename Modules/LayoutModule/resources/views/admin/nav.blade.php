@@ -14,7 +14,7 @@
                 <li class="nav-item">
                     <a href="#" class="nav-monthly-ops">
                         <i class="fa fa-calendar-check-o"></i>
-                        <span class="menu-title">العمليات الشهرية</span>
+                        <span class="menu-title">العمليات و الإجراءات</span>
                     </a>
                     <ul class="dropdown">
                         {{-- <li>
@@ -37,24 +37,9 @@
                                 <i class="fa fa-minus-circle"></i> الجزاءات والخصومات
                             </a>
                         </li>
-                    </ul>
-                </li>
-
-                {{-- الأداء والمتابعة --}}
-                <li class="nav-item">
-                    <a href="#">
-                        <i class="fa fa-line-chart"></i>
-                        <span class="menu-title">الأداء والمتابعة</span>
-                    </a>
-                    <ul class="dropdown">
                         <li>
                             <a href="{{ route('admin.tasks.index') }}" class="@if (Request::segment(2) == 'task') active @endif">
                                 <i class="fa fa-tasks"></i> التكليفات و المهام
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#">
-                                <i class="fa fa-star-o"></i> تقييم الأداء
                             </a>
                         </li>
                         <li>
@@ -64,6 +49,7 @@
                         </li>
                     </ul>
                 </li>
+
 
                 {{--  التقارير --}}
                 <li class="nav-item">
