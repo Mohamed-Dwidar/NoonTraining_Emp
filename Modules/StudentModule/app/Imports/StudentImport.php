@@ -15,6 +15,23 @@ class StudentImport implements ToCollection {
         $this->employeeId     = $employeeId;
     }
 
+    private function parseDate(mixed $value): ?string {
+        if (empty($value)) return null;
+
+        // Excel serial number (e.g. 46178)
+        if (is_numeric($value)) {
+            return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)
+                ->format('Y-m-d');
+        }
+
+        // Already a formatted string (e.g. "05/06/2026" or "2026-06-05")
+        try {
+            return \Carbon\Carbon::parse($value)->format('Y-m-d');
+        } catch (\Exception) {
+            return null;
+        }
+    }
+
     public function collection(Collection $rows) {
         foreach ($rows as $key => $row) {
             if ($key === 0) {
@@ -34,7 +51,7 @@ class StudentImport implements ToCollection {
                 'total_amount'        => $row[3] ?? 0,
                 'paid_amount'         => $row[4] ?? 0,
                 'payment_method'      => $row[5] ?? null,
-                'payment_date'        => $row[6] ?? null,
+                'payment_date'        => $this->parseDate($row[6] ?? null),
                 'previous_student_of' => $row[7] ?? null,
             ];
 

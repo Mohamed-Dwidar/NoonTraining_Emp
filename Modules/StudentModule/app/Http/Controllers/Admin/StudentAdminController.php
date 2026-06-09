@@ -11,6 +11,7 @@ use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\StudentModule\App\Imports\StudentImport;
+use Modules\StudentModule\Exports\StudentsExport;
 
 class StudentAdminController extends Controller {
     protected StudentService $studentService;
@@ -41,7 +42,26 @@ class StudentAdminController extends Controller {
 
         session(['student_branch_id' => $branchId]);
 
-        $students = $this->studentService->filter($request->all())->paginate(50);
+        $students_query = $this->studentService->filter($request->all());
+
+        if ($request->export == 'yes') {
+            $label = '';
+
+            if ($branchId) {
+                $label = $label  . ' فرع ' . ($this->branchService->findOne($branchId)->name) . ' - ';
+            }
+            if ($deptId) {
+                $label =  $label . ' قسم ' . ($this->departmentService->findOne($deptId)->name) . ' - ';
+            }
+            if ($employeeId != null) {
+                $label = $label . ' موظف ' . ($this->employeeService->findOne($employeeId)->name) . ' - ';
+            }
+
+            $fileName = 'طلاب - ' . $label . now()->format('Y-m-d') . '.xlsx';
+            return Excel::download(new StudentsExport($students_query->get()), $fileName);
+        }
+
+        $students = $students_query->paginate(50);
 
         return view('studentmodule::Admin.index', compact(
             'students',

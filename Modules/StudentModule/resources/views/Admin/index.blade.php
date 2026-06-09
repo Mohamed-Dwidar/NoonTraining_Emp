@@ -80,7 +80,12 @@
                             جديد</a> --}}
 
                         <button class="btn btn-primary round btn-min-width mr-1 mb-1" data-toggle="modal"
-                            data-target="#importModal" type="button">استيراد الطلاب</button>
+                            data-target="#importModal" type="button">استيراد طلاب جدد</button>
+
+                        <a id="exportBtn" class="btn btn-success round btn-min-width mr-1 mb-1" href="#">
+                            <i class="fa fa-file-excel-o"></i>
+                            تصدير ملف اكسل
+                        </a>
                     </div>
                 </div>
             </div>
@@ -287,13 +292,24 @@
         // Filter cascade
         (function() {
             var deptsByBranch = @json($departments->groupBy('branch_id')->map(fn($g) => $g->map(fn($d) => ['id' => $d->id, 'name' => $d->name])->values()));
-            var empsByDeptFilter = @json($employees->groupBy('department_id')->map(fn($g) => $g->map(fn($e) => ['id' => $e->id, 'name' => $e->name])->values()));
+            var empsByDept = @json($employees->groupBy('department_id')->map(fn($g) => $g->map(fn($e) => ['id' => $e->id, 'name' => $e->name])->values()));
+            var empsByBranch = @json($employees->groupBy('branch_id')->map(fn($g) => $g->map(fn($e) => ['id' => $e->id, 'name' => $e->name])->values()));
 
             var branchSelect = document.getElementById('branchSelect');
             var deptSelect = document.getElementById('deptSelect');
             var empSelect = document.getElementById('empSelect');
             var selectedDept = {{ $deptId ? (int) $deptId : 'null' }};
             var selectedEmp = {{ $employeeId ? (int) $employeeId : 'null' }};
+
+            function populateEmps(deptId, branchId) {
+                var opts = '<option value="">-- كل الموظفين --</option>';
+                var list = deptId ? (empsByDept[deptId] || []) : (branchId ? (empsByBranch[branchId] || []) : []);
+                list.forEach(function(e) {
+                    var sel = (selectedEmp && e.id === selectedEmp) ? ' selected' : '';
+                    opts += '<option value="' + e.id + '"' + sel + '>' + e.name + '</option>';
+                });
+                empSelect.innerHTML = opts;
+            }
 
             function populateDepts(branchId) {
                 var opts = '<option value="">-- كل الأقسام --</option>';
@@ -303,17 +319,7 @@
                     opts += '<option value="' + d.id + '"' + sel + '>' + d.name + '</option>';
                 });
                 deptSelect.innerHTML = opts;
-                populateEmps(deptSelect.value);
-            }
-
-            function populateEmps(deptId) {
-                var opts = '<option value="">-- كل الموظفين --</option>';
-                var list = empsByDeptFilter[deptId] || [];
-                list.forEach(function(e) {
-                    var sel = (selectedEmp && e.id === selectedEmp) ? ' selected' : '';
-                    opts += '<option value="' + e.id + '"' + sel + '>' + e.name + '</option>';
-                });
-                empSelect.innerHTML = opts;
+                populateEmps(deptSelect.value, branchId);
             }
 
             branchSelect.addEventListener('change', function() {
@@ -324,7 +330,7 @@
 
             deptSelect.addEventListener('change', function() {
                 selectedEmp = null;
-                populateEmps(this.value);
+                populateEmps(this.value, branchSelect.value);
             });
 
             if (branchSelect.value) populateDepts(branchSelect.value);
@@ -349,6 +355,14 @@
                 $('#modalFooter').show();
                 $('#uploadingMessage').hide();
                 $('#importForm')[0].reset();
+            });
+
+            // Export button
+            $('#exportBtn').on('click', function(e) {
+                e.preventDefault();
+                var params = new URLSearchParams(window.location.search);
+                params.set('export', 'yes');
+                window.location.href = window.location.pathname + '?' + params.toString();
             });
 
             // Clear search button
