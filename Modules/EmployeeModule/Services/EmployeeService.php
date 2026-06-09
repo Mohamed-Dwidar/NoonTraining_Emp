@@ -2,7 +2,6 @@
 
 namespace Modules\EmployeeModule\Services;
 
-use Modules\EmployeeModule\App\Http\Models\Employee;
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 
 class EmployeeService {
@@ -38,6 +37,7 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary'],
             'monthly_working_days' => $data['monthly_working_days'],
             'daily_working_hours'  => $data['daily_working_hours'],
+            'stu_commission'       => $data['stu_commission'] ?? 0,
         ]);
 
         $employee->user()->create([
@@ -61,6 +61,7 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary']         ?? $employee->basic_salary,
             'monthly_working_days' => $data['monthly_working_days'] ?? $employee->monthly_working_days,
             'daily_working_hours'  => $data['daily_working_hours']  ?? $employee->daily_working_hours,
+            'stu_commission'       => $data['stu_commission']        ?? $employee->stu_commission,
         ], $id);
 
         if (!empty($data['email'])) {
@@ -76,5 +77,13 @@ class EmployeeService {
 
     public function filter($data = []) {
         return $this->employeeRepository->filter($data);
+    }
+
+    public function updateStatus($id, $status) {
+        return $this->employeeRepository->update(['status' => $status], $id);
+    }
+
+    public function updateCommission($id, $commission) {
+        return $this->employeeRepository->update(['stu_commission' => $commission], $id);
     }
 }

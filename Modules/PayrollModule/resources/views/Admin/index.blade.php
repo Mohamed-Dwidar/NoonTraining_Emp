@@ -78,6 +78,7 @@
                                         <th>المرتب الاساسي</th>
                                         <th>الخصومات</th>
                                         <th>المكافات</th>
+                                        <th>عمولة الطلاب</th>
                                         <th>المرتب النهائي</th>
                                     </tr>
                                 </thead>
@@ -100,6 +101,7 @@
                                             <td>{{ number_format($payroll->basic_salary, 2) }}</td>
                                             <td>{{ number_format($payroll->deductions, 2) }}</td>
                                             <td>{{ number_format($payroll->bonuses, 2) }}</td>
+                                            <td>{{ number_format($payroll->students_commission, 2) }}</td>
                                             <td>{{ number_format($payroll->total_salary, 2) }}</td>
                                         </tr>
                                     @endforeach

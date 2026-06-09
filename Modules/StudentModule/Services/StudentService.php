@@ -32,6 +32,7 @@ class StudentService {
     public function create(array $data) {
         return $this->studentRepository->create([
             'employee_id' => $data['employee_id'],
+            'month'       => $data['month'],
             'name'        => $data['name'],
             'mobile'      => $data['mobile'],
             'course_name' => $data['course_name'],
@@ -46,6 +47,7 @@ class StudentService {
     public function update(array $data) {
         $updateData = [
             'employee_id' => $data['employee_id'],
+            'month'       => $data['month'],
             'name'        => $data['name'],
             'mobile'      => $data['mobile'],
             'course_name' => $data['course_name'],

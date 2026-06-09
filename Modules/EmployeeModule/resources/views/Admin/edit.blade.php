@@ -78,7 +78,7 @@
                                                         id="branch_id" name="branch_id">
                                                         <option value="">اختر الفرع</option>
                                                         @foreach($branches as $branch)
-                                                            <option value="{{ $branch->id }}" {{ old('branch_id', $employee->branch_id) == $branch->id ? 'selected' : '' }}>
+                                                            <option value="{{ $branch->id }}" data-type="{{ $branch->type }}" {{ old('branch_id', $employee->branch_id) == $branch->id ? 'selected' : '' }}>
                                                                 {{ $branch->name }}
                                                             </option>
                                                         @endforeach
@@ -144,6 +144,21 @@
                                             </div>
                                         </div>
 
+                                        <div class="row" id="commission-row" style="display:none;">
+                                            <div class="col-lg-2 col-sm-12 col-xs-12 col-6">
+                                                <label for="stu_commission">عمولة الطلاب</label>
+                                                <div class="form-group">
+                                                    <input type="number" step="0.01" min="0"
+                                                        class="form-control @error('stu_commission') is-invalid @enderror"
+                                                        id="stu_commission" name="stu_commission"
+                                                        value="{{ old('stu_commission', $employee->stu_commission) }}">
+                                                    @error('stu_commission')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="col-12 mt-1">
                                             <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}"
                                                 class="btn btn-secondary">إلغاء</a>
@@ -198,7 +213,14 @@
         });
     }
 
+    function updateCommissionVisibility() {
+        const opt = branchSelect.options[branchSelect.selectedIndex];
+        const isTraining = opt && opt.dataset.type === 'training';
+        document.getElementById('commission-row').style.display = isTraining ? '' : 'none';
+    }
+
     branchSelect.addEventListener('change', function () {
+        updateCommissionVisibility();
         if (!this.value) {
             deptSelect.innerHTML = '<option value="">اختر الفرع أولاً</option>';
             deptSelect.disabled  = true;
@@ -209,6 +231,7 @@
 
     // Load departments for the pre-selected branch on page load
     if (branchSelect.value) {
+        updateCommissionVisibility();
         loadDepartments(branchSelect.value, currentDeptId);
     } else {
         deptSelect.innerHTML = '<option value="">اختر الفرع أولاً</option>';

@@ -22,7 +22,7 @@ class EmployeeAdminController extends Controller {
     }
 
     public function index(Request $request) {
-        $employees   = $this->employeeService->filter($request->all())->paginate(10);
+        $employees   = $this->employeeService->filter($request->all())->paginate(30);
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         return view('employeemodule::Admin.index', compact('employees', 'branches', 'departments'));
@@ -51,6 +51,7 @@ class EmployeeAdminController extends Controller {
                 'basic_salary'         => 'required|numeric|min:0',
                 'monthly_working_days' => 'required|integer|min:1|max:31',
                 'daily_working_hours'  => 'required|integer|min:1|max:24',
+                'stu_commission'       => 'nullable|numeric|min:0',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -68,6 +69,7 @@ class EmployeeAdminController extends Controller {
                 'monthly_working_days.integer'  => 'أيام العمل الشهرية يجب أن تكون رقماً صحيحاً',
                 'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
                 'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
+                'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
             ]
         );
 
@@ -101,6 +103,7 @@ class EmployeeAdminController extends Controller {
                 'basic_salary'         => 'required|numeric|min:0',
                 'monthly_working_days' => 'required|integer|min:1|max:31',
                 'daily_working_hours'  => 'required|integer|min:1|max:24',
+                'stu_commission'       => 'nullable|numeric|min:0',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -118,6 +121,7 @@ class EmployeeAdminController extends Controller {
                 'monthly_working_days.integer'  => 'أيام العمل الشهرية يجب أن تكون رقماً صحيحاً',
                 'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
                 'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
+                'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
             ]
         );
 
@@ -139,5 +143,47 @@ class EmployeeAdminController extends Controller {
     public function departmentsByBranch($branchId) {
         $departments = $this->departmentService->findWhere(['branch_id' => $branchId]);
         return response()->json($departments);
+    }
+
+    public function updateStatus(Request $request, $id) {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|in:active,suspended,on_leave,resigned,terminated',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'حالة غير صحيحة'], 422);
+        }
+
+        $employee = $this->employeeService->findOne($id);
+        if (!$employee) {
+            return response()->json(['success' => false, 'message' => 'الموظف غير موجود'], 404);
+        }
+
+        $this->employeeService->updateStatus($id, $request->status);
+
+        return response()->json(['success' => true, 'message' => 'تم تحديث الحالة بنجاح']);
+    }
+
+    public function updateCommission(Request $request, $id) {
+        $validator = Validator::make($request->all(), [
+            'stu_commission' => 'required|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'قيمة العمولة غير صحيحة'], 422);
+        }
+
+        $employee = $this->employeeService->findOne($id);
+        if (!$employee) {
+            return response()->json(['success' => false, 'message' => 'الموظف غير موجود'], 404);
+        }
+
+        if (!$employee->branch || $employee->branch->type !== 'training') {
+            return response()->json(['success' => false, 'message' => 'لا يمكن تعيين عمولة الطلاب إلا لموظفي فروع التدريب'], 422);
+        }
+
+        $this->employeeService->updateCommission($id, $request->stu_commission);
+
+        return response()->json(['success' => true, 'message' => 'تم تحديث العمولة بنجاح']);
     }
 }

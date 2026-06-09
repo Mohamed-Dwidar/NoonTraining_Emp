@@ -40,16 +40,6 @@ class PayrollService {
      */
     public function ensureMonthlyRecords(Collection $employees, string $monthDate): void {
         foreach ($employees as $employee) {
-            // $this->payrollRepository->initRecord(
-            //     $employee->id,
-            //     $monthDate,
-            //     [
-            //         'monthly_working_days' => $employee->monthly_working_days,
-            //         'days_present'         => $employee->monthly_working_days,
-            //         'days_absent'          => 0
-            //     ]
-            // );
-
             $this->recalculateForEmployee($employee->id, $monthDate);
         }
     }

@@ -40,7 +40,10 @@ class PayrollAdminController extends Controller {
 
         if ($branchId) {
             $monthDate = $month;
-            $employees = $this->employeeService->findWhere(['branch_id' => $branchId]);
+            $employees = $this->employeeService->filter([
+                'branch_id' => $branchId,
+                'status' => ['active', 'on_leave']
+            ])->get();
             $this->payrollService->ensureMonthlyRecords($employees, $monthDate); // ensure records exist for each employee
 
             $payrolls = $this->payrollService->filter([

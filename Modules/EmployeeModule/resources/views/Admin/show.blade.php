@@ -18,64 +18,123 @@
 
         @include('layoutmodule::layouts.flash')
 
+        @php
+            $statusLabels = [
+                'active' => ['label' => 'نشط', 'bg' => '#28a745', 'color' => '#fff'],
+                'suspended' => ['label' => 'موقوف', 'bg' => '#ffba16', 'color' => '#000'],
+                'on_leave' => ['label' => 'إجازة', 'bg' => '#17a2b8', 'color' => '#fff'],
+                'resigned' => ['label' => 'مستقيل', 'bg' => '#f8d7da', 'color' => '#721c24'],
+                'terminated' => ['label' => 'منهي الخدمة', 'bg' => '#dc3545', 'color' => '#fff'],
+            ];
+            $status = $statusLabels[$employee->status] ?? [
+                'label' => $employee->status,
+                'bg' => '#6c757d',
+                'color' => '#fff',
+            ];
+        @endphp
+
         <div class="content-body">
             <div class="row">
-                <div class="col-lg-8 col-12">
+                <div class="col-lg-12">
                     <div class="card">
+
                         <div class="card-header">
-                            <h4 class="card-title">{{ $employee->name }}</h4>
+                            <div class="row align-items-end">
+                                <div class="col-lg-10">
+                                    <h4 class="card-title mb-0">
+                                        {{ $employee->name }}
+                                        &nbsp;&nbsp;&nbsp;
+                                        <span
+                                            style="background-color:{{ $status['bg'] }}; color:{{ $status['color'] }}; padding:4px 14px; border-radius:50px; font-size:.85rem; font-weight:600;">
+                                            {{ $status['label'] }}
+                                        </span>
+                                    </h4>
+                                </div>
+                            </div>
                         </div>
+
+
+
                         <div class="card-body">
-                            <table class="table table-bordered">
-                                <tbody>
-                                    <tr>
-                                        <th class="w-25">اسم الموظف</th>
-                                        <td>{{ $employee->name }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>الوظيفة</th>
-                                        <td>{{ $employee->job }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>القسم</th>
-                                        <td>{{ $employee->department ? $employee->department->name : '-' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>الفرع</th>
-                                        <td>{{ $employee->branch ? $employee->branch->name : '-' }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>الراتب الأساسي</th>
-                                        <td>{{ number_format($employee->basic_salary, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>أيام العمل الشهرية</th>
-                                        <td>{{ $employee->monthly_working_days }} يوم</td>
-                                    </tr>
-                                    <tr>
-                                        <th>ساعات العمل اليومية</th>
-                                        <td>{{ $employee->daily_working_hours }} ساعة</td>
-                                    </tr>
-                                    <tr>
-                                        <th>إجمالي ساعات العمل الشهرية</th>
-                                        <td>{{ $employee->total_working_hours }} ساعة</td>
-                                    </tr>
-                                    <tr>
-                                        <th>الراتب اليومي</th>
-                                        <td>{{ number_format($employee->daily_salary, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <th>سعر الساعة</th>
-                                        <td>{{ number_format($employee->hourly_salary, 2) }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="p-2">
+                                {{-- Section: Personal --}}
+
+                                <div class="row mb-4">
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">اسم الموظف</div>
+                                        <div class="font-weight-bold">{{ $employee->name }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">الوظيفة</div>
+                                        <div class="font-weight-bold">{{ $employee->job }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">البريد الإلكتروني</div>
+                                        <div class="font-weight-bold">{{ $employee->user->first()?->email ?? '—' }}</div>
+                                    </div>
+                                </div>
+
+                                {{-- Section: Branch / Department --}}
+
+                                <div class="row mb-4">
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">الفرع</div>
+                                        <div class="font-weight-bold">{{ $employee->branch?->name ?? '—' }}</div>
+                                    </div>
+                                    <div class="col-md-4 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">القسم</div>
+                                        <div class="font-weight-bold">{{ $employee->department?->name ?? '—' }}</div>
+                                    </div>
+                                </div>
+
+                                {{-- Section: Salary --}}
+
+                                <div class="row mb-2">
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">الراتب الأساسي</div>
+                                        <div class="font-weight-bold">{{ number_format($employee->basic_salary, 2) }} ر٫س
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">الراتب اليومي</div>
+                                        <div class="font-weight-bold">{{ number_format($employee->daily_salary, 2) }} ر٫س
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">سعر الساعة</div>
+                                        <div class="font-weight-bold">{{ number_format($employee->hourly_salary, 2) }} ر٫س
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">أيام العمل الشهرية</div>
+                                        <div class="font-weight-bold">{{ $employee->monthly_working_days }} يوم</div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">ساعات العمل اليومية</div>
+                                        <div class="font-weight-bold">{{ $employee->daily_working_hours }} ساعة</div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">إجمالي ساعات العمل الشهرية</div>
+                                        <div class="font-weight-bold">{{ $employee->total_working_hours }} ساعة</div>
+                                    </div>
+                                    @if ($employee->branch && $employee->branch->type === 'training')
+                                        <div class="col-md-4 col-sm-6 mb-3">
+                                            <div class="text-muted small mb-1">عمولة اضافة الطالب</div>
+                                            <div class="font-weight-bold">{{ number_format($employee->stu_commission, 2) }}
+                                                ر٫س
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
+
                         <div class="card-footer">
                             <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}" class="btn btn-secondary">
                                 <i class="fa fa-arrow-right"></i> رجوع
                             </a>
-                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.edit', $employee->id) }}" class="btn btn-warning">
+                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.edit', $employee->id) }}"
+                                class="btn btn-warning">
                                 <i class="fa fa-edit"></i> تعديل
                             </a>
                         </div>

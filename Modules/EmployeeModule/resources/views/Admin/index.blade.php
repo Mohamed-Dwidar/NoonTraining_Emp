@@ -56,6 +56,16 @@
                                                     @endforeach
                                                 </select>
                                             </div>
+                                            <div class="col-md-2 mb-1">
+                                                <select name="status" class="form-control filter-select">
+                                                    <option value="">-- كل الحالات --</option>
+                                                    <option value="active"     {{ request('status') === 'active'     ? 'selected' : '' }}>نشط</option>
+                                                    <option value="suspended"  {{ request('status') === 'suspended'  ? 'selected' : '' }}>موقوف</option>
+                                                    {{-- <option value="on_leave"   {{ request('status') === 'on_leave'   ? 'selected' : '' }}>إجازة</option> --}}
+                                                    <option value="resigned"   {{ request('status') === 'resigned'   ? 'selected' : '' }}>مستقيل</option>
+                                                    <option value="terminated" {{ request('status') === 'terminated' ? 'selected' : '' }}>منهي الخدمة</option>
+                                                </select>
+                                            </div>
                                             <div class="col-md-3 mb-1">
                                                 <button type="submit" class="btn btn-primary">
                                                     <i class="fa fa-search"></i> بحث
@@ -86,13 +96,23 @@
                                             <th>الراتب الأساسي</th>
                                             <th>أيام  / ساعات العمل الشهرية</th>
                                             <th>الأجر اليومي</th>
-                                            <th>&nbsp;</th>
+                                            <th>الحالة</th>
+                                            <th>عمولة الطلاب</th>
+                                            <th style="width: 220px">&nbsp;</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @if ($employees->count())
                                             @foreach ($employees as $employee)
-                                                <tr>
+                                                @php
+                                                    $rowStyle = match($employee->status) {
+                                                        'suspended'  => 'background-color:#ffeab9; color:#000;',
+                                                        'resigned'   => 'background-color:#f8d7da;',
+                                                        'terminated' => 'background-color:#dc3545; color:#fff;',
+                                                        default      => '',
+                                                    };
+                                                @endphp
+                                                <tr style="{{ $rowStyle }}">
                                                     <td class="strong">
                                                         <a
                                                             href="{{ route(Auth::getDefaultDriver() . '.employees.show', $employee->id) }}">
@@ -105,11 +125,29 @@
                                                     <td>{{ $employee->monthly_working_days }} يوم (  {{ $employee->daily_working_hours }} ساعة لليوم)</td>
                                                     <td>{{ number_format($employee->daily_salary, 2) }} ر٫س</td>
                                                     <td>
-                                                        <a class="btn btn-info"
+                                                        <select class="status-select form-control form-control-sm"
+                                                            data-id="{{ $employee->id }}"
+                                                            data-url="{{ route(Auth::getDefaultDriver() . '.employees.update-status', $employee->id) }}">
+                                                            <option value="active"      {{ $employee->status === 'active'      ? 'selected' : '' }}>نشط</option>
+                                                            <option value="suspended"   {{ $employee->status === 'suspended'   ? 'selected' : '' }}>موقوف</option>
+                                                            {{-- <option value="on_leave"    {{ $employee->status === 'on_leave'    ? 'selected' : '' }}>إجازة</option> --}}
+                                                            <option value="resigned"    {{ $employee->status === 'resigned'    ? 'selected' : '' }}>مستقيل</option>
+                                                            <option value="terminated"  {{ $employee->status === 'terminated'  ? 'selected' : '' }}>منهي الخدمة</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        @if ($employee->branch && $employee->branch->type === 'training')
+                                                            {{ number_format($employee->stu_commission, 2) }} ر٫س
+                                                        @else
+                                                            <span class="text-muted">—</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <a class="btn btn-sm btn-info"
                                                             href="{{ route(Auth::getDefaultDriver() . '.employees.show', $employee->id) }}"
                                                             role="button">عرض</a>
 
-                                                        <a class="btn btn-warning"
+                                                        <a class="btn btn-sm btn-warning"
                                                             href="{{ route(Auth::getDefaultDriver() . '.employees.edit', $employee->id) }}"
                                                             role="button">تعديل</a>
 
@@ -118,7 +156,7 @@
                                                             method="POST" style="display:inline;">
                                                             @csrf
                                                             @method('POST')
-                                                            <button type="submit" class="btn btn-danger"
+                                                            <button type="submit" class="btn btn-sm btn-danger"
                                                                 onclick="return confirm('هل انت متأكد انك تريد حذف هذا الموظف ؟')">حذف</button>
                                                         </form>
                                                     </td>
@@ -126,7 +164,7 @@
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="7" class="text-center">لا يوجد موظفون</td>
+                                                <td colspan="9" class="text-center">لا يوجد موظفون</td>
                                             </tr>
                                         @endif
                                     </tbody>
@@ -172,5 +210,63 @@
                 departmentSelect.disabled = false;
             });
     });
+
+    const statusRowStyles = {
+        active:     { background: '',        color: ''      },
+        on_leave:   { background: '',        color: ''      },
+        suspended:  { background: '#ffeab9', color: '#000'  },
+        resigned:   { background: '#f8d7da', color: ''      },
+        terminated: { background: '#dc3545', color: '#fff'  },
+    };
+
+    function applyRowColor(tr, status) {
+        const style = statusRowStyles[status] || statusRowStyles.active;
+        tr.style.backgroundColor = style.background;
+        tr.style.color            = style.color;
+    }
+
+    document.querySelectorAll('.status-select').forEach(function (select) {
+
+        select.addEventListener('change', function () {
+            const url      = this.dataset.url;
+            const newStatus = this.value;
+            const tr       = this.closest('tr');
+            const select   = this;
+
+            select.disabled    = true;
+            tr.style.opacity   = '0.4';
+            tr.style.transition = 'opacity 0.2s';
+
+            fetch(url, {
+                method:  'POST',
+                headers: {
+                    'Content-Type':     'application/json',
+                    'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ status: newStatus }),
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    applyRowColor(tr, newStatus);
+                } else {
+                    alert(data.message);
+                    select.value = select.dataset.prevValue;
+                }
+            })
+            .catch(() => alert('حدث خطأ، يرجى المحاولة لاحقاً'))
+            .finally(() => {
+                select.disabled  = false;
+                tr.style.opacity = '1';
+            });
+        });
+
+        select.addEventListener('mousedown', function () {
+            this.dataset.prevValue = this.value;
+        });
+    });
+
+
 </script>
 @endpush

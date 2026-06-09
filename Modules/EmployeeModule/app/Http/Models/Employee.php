@@ -34,7 +34,7 @@ class Employee extends Model {
         return $this->basic_salary / $this->monthly_working_days;
     }
 
-     public function getHourlySalaryAttribute() {
+    public function getHourlySalaryAttribute() {
         return $this->daily_salary / $this->daily_working_hours;
     }
 
@@ -43,10 +43,10 @@ class Employee extends Model {
             $term = $request['search'];
             $query->where(function ($q) use ($term) {
                 $q->where('name', 'like', '%' . $term . '%')
-                  ->orWhere('job', 'like', '%' . $term . '%')
-                  ->orWhereHas('user', function ($q2) use ($term) {
-                      $q2->where('email', 'like', '%' . $term . '%');
-                  });
+                    ->orWhere('job', 'like', '%' . $term . '%')
+                    ->orWhereHas('user', function ($q2) use ($term) {
+                        $q2->where('email', 'like', '%' . $term . '%');
+                    });
             });
         }
         if (!empty($request['branch_id'])) {
@@ -54,6 +54,10 @@ class Employee extends Model {
         }
         if (!empty($request['department_id'])) {
             $query->where('department_id', $request['department_id']);
+        }
+        if (!empty($request['status'])) {
+            $status = is_array($request['status']) ? $request['status'] : [$request['status']];
+            $query->whereIn('status', $status);
         }
         return $query;
     }

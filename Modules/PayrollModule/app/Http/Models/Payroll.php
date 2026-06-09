@@ -15,7 +15,7 @@ class Payroll extends Model {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
-     public function scopeFilter($query, $request = []){
+    public function scopeFilter($query, $request = []) {
         if (!empty($request['month'])) {
             $query->where('month', $request['month']);
         }
@@ -31,6 +31,11 @@ class Payroll extends Model {
                 $q->where('department_id', $request['department_id']);
             });
         }
+
+        //check if the employee is active
+        $query->whereHas('employee', function ($q) {
+            $q->whereIn('status', ['active', 'on_leave']);
+        });
 
         return $query->with('employee');
     }

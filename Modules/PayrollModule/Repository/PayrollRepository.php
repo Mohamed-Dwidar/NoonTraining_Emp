@@ -8,6 +8,7 @@ use Modules\EmployeeModule\App\Http\Models\Employee;
 use Modules\DeductionModule\App\Http\Models\Deduction;
 use Modules\BonuseModule\App\Http\Models\Bonuse;
 use Modules\LeaveModule\App\Http\Models\Leave;
+use Modules\StudentModule\App\Http\Models\Student;
 
 class PayrollRepository extends BaseRepository {
     public function model() {
@@ -49,10 +50,15 @@ class PayrollRepository extends BaseRepository {
                                          ->where('month', $month)
                                          ->sum('amount');
 
+        $studentCount       = Student::where('employee_id', $employeeId)
+                                     ->where('month', $month)
+                                     ->count();
+        $studentsCommission = $studentCount * (float) $employee->stu_commission;
+
         $totalDeductions = $fixedDeductions + $leaveDeductions;
         $daysAbsent      = $leaveDays;
         $daysPresent     = max(0, $monthlyWorkingDays - $daysAbsent);
-        $totalSalary     = max(0, $basicSalary - $totalDeductions + $bonuses);
+        $totalSalary     = max(0, $basicSalary - $totalDeductions + $bonuses + $studentsCommission);
 
         return $this->updateRecord($employeeId, $month, [
             'monthly_working_days' => $monthlyWorkingDays,
@@ -62,6 +68,7 @@ class PayrollRepository extends BaseRepository {
             'basic_salary'         => $basicSalary,
             'deductions'           => $totalDeductions,
             'bonuses'              => $bonuses,
+            'students_commission'  => $studentsCommission,
             'total_salary'         => $totalSalary,
         ]);
     }

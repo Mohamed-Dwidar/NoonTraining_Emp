@@ -27,6 +27,7 @@ class StudentImport implements ToCollection {
 
             $data = [
                 'employee_id'         => $this->employeeId,
+                'month'               => date('Y-m'),
                 'name'                => $row[0],
                 'mobile'              => $row[1],
                 'course_name'         => $row[2],
