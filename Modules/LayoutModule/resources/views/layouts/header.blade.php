@@ -8,9 +8,9 @@
                 @if (Auth::guard('employee')->check())
                     <div class="col-xl-12 col-lg-12 col-xs-12 header-branch">
                         <span>
-                            موقع الأختبارت
+                            موقع الموظفين
                             &nbsp; - &nbsp;
-                           مستخدم
+                            {{ Auth::guard('employee')->user()->userable->name }}
                         </span>
                     </div>
                 @elseif(Auth::guard('admin')->check())

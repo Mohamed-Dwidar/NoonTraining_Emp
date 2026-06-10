@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Modules\AdminModule\App\Http\Models\Admin;
+use Modules\EmployeeModule\App\Http\Models\Employee;
 use Modules\UserModule\Services\UserService;
 
 class UserAuthController extends Controller {
@@ -59,13 +60,16 @@ class UserAuthController extends Controller {
             if ($user->userable_type === Admin::class) {
                 Auth::guard('admin')->login($user);
                 return redirect()->route('admin.dashboard');
-            } elseif ($user->userable_type === 'App\Models\Employee') {
+            } elseif ($user->userable_type === Employee::class) {
+                if (in_array($user->userable->status, ['suspended', 'resigned', 'terminated', 'deleted'])) {        //suspended or resigned or terminated or deleted
+                    return redirect()->back()->with('error', 'حسابك غير موجود او محظور')->withInput();
+                }
                 Auth::guard('employee')->login($user);
                 return redirect()->route('employee.dashboard');
             }
         }
 
-        return redirect('/')->with('error', 'البريد الإلكتروني او كلمة المرور غير صحيحة');
+        return redirect()->back()->with('error', 'البريد الإلكتروني او كلمة المرور غير صحيحة')->withInput();
     }
 
     public function changePassword() {

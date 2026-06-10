@@ -5,75 +5,59 @@ namespace Modules\EmployeeModule\App\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class EmployeeModuleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
-    public function index()
-    {
-        return view('employeemodule::index');
+
+    public function dashboard() {
+        return view('employeemodule::employee.dashboard');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+    public function changePassword()
     {
-        return view('employeemodule::create');
+        $employee = auth()->guard('employee')->user();
+        return view('employeemodule::employee.change_password', compact('employee'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
+    public function updatePassword(Request $request)
     {
-        //
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'old_password' => 'required',
+                'password' => 'required|confirmed|min:4',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        /** @var User $user */
+        $user = auth()->guard('employee')->user();
+
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->update(['password' => bcrypt($request->password)]);
+
+            return redirect()->route(Auth::getDefaultDriver() . '.changePassword')
+                ->with('success', 'تم تغيير كلمة المرور بنجاح');
+        } else {
+            return back()
+                ->withErrors(['كلمة المرور القديمة غير صحيحة'])
+                ->withInput();
+        }
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
+    public function logout(Request $request)
     {
-        return view('employeemodule::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
-    {
-        return view('employeemodule::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
-    {
-        //
+        Auth::guard('employee')->logout();
+        $request->session()->flush();
+        $request->session()->regenerate();
+        return redirect()->to('employee');
     }
 }

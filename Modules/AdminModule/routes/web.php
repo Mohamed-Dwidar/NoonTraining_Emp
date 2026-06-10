@@ -3,9 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use Modules\AdminModule\App\Http\Controllers\AdminModuleController;
 use Modules\AdminModule\App\Http\Controllers\Auth\AdminAuthController;
+use Modules\UserModule\App\Http\Controllers\Auth\UserAuthController;
 
 Route::prefix('admin')->group(function () {
-    Route::get('/', [AdminModuleController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/', [AdminAuthController::class, 'index'])->name('admin.login');
+    Route::post('login', [UserAuthController::class, 'login'])->name('admin.loginpost');
 });
 
 Route::group(['prefix' => 'admin', 'middleware' => ['auth:admin']], function () {
