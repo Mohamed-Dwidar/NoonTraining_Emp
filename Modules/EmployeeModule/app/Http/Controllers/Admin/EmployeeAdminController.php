@@ -52,6 +52,9 @@ class EmployeeAdminController extends Controller {
                 'monthly_working_days' => 'required|integer|min:1|max:31',
                 'daily_working_hours'  => 'required|integer|min:1|max:24',
                 'stu_commission'       => 'nullable|numeric|min:0',
+                'hired_at'             => 'nullable|date',
+                'contract_ends_at'     => 'nullable|date',
+                'terminated_at'        => 'nullable|date',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -70,6 +73,9 @@ class EmployeeAdminController extends Controller {
                 'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
                 'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
                 'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
+                'hired_at.date'                 => 'تاريخ التعيين غير صحيح',
+                'contract_ends_at.date'         => 'تاريخ انتهاء العقد غير صحيح',
+                'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
             ]
         );
 
@@ -104,6 +110,9 @@ class EmployeeAdminController extends Controller {
                 'monthly_working_days' => 'required|integer|min:1|max:31',
                 'daily_working_hours'  => 'required|integer|min:1|max:24',
                 'stu_commission'       => 'nullable|numeric|min:0',
+                'hired_at'             => 'nullable|date',
+                'contract_ends_at'     => 'nullable|date',
+                'terminated_at'        => 'nullable|date',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -122,6 +131,9 @@ class EmployeeAdminController extends Controller {
                 'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
                 'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
                 'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
+                'hired_at.date'                 => 'تاريخ التعيين غير صحيح',
+                'contract_ends_at.date'         => 'تاريخ انتهاء العقد غير صحيح',
+                'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
             ]
         );
 

@@ -44,7 +44,7 @@
                         </li>
                         <li>
                             <a href="{{ route('admin.students.index') }}" class="@if (Request::segment(2) == 'student') active @endif">
-                                <i class="fa fa-graduation-cap"></i> الطلاب <small class="text-muted">(للمعهد)</small>
+                                <i class="fa fa-graduation-cap"></i> تسجيل الطلاب <small class="text-muted">(للمعهد)</small>
                             </a>
                         </li>
                     </ul>

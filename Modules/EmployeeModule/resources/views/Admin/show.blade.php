@@ -126,6 +126,24 @@
                                         </div>
                                     @endif
                                 </div>
+
+                                {{-- Section: Contract Dates --}}
+
+                                <div class="row mb-2">
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">تاريخ التعيين</div>
+                                        <div class="font-weight-bold">{{ $employee->hired_at ?? '—' }}</div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">تاريخ انتهاء العقد</div>
+                                        <div class="font-weight-bold">{{ $employee->contract_ends_at ?? '—' }}</div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6 mb-3">
+                                        <div class="text-muted small mb-1">تاريخ إنهاء الخدمة</div>
+                                        <div class="font-weight-bold">{{ $employee->terminated_at ?? '—' }}</div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 

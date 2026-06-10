@@ -37,7 +37,10 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary'],
             'monthly_working_days' => $data['monthly_working_days'],
             'daily_working_hours'  => $data['daily_working_hours'],
-            'stu_commission'       => $data['stu_commission'] ?? 0,
+            'stu_commission'       => $data['stu_commission']   ?? 0,
+            'hired_at'             => $data['hired_at']         ?? null,
+            'contract_ends_at'     => $data['contract_ends_at'] ?? null,
+            'terminated_at'        => $data['terminated_at']    ?? null,
         ]);
 
         $employee->user()->create([
@@ -61,7 +64,10 @@ class EmployeeService {
             'basic_salary'         => $data['basic_salary']         ?? $employee->basic_salary,
             'monthly_working_days' => $data['monthly_working_days'] ?? $employee->monthly_working_days,
             'daily_working_hours'  => $data['daily_working_hours']  ?? $employee->daily_working_hours,
-            'stu_commission'       => $data['stu_commission']        ?? $employee->stu_commission,
+            'stu_commission'       => $data['stu_commission']   ?? $employee->stu_commission,
+            'hired_at'             => $data['hired_at']         ?? $employee->hired_at,
+            'contract_ends_at'     => $data['contract_ends_at'] ?? $employee->contract_ends_at,
+            'terminated_at'        => $data['terminated_at']    ?? $employee->terminated_at,
         ], $id);
 
         if (!empty($data['email'])) {
@@ -80,7 +86,12 @@ class EmployeeService {
     }
 
     public function updateStatus($id, $status) {
-        return $this->employeeRepository->update(['status' => $status], $id);
+        if ($status === 'resigned' || $status === 'terminated') { //resigned or terminated
+            $terminated_at = now();
+        } else {
+            $terminated_at = null;
+        }
+        return $this->employeeRepository->update(['terminated_at' => $terminated_at, 'status' => $status], $id);
     }
 
     public function updateCommission($id, $commission) {
