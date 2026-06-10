@@ -34,6 +34,10 @@ class PayrollService {
         return $this->payrollRepository->filter($request);
     }
 
+    public function findOne($id) {
+        return $this->payrollRepository->find($id);
+    }
+
     /**
      * For each employee ensure a record exists for the given month.
      * Does nothing if the record already exists.

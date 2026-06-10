@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(python3 -c ' *)",
-      "Bash(python3)"
+      "Bash(python3)",
+      "Bash(composer show *)",
+      "Bash(python3 -)",
+      "Bash(composer require *)",
+      "Bash(python3 /dev/stdin)"
     ]
   }
 }
