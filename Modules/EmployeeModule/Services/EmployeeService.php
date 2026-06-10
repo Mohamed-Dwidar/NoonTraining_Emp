@@ -45,7 +45,7 @@ class EmployeeService {
 
         $employee->user()->create([
             'email'    => $data['email'],
-            'password' => bcrypt('123456'),
+            'password' => bcrypt($data['password']),
         ]);
 
         return $employee;
@@ -70,8 +70,15 @@ class EmployeeService {
             'terminated_at'        => $data['terminated_at']    ?? $employee->terminated_at,
         ], $id);
 
+        $userUpdate = [];
         if (!empty($data['email'])) {
-            $employee->user()->update(['email' => $data['email']]);
+            $userUpdate['email'] = $data['email'];
+        }
+        if (!empty($data['change_password']) && !empty($data['password'])) {
+            $userUpdate['password'] = bcrypt($data['password']);
+        }
+        if (!empty($userUpdate)) {
+            $employee->user()->update($userUpdate);
         }
 
         return $employee;

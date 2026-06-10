@@ -61,6 +61,19 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
+                                                <label for="password">كلمة المرور</label>
+                                                <div class="form-group">
+                                                    <input type="text"
+                                                        class="form-control @error('password') is-invalid @enderror"
+                                                        id="password" name="password" autocomplete="new-password">
+                                                    @error('password')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
                                          <div class="row">
                                             <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
                                                 <label for="job">الوظيفة</label>
@@ -170,28 +183,6 @@
                                                         class="form-control @error('hired_at') is-invalid @enderror"
                                                         id="hired_at" name="hired_at" value="{{ old('hired_at') }}">
                                                     @error('hired_at')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-sm-12 col-xs-12 col-6">
-                                                <label for="contract_ends_at">تاريخ انتهاء العقد</label>
-                                                <div class="form-group">
-                                                    <input type="date"
-                                                        class="form-control @error('contract_ends_at') is-invalid @enderror"
-                                                        id="contract_ends_at" name="contract_ends_at" value="{{ old('contract_ends_at') }}">
-                                                    @error('contract_ends_at')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-sm-12 col-xs-12 col-6">
-                                                <label for="terminated_at">تاريخ إنهاء الخدمة</label>
-                                                <div class="form-group">
-                                                    <input type="date"
-                                                        class="form-control @error('terminated_at') is-invalid @enderror"
-                                                        id="terminated_at" name="terminated_at" value="{{ old('terminated_at') }}">
-                                                    @error('terminated_at')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>

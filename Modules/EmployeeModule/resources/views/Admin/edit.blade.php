@@ -57,6 +57,29 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="row">
+                                            <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
+                                                <div class="form-group mt-1">
+                                                    <label>
+                                                        <input type="checkbox" id="change_password"
+                                                            name="change_password" value="1"
+                                                            {{ old('change_password') ? 'checked' : '' }}>
+                                                        &nbsp; تغيير كلمة المرور
+                                                    </label>
+                                                </div>
+                                                <div id="password-row" style="display:none;">
+                                                    <label for="password">كلمة المرور الجديدة</label>
+                                                    <div class="form-group">
+                                                        <input type="text"
+                                                            class="form-control @error('password') is-invalid @enderror"
+                                                            id="password" name="password" autocomplete="new-password">
+                                                        @error('password')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                          <div class="row">
                                             <div class="col-lg-4 col-sm-12 col-xs-12 col-6">
                                                 <label for="job">الوظيفة</label>
@@ -275,6 +298,20 @@
     } else {
         deptSelect.innerHTML = '<option value="">اختر الفرع أولاً</option>';
     }
+
+    // Change password toggle
+    var changePwdChk  = document.getElementById('change_password');
+    var passwordRow   = document.getElementById('password-row');
+    var passwordInput = document.getElementById('password');
+
+    function syncPasswordRow() {
+        var show = changePwdChk.checked;
+        passwordRow.style.display = show ? '' : 'none';
+        if (!show) passwordInput.value = '';
+    }
+
+    changePwdChk.addEventListener('change', syncPasswordRow);
+    syncPasswordRow(); // restore state on validation fail redirect
 })();
 </script>
 @endpush

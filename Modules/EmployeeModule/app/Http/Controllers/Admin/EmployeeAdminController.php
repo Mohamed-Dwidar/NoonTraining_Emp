@@ -55,6 +55,7 @@ class EmployeeAdminController extends Controller {
                 'hired_at'             => 'nullable|date',
                 'contract_ends_at'     => 'nullable|date',
                 'terminated_at'        => 'nullable|date',
+                'password'             => 'required|string|min:6',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -76,6 +77,8 @@ class EmployeeAdminController extends Controller {
                 'hired_at.date'                 => 'تاريخ التعيين غير صحيح',
                 'contract_ends_at.date'         => 'تاريخ انتهاء العقد غير صحيح',
                 'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
+                'password.required'             => 'كلمة المرور مطلوبة',
+                'password.min'                  => 'كلمة المرور يجب أن تكون 6 حرف على الأقل',
             ]
         );
 
@@ -97,45 +100,50 @@ class EmployeeAdminController extends Controller {
     }
 
     public function update(Request $request) {
-        $employeeId = $request->input('id');
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'name'                 => 'required|string|max:255',
-                'email'                => 'required|email|unique:users,email,' . $employeeId . ',userable_id,userable_type,' . \Modules\EmployeeModule\App\Http\Models\Employee::class,
-                'job'                  => 'required|string|max:255',
-                'branch_id'            => 'required|exists:branches,id',
-                'department_id'        => 'required|exists:departments,id',
-                'basic_salary'         => 'required|numeric|min:0',
-                'monthly_working_days' => 'required|integer|min:1|max:31',
-                'daily_working_hours'  => 'required|integer|min:1|max:24',
-                'stu_commission'       => 'nullable|numeric|min:0',
-                'hired_at'             => 'nullable|date',
-                'contract_ends_at'     => 'nullable|date',
-                'terminated_at'        => 'nullable|date',
-            ],
-            [
-                'name.required'                 => 'اسم الموظف مطلوب',
-                'email.required'                => 'البريد الإلكتروني مطلوب',
-                'email.email'                   => 'البريد الإلكتروني غير صحيح',
-                'email.unique'                  => 'البريد الإلكتروني مستخدم من قبل',
-                'job.required'                  => 'الوظيفة مطلوبة',
-                'branch_id.required'            => 'الفرع مطلوب',
-                'branch_id.exists'              => 'الفرع غير موجود',
-                'department_id.required'        => 'القسم مطلوب',
-                'department_id.exists'          => 'القسم غير موجود',
-                'basic_salary.required'         => 'الراتب الأساسي مطلوب',
-                'basic_salary.numeric'          => 'الراتب الأساسي يجب أن يكون رقماً',
-                'monthly_working_days.required' => 'أيام العمل الشهرية مطلوبة',
-                'monthly_working_days.integer'  => 'أيام العمل الشهرية يجب أن تكون رقماً صحيحاً',
-                'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
-                'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
-                'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
-                'hired_at.date'                 => 'تاريخ التعيين غير صحيح',
-                'contract_ends_at.date'         => 'تاريخ انتهاء العقد غير صحيح',
-                'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
-            ]
-        );
+        $employeeId     = $request->input('id');
+        $changePassword = $request->boolean('change_password');
+
+        $rules = [
+            'name'                 => 'required|string|max:255',
+            'email'                => 'required|email|unique:users,email,' . $employeeId . ',userable_id,userable_type,' . \Modules\EmployeeModule\App\Http\Models\Employee::class,
+            'job'                  => 'required|string|max:255',
+            'branch_id'            => 'required|exists:branches,id',
+            'department_id'        => 'required|exists:departments,id',
+            'basic_salary'         => 'required|numeric|min:0',
+            'monthly_working_days' => 'required|integer|min:1|max:31',
+            'daily_working_hours'  => 'required|integer|min:1|max:24',
+            'stu_commission'       => 'nullable|numeric|min:0',
+            'hired_at'             => 'nullable|date',
+            'contract_ends_at'     => 'nullable|date',
+            'terminated_at'        => 'nullable|date',
+            'password'             => $changePassword ? 'required|string|min:6' : 'nullable',
+        ];
+
+        $messages = [
+            'name.required'                 => 'اسم الموظف مطلوب',
+            'email.required'                => 'البريد الإلكتروني مطلوب',
+            'email.email'                   => 'البريد الإلكتروني غير صحيح',
+            'email.unique'                  => 'البريد الإلكتروني مستخدم من قبل',
+            'job.required'                  => 'الوظيفة مطلوبة',
+            'branch_id.required'            => 'الفرع مطلوب',
+            'branch_id.exists'              => 'الفرع غير موجود',
+            'department_id.required'        => 'القسم مطلوب',
+            'department_id.exists'          => 'القسم غير موجود',
+            'basic_salary.required'         => 'الراتب الأساسي مطلوب',
+            'basic_salary.numeric'          => 'الراتب الأساسي يجب أن يكون رقماً',
+            'monthly_working_days.required' => 'أيام العمل الشهرية مطلوبة',
+            'monthly_working_days.integer'  => 'أيام العمل الشهرية يجب أن تكون رقماً صحيحاً',
+            'daily_working_hours.required'  => 'ساعات العمل اليومية مطلوبة',
+            'daily_working_hours.integer'   => 'ساعات العمل اليومية يجب أن تكون رقماً صحيحاً',
+            'stu_commission.numeric'        => 'عمولة الطلاب يجب أن تكون رقماً',
+            'hired_at.date'                 => 'تاريخ التعيين غير صحيح',
+            'contract_ends_at.date'         => 'تاريخ انتهاء العقد غير صحيح',
+            'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
+            'password.required'             => 'كلمة المرور الجديدة مطلوبة عند تفعيل تغيير كلمة المرور',
+            'password.min'                  => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator)->withInput();

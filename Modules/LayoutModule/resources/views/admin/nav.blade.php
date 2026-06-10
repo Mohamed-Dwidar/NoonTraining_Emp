@@ -68,16 +68,13 @@
                     </a>
                 </li>
 
-
-
-
                 {{--  التقارير --}}
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a href="#">
                         <i class="fa fa-bar-chart"></i>
                         <span class="menu-title">تقارير الأداء</span>
                     </a>
-                </li>
+                </li> --}}
 
                 {{-- الإعدادات --}}
                 <li class="nav-item">
