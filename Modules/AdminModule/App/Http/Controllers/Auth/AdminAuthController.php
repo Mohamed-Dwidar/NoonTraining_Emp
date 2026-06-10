@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 use Modules\AdminModule\Services\AdminService;
+use Modules\UserModule\App\Http\Models\User;
 
 class AdminAuthController extends Controller
 {
@@ -67,17 +68,17 @@ class AdminAuthController extends Controller
                 ->withInput();
         }
 
-        $admin = auth()->guard('admin')->user();
-        $request['id'] = $admin->id;
+        /** @var User $user */
+        $user = auth()->guard('admin')->user();
 
-        if (Hash::check($request->old_password, $admin->password)) {
-            $this->adminService->updatePassword($request);
+        if (Hash::check($request->old_password, $user->password)) {
+            $user->update(['password' => bcrypt($request->password)]);
 
             return redirect()->route(Auth::getDefaultDriver() . '.changePassword')
                 ->with('success', 'تم تغيير كلمة المرور بنجاح');
         } else {
             return back()
-                ->withErrors(['كلمة المرو القديمة غير صحيحة'])
+                ->withErrors(['كلمة المرور القديمة غير صحيحة'])
                 ->withInput();
         }
     }

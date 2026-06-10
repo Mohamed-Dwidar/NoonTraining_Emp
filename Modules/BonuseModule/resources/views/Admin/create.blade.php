@@ -4,7 +4,6 @@
 
 @section('content')
 <div class="content-wrapper container-fluid">
-
     <div class="content-header mb-2">
         <h3><i class="fa fa-plus-circle"></i> &nbsp; إضافة مكافأة جديدة</h3>
     </div>
