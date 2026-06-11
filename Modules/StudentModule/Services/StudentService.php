@@ -62,6 +62,6 @@ class StudentService {
     }
 
     public function delete(int $id): void {
-        $this->studentRepository->deleteStudent($id);
+        $this->studentRepository->delete($id);
     }
 }

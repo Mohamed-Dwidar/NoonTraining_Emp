@@ -11,17 +11,15 @@ class Student extends Model {
 
     protected $guarded = [];
 
-    public function employee()
-    {
+    public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
-    public function remainingAmount(): int
-    {
+    public function remainingAmount(): int {
         return (int) $this->total_amount - (int) $this->paid_amount;
     }
 
-    public function scopeFilter($query, $request = []){
+    public function scopeFilter($query, $request = []) {
         if (isset($request['branch_id']) && $request['branch_id']) {
             $query->whereHas('employee', fn($q) => $q->where('branch_id', $request['branch_id']));
         }
@@ -30,6 +28,15 @@ class Student extends Model {
         }
         if (isset($request['employee_id']) && $request['employee_id']) {
             $query->where('employee_id', $request['employee_id']);
+        }
+        if (!empty($request['search'])) {
+            $search = $request['search'];
+            $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")
+                ->orWhere('mobile', 'like', "%{$search}%")
+                ->orWhere('course_name', 'like', "%{$search}%"));
+        }
+        if (!empty($request['month'])) {
+            $query->where('month', $request['month']);
         }
 
         return $query;

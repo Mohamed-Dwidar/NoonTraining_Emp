@@ -3,10 +3,14 @@
         <nav id="primary-menu">
             <ul class="top-menu menu-eff text-right">
 
-          
+                <li class="nav-item">
+                    <a href="{{ route('employee.students.index') }}" class="nav-monthly-ops">
+                        <i class="fa fa-graduation-cap"></i>
+                        <span class="menu-title">تسجيل الطلاب </span>
+                    </a>
+                </li>
 
             </ul>
         </nav>
     </div>
-
 </div>
