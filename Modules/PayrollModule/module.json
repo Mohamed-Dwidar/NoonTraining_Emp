@@ -5,7 +5,7 @@
     "keywords": [],
     "priority": 0,
     "providers": [
-        "Modules\\PayrollModule\\app\\Providers\\PayrollModuleServiceProvider"
+        "Modules\\PayrollModule\\App\\Providers\\PayrollModuleServiceProvider"
     ],
     "files": []
 }

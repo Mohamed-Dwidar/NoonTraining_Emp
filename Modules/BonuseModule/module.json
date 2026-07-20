@@ -5,7 +5,7 @@
     "keywords": [],
     "priority": 0,
     "providers": [
-        "Modules\\BonuseModule\\app\\Providers\\BonuseModuleServiceProvider"
+        "Modules\\BonuseModule\\App\\Providers\\BonuseModuleServiceProvider"
     ],
     "files": []
 }

@@ -6,7 +6,12 @@
       "Bash(composer show *)",
       "Bash(python3 -)",
       "Bash(composer require *)",
-      "Bash(python3 /dev/stdin)"
+      "Bash(python3 /dev/stdin)",
+      "Bash(git diff *)",
+      "Bash(cd /Users/mohameddwidar/Work/www/html/mdwidar/Noon/NoonTraining_Emp *)"
+    ],
+    "additionalDirectories": [
+      "/Users/mohameddwidar/Work/www/html/mdwidar/Noon/NoonTraining_Emp/bootstrap/cache"
     ]
   }
 }
