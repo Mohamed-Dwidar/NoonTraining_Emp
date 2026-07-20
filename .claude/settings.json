@@ -8,7 +8,18 @@
       "Bash(composer require *)",
       "Bash(python3 /dev/stdin)",
       "Bash(git diff *)",
-      "Bash(cd /Users/mohameddwidar/Work/www/html/mdwidar/Noon/NoonTraining_Emp *)"
+      "Bash(cd /Users/mohameddwidar/Work/www/html/mdwidar/Noon/NoonTraining_Emp *)",
+      "Bash(php -r ' *)",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(ls -la /Users/mohameddwidar/Work/www/html/mdwidar/Noon/ | grep NoonTraining *)",
+      "Read(//Users/mohameddwidar/Work/www/html/mdwidar/Noon/**)",
+      "Read(//Users/mohameddwidar/Work/html/mdwidar/Noon/**)",
+      "Bash(composer dump-autoload *)",
+      "Bash(php artisan *)",
+      "Bash(cat /tmp_route_err.log)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('autoload',{}\\),indent=2\\)\\); print\\('---extra---'\\); print\\(json.dumps\\(d.get\\('extra',{}\\),indent=2\\)\\)\")",
+      "Bash(awk '{print $1}')"
     ],
     "additionalDirectories": [
       "/Users/mohameddwidar/Work/www/html/mdwidar/Noon/NoonTraining_Emp/bootstrap/cache"

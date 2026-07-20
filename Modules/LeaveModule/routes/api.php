@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\LeaveModule\Http\Controllers\LeaveModuleController;
+use Modules\LeaveModule\App\Http\Controllers\LeaveModuleController;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('leavemodules', LeaveModuleController::class)->names('leavemodule');
