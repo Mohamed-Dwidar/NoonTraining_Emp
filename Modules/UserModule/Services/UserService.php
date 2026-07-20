@@ -27,7 +27,7 @@ class UserService
         if (!empty($data['permissions'])) {
             $user->permissions()->sync(
                 collect($data['permissions'])->mapWithKeys(function ($id) {
-                    return [$id => ['model_type' => \Modules\UserModule\app\Http\Models\User::class]];
+                    return [$id => ['model_type' => \Modules\UserModule\App\Http\Models\User::class]];
                 })->toArray()
             );
         }
@@ -58,7 +58,7 @@ class UserService
             // Sync same way as create()
             $user->permissions()->sync(
                 collect($permissionIds)->mapWithKeys(function ($id) {
-                    return [$id => ['model_type' => \Modules\UserModule\app\Http\Models\User::class]];
+                    return [$id => ['model_type' => \Modules\UserModule\App\Http\Models\User::class]];
                 })->toArray()
             );
         } else {

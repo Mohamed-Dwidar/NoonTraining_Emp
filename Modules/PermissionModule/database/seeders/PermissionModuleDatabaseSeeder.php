@@ -57,7 +57,7 @@ class PermissionModuleDatabaseSeeder extends Seeder
         // ======================================
         // 3️⃣ Assign Roles to Users (example)
         // ======================================
-        $userModel = 'Modules\UserModule\app\Http\Models\User';
+        $userModel = 'Modules\UserModule\App\Http\Models\User';
 
         $assignments = [
             1 => 'Admin',

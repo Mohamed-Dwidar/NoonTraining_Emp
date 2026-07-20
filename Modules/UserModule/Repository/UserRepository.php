@@ -2,7 +2,7 @@
 
 namespace Modules\UserModule\Repository;
 
-use Modules\UserModule\app\Http\Models\User;
+use Modules\UserModule\App\Http\Models\User;
 use Prettus\Repository\Eloquent\BaseRepository;
 
 class UserRepository extends BaseRepository
