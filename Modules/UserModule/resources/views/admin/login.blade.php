@@ -9,16 +9,16 @@
 تسجيل دخول |المدراء
 @endsection
 
-@section('content') 
+@section('content')
 
 <div class="card card-login border-grey border-lighten-3 m-0">
     <div class="card-header no-border">
         <div class="card-title text-xs-center">
             <div class="p-1">
                 <a href="{{url('/')}}">
-                    <img alt="branding logo" src="{{ url('assets/images/logo.png') }}"
-                        data-expand="{{ url('assets/images/logo.png') }}"
-                        data-collapse="{{ url('assets/images/logo.png') }}" class="brand-logo" style="height: 40px">
+                    <img alt="branding logo" src="{{ url('assets/images/logo.jpeg') }}"
+                        data-expand="{{ url('assets/images/logo.jpeg') }}"
+                        data-collapse="{{ url('assets/images/logo.jpeg') }}" class="brand-logo" style="height: 40px">
                 </a>
             </div>
         </div>
@@ -28,7 +28,7 @@
     </div>
     <div class="card-body collapse in">
         <div class="card-block">
-                <form method="POST" action="{{ route('user.loginpost') }}" style="direction: rtl"> 
+                <form method="POST" action="{{ route('user.loginpost') }}" style="direction: rtl">
                     @csrf
                     @if ($errors->any())
                     <div class="alert alert-warning mb-2" role="alert">
@@ -59,10 +59,10 @@
                         <i class="icon-unlock2"></i>
                         {{ __('دخول') }}
                     </button>
-                    
+
                 </form>
         </div>
-        
+
     </div>
 </div>
 

@@ -6,7 +6,7 @@
         <div class="left-section">
             <div class="logo-container">
                 <a href="{{ route('home') }}">
-                    <img src="{{ asset('admin-assets/images/logo/logo.png') }}" alt="Logo" class="logo">
+                    <img src="{{ asset('admin-assets/images/logo/logo.jpeg') }}" alt="Logo" class="logo">
                 </a>
             </div>
 

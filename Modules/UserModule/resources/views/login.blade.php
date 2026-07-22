@@ -7,7 +7,7 @@
     <div class="admin-login-form">
         <div class="admin-login-header">
             <a href="{{ route('home') }}">
-            <img src="{{ asset('admin-assets/images/logo/logo.png') }}" alt="معهد نون للتدريب" class="admin-login-logo">
+            <img src="{{ asset('admin-assets/images/logo/logo.jpeg') }}" alt="معهد نون للتدريب" class="admin-login-logo">
             </a>
             <h1 class="admin-login-title">تسجيل الدخول</h1>
             {{-- <p class="admin-login-subtitle">مرحباً بك في نظام إدارة الاختبارات الإلكتروني</p> --}}

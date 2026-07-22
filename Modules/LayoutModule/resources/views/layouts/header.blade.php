@@ -25,7 +25,7 @@
             </div>
             <div class="col-xl-6 col-lg-8 col-xs-6 h-logo">
                 {{-- <a href="{{url('/')}}" class=" nav-link" target="_blank"> --}}
-                <img src="{{ url('admin-assets/images/logo/logo-col.png') }}" alt="logo" class="logo-default">
+                <img src="{{ url('admin-assets/images/logo/logo.jpeg') }}" alt="logo" class="logo-default" style="height: 62px">
                 {{-- </a> --}}
             </div>
             <div class="col-xl-3 col-lg-2 col-xs-6 h-info">
