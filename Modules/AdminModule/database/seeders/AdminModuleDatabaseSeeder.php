@@ -5,7 +5,7 @@ namespace Modules\AdminModule\Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
-use Modules\AdminModule\app\Http\Models\Admin;
+use Modules\AdminModule\App\Http\Models\Admin;
 use Modules\UserModule\App\Http\Models\User;
 
 class AdminModuleDatabaseSeeder extends Seeder
