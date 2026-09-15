@@ -1,7 +1,7 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    لوحة تحكم الأختبارات
+    موقع ادارة الموظفين
 @endsection
 
 @section('content')

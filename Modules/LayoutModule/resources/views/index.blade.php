@@ -10,7 +10,7 @@
                 </a>
             </div>
 
-            <h1 class="main-title">منصة الاختبارات المحوسبة</h1>
+            <h1 class="main-title">موقع ادارة الموظفين</h1>
             <p class="sub-title">معهد نون للتدريب</p>
 
             <p class="description">
@@ -26,7 +26,7 @@
                 <div class="exam-icon">📋</div>
 
                 <h2 class="card-title">ابدأ اختبارك الآن</h2>
-                <p class="card-subtitle">منصة الاختبارات المحوسبة</p>
+                <p class="card-subtitle">موقع ادارة الموظفين</p>
 
                 <div class="features-grid">
                     <div class="feature-item">✅ تقييم فوري</div>

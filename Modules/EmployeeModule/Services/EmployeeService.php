@@ -3,6 +3,7 @@
 namespace Modules\EmployeeModule\Services;
 
 use Modules\EmployeeModule\Repository\EmployeeRepository;
+use Modules\EmployeeModule\App\Http\Models\EmployeeCommission;
 
 class EmployeeService {
 
@@ -48,6 +49,8 @@ class EmployeeService {
             'password' => bcrypt($data['password']),
         ]);
 
+        $this->syncCommissions($employee->id, $data['commissions'] ?? []);
+
         return $employee;
     }
 
@@ -81,6 +84,8 @@ class EmployeeService {
             $employee->user()->update($userUpdate);
         }
 
+        $this->syncCommissions($id, $data['commissions'] ?? []);
+
         return $employee;
     }
 
@@ -90,6 +95,19 @@ class EmployeeService {
 
     public function filter($data = []) {
         return $this->employeeRepository->filter($data);
+    }
+
+    private function syncCommissions(int $employeeId, array $commissions): void {
+        foreach ($commissions as $commissionId => $row) {
+            if (!isset($row['value']) || $row['value'] === '') {
+                continue;
+            }
+
+            EmployeeCommission::updateOrCreate(
+                ['student_id' => $employeeId, 'commission_id' => $commissionId],
+                ['type' => $row['type'] ?? 'fixed', 'value' => $row['value']]
+            );
+        }
     }
 
     public function updateStatus($id, $status) {

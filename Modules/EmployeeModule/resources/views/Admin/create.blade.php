@@ -32,7 +32,7 @@
                             <div class="row">
                                 <div class="col-lg-12 col-12">
                                     <form class="card-form side-form" method="POST"
-                                        action="{{ route(Auth::getDefaultDriver() . '.employees.store') }}"
+                                        action="{{ route('admin.employees.store') }}"
                                         enctype="multipart/form-data">
                                         @csrf
                                         <div class="row">
@@ -189,8 +189,53 @@
                                             </div>
                                         </div>
 
+                                        @if ($commissions->isNotEmpty())
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h5 class="mt-2 mb-1">العمولات</h5>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-lg-8 col-12">
+                                                    <table class="table table-sm table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>العمولة</th>
+                                                                <th style="width:200px">النوع</th>
+                                                                <th style="width:160px">القيمة</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            @foreach ($commissions as $commission)
+                                                                <tr>
+                                                                    <td class="align-middle">{{ $commission->name }}</td>
+                                                                    <td>
+                                                                        <select class="form-control form-control-sm"
+                                                                            name="commissions[{{ $commission->id }}][type]">
+                                                                            <option value="fixed"
+                                                                                {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'fixed' ? 'selected' : '' }}>
+                                                                                قيمة ثابتة</option>
+                                                                            <option value="percentage"
+                                                                                {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'percentage' ? 'selected' : '' }}>
+                                                                                نسبة مئوية</option>
+                                                                        </select>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="number" step="0.01" min="0"
+                                                                            class="form-control form-control-sm"
+                                                                            name="commissions[{{ $commission->id }}][value]"
+                                                                            value="{{ old('commissions.' . $commission->id . '.value', $commission->value) }}">
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        @endif
+
                                         <div class="col-12 mt-1">
-                                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}"
+                                            <a href="{{ route('admin.employees.index') }}"
                                                 class="btn btn-secondary">إلغاء</a>
                                             <button type="submit" class="btn btn-primary">حفظ</button>
                                         </div>

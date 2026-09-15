@@ -18,7 +18,7 @@
         {{-- Filter --}}
         <div class="card mb-2">
             <div class="card-body py-2 px-2">
-                <form method="GET" action="{{ route('admin.students.index') }}">
+                <form method="GET" action="{{ route('admin.students.index') }}" id="filterForm">
                     <div class="row align-items-end">
                         <div class="col-md-3">
                             <label class="d-block mb-1"><strong>الفرع</strong></label>
@@ -59,20 +59,20 @@
             <div class="card-header">
                 <div class="row">
                     <div class="col-lg-8">
-                        <form method="GET" action="{{ route(Auth::getDefaultDriver() . '.students.index') }}"
-                            class="d-flex">
+                        <div class="d-flex">
                             <div class="input-group">
                                 <input type="text" name="search" id="searchInput" class="form-control"
                                     placeholder="بحث عن طالب..." value="{{ request()->query('search') }}"
-                                    style="width: 400px">
+                                    style="width: 400px" form="filterForm">
                                 &nbsp;&nbsp;&nbsp;
-                                <button class="btn btn-outline-secondary" type="submit" style="margin-top:5px">بحث</button>
+                                <button class="btn btn-outline-secondary" type="submit" form="filterForm"
+                                    style="margin-top:5px">بحث</button>
                                 &nbsp;
                                 <button class="btn btn-outline-danger" type="button" style="margin-top:5px"
                                     id="clearBtn">مسح</button>
 
                             </div>
-                        </form>
+                        </div>
                     </div>
                     <div class="col-lg-4">
                         {{-- <a class="btn btn-success round btn-min-width mr-1 mb-1"
@@ -99,7 +99,7 @@
                                 <tr class="head">
                                     <th>اسم الطالب</th>
                                     <th>الموظف المسؤول</th>
-                                    <th>الجوال</th>
+                                    <th>رقم الهوية</th>
                                     <th>الكورس</th>
                                     <th>الإجمالي</th>
                                     <th>المدفوع</th>
@@ -113,7 +113,15 @@
                                 @foreach ($students as $i => $student)
                                     @php $emp = $student->employee; @endphp
                                     <tr>
-                                        <td>{{ $student->name }}</td>
+                                        <td>
+                                            <div>{{ $student->name }}</div>
+                                            @if ($student->national_id && ($duplicateNationalIds[$student->national_id] ?? 0) > 1)
+                                                <a href="{{ route('admin.students.index', ['search' => $student->national_id]) }}"
+                                                    class="text-danger" style="font-size:14px" title="عرض السجلات المكررة بنفس رقم الهوية">
+                                                    <i class="fa fa-warning" style="font-size:13px"></i> مكرر ({{ $duplicateNationalIds[$student->national_id] }})
+                                                </a>
+                                            @endif
+                                        </td>
                                         <td>
                                             <div><strong>{{ $emp->name ?? '—' }}</strong></div>
                                             <small class="text-muted">
@@ -123,7 +131,7 @@
                                                 @endif
                                             </small>
                                         </td>
-                                        <td>{{ $student->mobile }}</td>
+                                        <td>{{ $student->national_id }}</td>
                                         <td>{{ $student->course_name }}</td>
                                         <td>{{ number_format($student->total_amount) }}</td>
                                         <td>
@@ -211,9 +219,8 @@
                                 <input type="file" name="file" id="fileInput" class="form-control"
                                     accept=".xlsx,.xls,.csv" required>
                                 <small class="form-text text-muted">الصيغ المدعومة: (.xlsx, .xls)</small>
-                                <a href="{{ asset('imports/students_template.xlsx') }}"
-                                    class="btn btn-sm btn-info mt-2 badge info" style="color: #ffffff !important;"
-                                    download>
+                                <a href="{{ route('admin.students.template') }}"
+                                    class="btn btn-sm btn-info mt-2 badge info" style="color: #ffffff !important;">
                                     تحميل نموذج الملف</a>
                             </div>
                         </div>
@@ -368,7 +375,7 @@
             // Clear search button
             $('#clearBtn').on('click', function() {
                 $('#searchInput').val('');
-                window.location.href = "{{ route(Auth::getDefaultDriver() . '.students.index') }}";
+                window.location.href = "{{ route('admin.students.index') }}";
             });
         });
     </script>

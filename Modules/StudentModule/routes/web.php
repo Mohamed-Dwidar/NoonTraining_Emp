@@ -12,6 +12,7 @@ Route::prefix('admin/student')->name('admin.students.')->middleware(['auth:admin
     Route::post('/{id}',     [StudentAdminController::class, 'update'])->name('update');
     Route::delete('/{id}',   [StudentAdminController::class, 'destroy'])->name('destroy');
     Route::post('/students/import', [StudentAdminController::class, 'importStudents'])->name('import');
+    Route::get('/students/template', [StudentAdminController::class, 'downloadTemplate'])->name('template');
 });
 
 Route::prefix('employee/student')->name('employee.students.')->middleware(['auth:employee'])->group(function () {
@@ -20,4 +21,5 @@ Route::prefix('employee/student')->name('employee.students.')->middleware(['auth
     Route::post('/{id}',     [StudentEmployeeController::class, 'update'])->name('update');
     Route::delete('/{id}',   [StudentEmployeeController::class, 'destroy'])->name('destroy');
     Route::post('/students/import', [StudentEmployeeController::class, 'importStudents'])->name('import');
+    Route::get('/students/template', [StudentEmployeeController::class, 'downloadTemplate'])->name('template');
 });

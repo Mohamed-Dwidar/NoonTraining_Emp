@@ -79,6 +79,17 @@
                             @enderror
                         </div>
                     </div>
+                    <div class="col-lg-3 col-sm-12">
+                        <label for="national_id">رقم الهوية <span class="text-danger">*</span></label>
+                        <div class="form-group">
+                            <input type="text" id="national_id" name="national_id"
+                                   class="form-control @error('national_id') is-invalid @enderror"
+                                   value="{{ old('national_id', $student->national_id) }}">
+                            @error('national_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
                     <div class="col-lg-4 col-sm-12">
                         <label for="course_name">اسم الكورس <span class="text-danger">*</span></label>
                         <div class="form-group">

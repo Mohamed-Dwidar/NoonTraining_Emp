@@ -33,6 +33,7 @@ class Student extends Model {
             $search = $request['search'];
             $query->where(fn($q) => $q->where('name', 'like', "%{$search}%")
                 ->orWhere('mobile', 'like', "%{$search}%")
+                ->orWhere('national_id', 'like', "%{$search}%")
                 ->orWhere('course_name', 'like', "%{$search}%"));
         }
         if (!empty($request['month'])) {

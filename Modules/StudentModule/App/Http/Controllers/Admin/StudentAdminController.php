@@ -12,6 +12,7 @@ use Modules\EmployeeModule\Services\EmployeeService;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\StudentModule\App\Imports\StudentImport;
 use Modules\StudentModule\Exports\StudentsExport;
+use Modules\StudentModule\Exports\StudentsTemplateExport;
 
 class StudentAdminController extends Controller {
     protected StudentService $studentService;
@@ -62,6 +63,7 @@ class StudentAdminController extends Controller {
         }
 
         $students = $students_query->paginate(50);
+        $duplicateNationalIds = $this->studentService->duplicateNationalIdCounts();
 
         return view('studentmodule::Admin.index', compact(
             'students',
@@ -70,7 +72,8 @@ class StudentAdminController extends Controller {
             'employees',
             'branchId',
             'deptId',
-            'employeeId'
+            'employeeId',
+            'duplicateNationalIds'
         ));
     }
 
@@ -155,6 +158,7 @@ class StudentAdminController extends Controller {
                 'employee_id'          => 'required|exists:employees,id',
                 'name'                 => 'required|string|max:255',
                 'mobile'               => 'required|string|max:20',
+                'national_id'          => 'required|string|max:20',
                 'course_name'          => 'required|string|max:255',
                 'total_amount'         => 'required|integer|min:0',
                 'paid_amount'          => 'required|integer|min:0',
@@ -167,6 +171,7 @@ class StudentAdminController extends Controller {
                 'employee_id.exists'      => 'الموظف غير موجود',
                 'name.required'           => 'اسم الطالب مطلوب',
                 'mobile.required'         => 'رقم الجوال مطلوب',
+                'national_id.required'    => 'رقم الهوية مطلوب',
                 'course_name.required'    => 'اسم الكورس مطلوب',
                 'total_amount.required'   => 'المبلغ الإجمالي مطلوب',
                 'paid_amount.required'    => 'المبلغ المدفوع مطلوب',
@@ -185,6 +190,7 @@ class StudentAdminController extends Controller {
                 'employee_id',
                 'name',
                 'mobile',
+                'national_id',
                 'course_name',
                 'total_amount',
                 'paid_amount',
@@ -214,5 +220,9 @@ class StudentAdminController extends Controller {
         );
 
         return back()->with('success', 'تم الاستيراد بنجاح!');
+    }
+
+    public function downloadTemplate() {
+        return Excel::download(new StudentsTemplateExport(), 'نموذج استيراد الطلاب.xlsx');
     }
 }

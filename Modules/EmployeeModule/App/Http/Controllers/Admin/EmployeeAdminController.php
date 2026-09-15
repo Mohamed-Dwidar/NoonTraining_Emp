@@ -4,21 +4,28 @@ namespace Modules\EmployeeModule\App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
+use Modules\CommissionModule\Services\CommissionService;
 
 class EmployeeAdminController extends Controller {
     protected EmployeeService $employeeService;
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
+    protected CommissionService $commissionService;
 
-    public function __construct(EmployeeService $employeeService, BranchService $branchService, DepartmentService $departmentService) {
+    public function __construct(
+        EmployeeService $employeeService,
+        BranchService $branchService,
+        DepartmentService $departmentService,
+        CommissionService $commissionService
+    ) {
         $this->employeeService   = $employeeService;
         $this->branchService     = $branchService;
         $this->departmentService = $departmentService;
+        $this->commissionService = $commissionService;
     }
 
     public function index(Request $request) {
@@ -36,7 +43,8 @@ class EmployeeAdminController extends Controller {
     public function create() {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
-        return view('employeemodule::Admin.create', compact('branches', 'departments'));
+        $commissions = $this->commissionService->getAllCommissions();
+        return view('employeemodule::Admin.create', compact('branches', 'departments', 'commissions'));
     }
 
     public function store(Request $request) {
@@ -56,6 +64,8 @@ class EmployeeAdminController extends Controller {
                 'contract_ends_at'     => 'nullable|date',
                 'terminated_at'        => 'nullable|date',
                 'password'             => 'required|string|min:6',
+                'commissions.*.type'   => 'nullable|in:fixed,percentage',
+                'commissions.*.value'  => 'nullable|numeric|min:0',
             ],
             [
                 'name.required'                 => 'اسم الموظف مطلوب',
@@ -79,6 +89,7 @@ class EmployeeAdminController extends Controller {
                 'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
                 'password.required'             => 'كلمة المرور مطلوبة',
                 'password.min'                  => 'كلمة المرور يجب أن تكون 6 حرف على الأقل',
+                'commissions.*.value.numeric'   => 'قيمة العمولة يجب أن تكون رقماً',
             ]
         );
 
@@ -88,15 +99,17 @@ class EmployeeAdminController extends Controller {
 
         $this->employeeService->create($request->all());
 
-        return redirect()->route(Auth::getDefaultDriver() . '.employees.index')
+        return redirect()->route('admin.employees.index')
             ->with('success', 'تم اضافة الموظف بنجاح');
     }
 
     public function edit($id) {
-        $employee    = $this->employeeService->findOne($id);
-        $branches    = $this->branchService->getAllBranches();
-        $departments = $this->departmentService->getAllDepartments();
-        return view('employeemodule::Admin.edit', compact('employee', 'branches', 'departments'));
+        $employee            = $this->employeeService->findOne($id);
+        $branches            = $this->branchService->getAllBranches();
+        $departments         = $this->departmentService->getAllDepartments();
+        $commissions         = $this->commissionService->getAllCommissions();
+        $employeeCommissions = $employee->commissions->keyBy('commission_id');
+        return view('employeemodule::Admin.edit', compact('employee', 'branches', 'departments', 'commissions', 'employeeCommissions'));
     }
 
     public function update(Request $request) {
@@ -117,6 +130,8 @@ class EmployeeAdminController extends Controller {
             'contract_ends_at'     => 'nullable|date',
             'terminated_at'        => 'nullable|date',
             'password'             => $changePassword ? 'required|string|min:6' : 'nullable',
+            'commissions.*.type'   => 'nullable|in:fixed,percentage',
+            'commissions.*.value'  => 'nullable|numeric|min:0',
         ];
 
         $messages = [
@@ -141,6 +156,7 @@ class EmployeeAdminController extends Controller {
             'terminated_at.date'            => 'تاريخ إنهاء الخدمة غير صحيح',
             'password.required'             => 'كلمة المرور الجديدة مطلوبة عند تفعيل تغيير كلمة المرور',
             'password.min'                  => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+            'commissions.*.value.numeric'   => 'قيمة العمولة يجب أن تكون رقماً',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -151,7 +167,7 @@ class EmployeeAdminController extends Controller {
 
         $this->employeeService->update($request->all());
 
-        return redirect()->route(Auth::getDefaultDriver() . '.employees.index')
+        return redirect()->route('admin.employees.index')
             ->with('success', 'تم تعديل الموظف بنجاح');
     }
 

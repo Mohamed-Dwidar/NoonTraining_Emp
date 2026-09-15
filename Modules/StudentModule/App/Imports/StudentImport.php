@@ -4,15 +4,29 @@ namespace Modules\StudentModule\App\Imports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\BeforeSheet;
 use Modules\StudentModule\Services\StudentService;
 
-class StudentImport implements ToCollection {
+class StudentImport implements ToCollection, WithEvents {
     protected $studentService;
     protected int $employeeId;
+    protected ?int $commissionId = null;
 
     public function __construct(StudentService $studentService, int $employeeId) {
         $this->studentService = $studentService;
         $this->employeeId     = $employeeId;
+    }
+
+    public function registerEvents(): array {
+        return [
+            // Each sub-sheet is named "{commission id} - {name}" (see StudentsTemplateExport).
+            // Capture the id here so every row imported from that sheet is tagged with it.
+            BeforeSheet::class => function (BeforeSheet $event) {
+                $title = $event->sheet->getDelegate()->getTitle();
+                $this->commissionId = preg_match('/^(\d+)/', trim($title), $m) ? (int) $m[1] : null;
+            },
+        ];
     }
 
     private function parseDate(mixed $value): ?string {
@@ -38,7 +52,7 @@ class StudentImport implements ToCollection {
                 continue;
             }
 
-            if (empty($row[0]) || empty($row[1]) || empty($row[2])) {
+            if (empty($row[0]) || empty($row[1]) || empty($row[2]) || empty($row[3])) {
                 continue;
             }
 
@@ -47,12 +61,14 @@ class StudentImport implements ToCollection {
                 'month'               => date('Y-m'),
                 'name'                => $row[0],
                 'mobile'              => $row[1],
-                'course_name'         => $row[2],
-                'total_amount'        => $row[3] ?? 0,
-                'paid_amount'         => $row[4] ?? 0,
-                'payment_method'      => $row[5] ?? null,
-                'payment_date'        => $this->parseDate($row[6] ?? null),
-                'previous_student_of' => $row[7] ?? null,
+                'national_id'         => $row[2],
+                'course_name'         => $row[3],
+                'total_amount'        => $row[4] ?? 0,
+                'paid_amount'         => $row[5] ?? 0,
+                'payment_method'      => $row[6] ?? null,
+                'payment_date'        => $this->parseDate($row[7] ?? null),
+                'previous_student_of' => $row[8] ?? null,
+                'commission_id'       => $this->commissionId,
             ];
 
             $this->studentService->create($data);

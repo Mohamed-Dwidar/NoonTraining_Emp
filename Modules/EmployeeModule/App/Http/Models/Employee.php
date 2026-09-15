@@ -26,6 +26,10 @@ class Employee extends Model {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
+    public function commissions() {
+        return $this->hasMany(EmployeeCommission::class, 'student_id');
+    }
+
     public function getTotalWorkingHoursAttribute() {
         return $this->monthly_working_days * $this->daily_working_hours;
     }

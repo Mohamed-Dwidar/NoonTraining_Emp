@@ -55,7 +55,7 @@
                             <thead>
                                 <tr class="head">
                                     <th>اسم الطالب</th>
-                                    <th>الجوال</th>
+                                    <th>رقم الهوية</th>
                                     <th>الكورس</th>
                                     <th>الإجمالي</th>
                                     <th>المدفوع</th>
@@ -69,8 +69,16 @@
                                 @foreach ($students as $i => $student)
                                     @php $emp = $student->employee; @endphp
                                     <tr>
-                                        <td>{{ $student->name }}</td>
-                                        <td>{{ $student->mobile }}</td>
+                                        <td>
+                                            <div>{{ $student->name }}</div>
+                                            @if ($student->national_id && ($duplicateNationalIds[$student->national_id] ?? 0) > 1)
+                                                <a href="{{ route('employee.students.index', ['search' => $student->national_id]) }}"
+                                                    class="text-danger" title="عرض السجلات المكررة بنفس رقم الهوية">
+                                                    <i class="fa fa-flag" style="font-size:11px"></i> مكرر ({{ $duplicateNationalIds[$student->national_id] }})
+                                                </a>
+                                            @endif
+                                        </td>
+                                        <td>{{ $student->national_id }}</td>
                                         <td>{{ $student->course_name }}</td>
                                         <td>{{ number_format($student->total_amount) }}</td>
                                         <td>
@@ -154,8 +162,8 @@
                                 <input type="file" name="file" id="fileInput" class="form-control"
                                     accept=".xlsx,.xls,.csv" required>
                                 <small class="form-text text-muted">الصيغ المدعومة: (.xlsx, .xls)</small>
-                                <a href="{{ asset('imports/students_template.xlsx') }}"
-                                    class="btn btn-sm btn-info mt-2 badge info" style="color: #ffffff !important;" download>
+                                <a href="{{ route('employee.students.template') }}"
+                                    class="btn btn-sm btn-info mt-2 badge info" style="color: #ffffff !important;">
                                     تحميل نموذج الملف</a>
                             </div>
                         </div>

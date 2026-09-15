@@ -8,7 +8,7 @@
     <meta name="description" content="نظام الاختبارات - معهد نون للتدريب">
     <meta name="keywords" content="اختبارات, معهد نون, تدريب">
     <meta name="author" content="Noon Training Center">
-    <title>مرحباً بك في منصة الاختبارات المحوسبة - معهد نون للتدريب</title>
+    <title>مرحباً بك في موقع ادارة الموظفين - معهد نون للتدريب</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('assets/images/favicon.ico') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
