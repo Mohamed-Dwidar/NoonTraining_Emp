@@ -26,7 +26,7 @@ class AdminModuleDatabaseSeeder extends Seeder
         ]);
 
         User::create([
-            'email' => "superAdmin@noontraining.com",
+            'email' => "admin@naifnawafest.com",
             'password' => bcrypt('123456'),
             'userable_type' => 'Modules\AdminModule\App\Http\Models\Admin',
             'userable_id' => 1,
