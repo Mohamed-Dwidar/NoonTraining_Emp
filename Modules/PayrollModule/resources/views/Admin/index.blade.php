@@ -97,7 +97,7 @@
                                                 </small>
                                             </td>
                                             <td>{{ $emp->job ?? '—' }}</td>
-                                            <td>{{ $payroll->days_present }}</td>
+                                            <td>{{ $payroll->days_present }}<span style="color:#adb5bd"> / {{ $payroll->monthly_working_days }}</span></td>
                                             <td>{{ $payroll->days_absent }}</td>
                                             <td>{{ number_format($payroll->basic_salary, 2) }}</td>
                                             <td>{{ number_format($payroll->deductions, 2) }}</td>
@@ -305,7 +305,7 @@
 
                     // deductions
                     var deductRows = d.deductions.length
-                        ? d.deductions.map(function(dd) { return '<tr><td>' + dd.reason + '</td><td class="font-weight-bold text-danger">- ' + dd.amount + ' ر.س</td></tr>'; }).join('')
+                        ? d.deductions.map(function(dd) { return '<tr><td>' + dd.reason + '</td><td class="font-weight-bold text-danger">- ' + dd.amount + ' ر.س</td><td>' + dd.created_at + '</td></tr>'; }).join('')
                         : emptyRow(3, 'لا توجد خصومات');
 
                     // leaves
@@ -333,7 +333,7 @@
                         + '<h6 class="font-weight-bold mb-1" style="color:#27ae60;"><i class="fa fa-plus-circle"></i> المكافآت (' + d.bonuses.length + ')</h6>'
                         + '<table class="table table-sm table-bordered mb-3"><thead class="thead-light"><tr><th>السبب</th><th>المبلغ</th></tr></thead><tbody>' + bonusRows + '</tbody></table>'
                         + '<h6 class="font-weight-bold mb-1" style="color:#c0392b;"><i class="fa fa-minus-circle"></i> الخصومات (' + d.deductions.length + ')</h6>'
-                        + '<table class="table table-sm table-bordered mb-3"><thead class="thead-light"><tr><th>السبب</th><th>المبلغ</th></tr></thead><tbody>' + deductRows + '</tbody></table>'
+                        + '<table class="table table-sm table-bordered mb-3"><thead class="thead-light"><tr><th>السبب</th><th>المبلغ</th><th>تاريخ الأعتماد</th></tr></thead><tbody>' + deductRows + '</tbody></table>'
                         + '<h6 class="font-weight-bold mb-1" style="color:#17a2b8;"><i class="fa fa-calendar-minus-o"></i> الإجازات (' + d.leaves.length + ')</h6>'
                         + '<table class="table table-sm table-bordered mb-3"><thead class="thead-light"><tr><th>النوع</th><th>من</th><th>إلى</th><th>الأيام</th><th>السبب</th></tr></thead><tbody>' + leaveRows + '</tbody></table>'
                         + studentsSection

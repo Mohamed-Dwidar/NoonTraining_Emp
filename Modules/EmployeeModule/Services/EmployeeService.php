@@ -4,6 +4,7 @@ namespace Modules\EmployeeModule\Services;
 
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 use Modules\EmployeeModule\App\Http\Models\EmployeeCommission;
+use Modules\BranchModule\App\Http\Models\Branch;
 
 class EmployeeService {
 
@@ -42,6 +43,7 @@ class EmployeeService {
             'hired_at'             => $data['hired_at']         ?? null,
             'contract_ends_at'     => $data['contract_ends_at'] ?? null,
             'terminated_at'        => $data['terminated_at']    ?? null,
+            'can_view_work_regulations' => $data['can_view_work_regulations'] ?? true,
         ]);
 
         $employee->user()->create([
@@ -49,7 +51,7 @@ class EmployeeService {
             'password' => bcrypt($data['password']),
         ]);
 
-        $this->syncCommissions($employee->id, $data['commissions'] ?? []);
+        $this->syncCommissionsForBranch($employee->id, $data['branch_id'], $data['commissions'] ?? []);
 
         return $employee;
     }
@@ -71,6 +73,7 @@ class EmployeeService {
             'hired_at'             => $data['hired_at']         ?? $employee->hired_at,
             'contract_ends_at'     => $data['contract_ends_at'] ?? $employee->contract_ends_at,
             'terminated_at'        => $data['terminated_at']    ?? $employee->terminated_at,
+            'can_view_work_regulations' => $data['can_view_work_regulations'] ?? $employee->can_view_work_regulations,
         ], $id);
 
         $userUpdate = [];
@@ -84,17 +87,29 @@ class EmployeeService {
             $employee->user()->update($userUpdate);
         }
 
-        $this->syncCommissions($id, $data['commissions'] ?? []);
+        $this->syncCommissionsForBranch($id, $data['branch_id'], $data['commissions'] ?? []);
 
         return $employee;
     }
 
     public function deleteEmployee($id) {
+        EmployeeCommission::where('student_id', $id)->delete();
         return $this->employeeRepository->delete($id);
     }
 
     public function filter($data = []) {
         return $this->employeeRepository->filter($data);
+    }
+
+    private function syncCommissionsForBranch(int $employeeId, $branchId, array $commissions): void {
+        $branch = Branch::find($branchId);
+
+        if (!$branch || $branch->type !== 'training') {
+            EmployeeCommission::where('student_id', $employeeId)->delete();
+            return;
+        }
+
+        $this->syncCommissions($employeeId, $commissions);
     }
 
     private function syncCommissions(int $employeeId, array $commissions): void {

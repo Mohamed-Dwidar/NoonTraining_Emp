@@ -1,18 +1,14 @@
 @extends('layoutmodule::layouts.layout_main')
 
 @section('title')
-    بيانات الموظف
+    بياناتي الوظيفية
 @endsection
 
 @section('content')
     <div class="content-wrapper container-fluid">
-        <div class="content-header">
-            <div class="content-header-left mb-2 breadcrumb-new col">
-                <h3>
-                    <i class="fa fa-user"></i>
-                    &nbsp;
-                    بيانات الموظف
-                </h3>
+        <div class="content-header mb-2">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <h3><i class="fa fa-id-card-o"></i> &nbsp; بياناتي الوظيفية</h3>
             </div>
         </div>
 
@@ -52,8 +48,6 @@
                                 </div>
                             </div>
                         </div>
-
-
 
                         <div class="card-body">
                             <div class="p-2">
@@ -117,14 +111,6 @@
                                         <div class="text-muted small mb-1">إجمالي ساعات العمل الشهرية</div>
                                         <div class="font-weight-bold">{{ $employee->total_working_hours }} ساعة</div>
                                     </div>
-                                    @if ($employee->branch && $employee->branch->type === 'training')
-                                        <div class="col-md-4 col-sm-6 mb-1">
-                                            <div class="text-muted small mb-1">عمولة اضافة الطالب</div>
-                                            <div class="font-weight-bold">{{ number_format($employee->stu_commission, 2) }}
-                                                ر٫س
-                                            </div>
-                                        </div>
-                                    @endif
                                 </div>
 
                                 {{-- Section: Contract Dates --}}
@@ -177,16 +163,6 @@
                                 @endif
 
                             </div>
-                        </div>
-
-                        <div class="card-footer">
-                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.index') }}" class="btn btn-secondary">
-                                <i class="fa fa-arrow-right"></i> رجوع
-                            </a>
-                            <a href="{{ route(Auth::getDefaultDriver() . '.employees.edit', $employee->id) }}"
-                                class="btn btn-warning">
-                                <i class="fa fa-edit"></i> تعديل
-                            </a>
                         </div>
                     </div>
                 </div>

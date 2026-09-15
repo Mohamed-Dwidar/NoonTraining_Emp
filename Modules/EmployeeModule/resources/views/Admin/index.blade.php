@@ -97,7 +97,6 @@
                                             <th>أيام  / ساعات العمل الشهرية</th>
                                             <th>الأجر اليومي</th>
                                             <th>الحالة</th>
-                                            <th>عمولة الطلاب</th>
                                             <th style="width: 220px">&nbsp;</th>
                                         </tr>
                                     </thead>
@@ -134,13 +133,6 @@
                                                             <option value="resigned"    {{ $employee->status === 'resigned'    ? 'selected' : '' }}>مستقيل</option>
                                                             <option value="terminated"  {{ $employee->status === 'terminated'  ? 'selected' : '' }}>منهي الخدمة</option>
                                                         </select>
-                                                    </td>
-                                                    <td>
-                                                        @if ($employee->branch && $employee->branch->type === 'training')
-                                                            {{ number_format($employee->stu_commission, 2) }} ر٫س
-                                                        @else
-                                                            <span class="text-muted">—</span>
-                                                        @endif
                                                     </td>
                                                     <td>
                                                         <a class="btn btn-sm btn-info"

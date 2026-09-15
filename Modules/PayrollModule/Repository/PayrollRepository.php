@@ -5,6 +5,8 @@ namespace Modules\PayrollModule\Repository;
 use Prettus\Repository\Eloquent\BaseRepository;
 use Modules\PayrollModule\App\Http\Models\Payroll;
 use Modules\EmployeeModule\App\Http\Models\Employee;
+use Modules\EmployeeModule\App\Http\Models\EmployeeCommission;
+use Modules\CommissionModule\App\Http\Models\Commission;
 use Modules\DeductionModule\App\Http\Models\Deduction;
 use Modules\BonuseModule\App\Http\Models\Bonuse;
 use Modules\LeaveModule\App\Http\Models\Leave;
@@ -50,10 +52,35 @@ class PayrollRepository extends BaseRepository {
                                          ->where('month', $month)
                                          ->sum('amount');
 
-        $studentCount       = Student::where('employee_id', $employeeId)
-                                     ->where('month', $month)
-                                     ->count();
-        $studentsCommission = $studentCount * (float) $employee->stu_commission;
+        // Commission applies only to students who paid in the active payroll month.
+        $students = Student::where('employee_id', $employeeId)
+                            ->paidInMonth($month)
+                            ->get();
+
+        $commissionIds = $students->pluck('commission_id')->filter()->unique();
+
+        // Employee-specific overrides take priority; fall back to the commission's default rate.
+        $employeeRates = EmployeeCommission::where('student_id', $employeeId)
+                                            ->whereIn('commission_id', $commissionIds)
+                                            ->get()
+                                            ->keyBy('commission_id');
+
+        $defaultRates = Commission::whereIn('id', $commissionIds)
+                                   ->get()
+                                   ->keyBy('id');
+
+        $studentsCommission = 0.0;
+        foreach ($students as $student) {
+            $rate = $employeeRates->get($student->commission_id) ?? $defaultRates->get($student->commission_id);
+
+            if (!$rate) {
+                continue;
+            }
+
+            $studentsCommission += $rate->type === 'percentage'
+                ? (float) $student->paid_amount * ((float) $rate->value / 100)
+                : (float) $rate->value;
+        }
 
         $totalDeductions = $fixedDeductions + $leaveDeductions;
         $daysAbsent      = $leaveDays;

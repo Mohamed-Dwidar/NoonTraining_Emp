@@ -36,8 +36,10 @@ class EmployeeAdminController extends Controller {
     }
 
     public function show($id) {
-        $employee = $this->employeeService->findOne($id);
-        return view('employeemodule::Admin.show', compact('employee'));
+        $employee            = $this->employeeService->findOne($id);
+        $commissions         = $this->commissionService->getAllCommissions();
+        $employeeCommissions = $employee->commissions->keyBy('commission_id');
+        return view('employeemodule::Admin.show', compact('employee', 'commissions', 'employeeCommissions'));
     }
 
     public function create() {
@@ -97,7 +99,10 @@ class EmployeeAdminController extends Controller {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->employeeService->create($request->all());
+        $data = $request->all();
+        $data['can_view_work_regulations'] = $request->boolean('can_view_work_regulations');
+
+        $this->employeeService->create($data);
 
         return redirect()->route('admin.employees.index')
             ->with('success', 'تم اضافة الموظف بنجاح');
@@ -165,9 +170,12 @@ class EmployeeAdminController extends Controller {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->employeeService->update($request->all());
+        $data = $request->all();
+        $data['can_view_work_regulations'] = $request->boolean('can_view_work_regulations');
 
-        return redirect()->route('admin.employees.index')
+        $this->employeeService->update($data);
+
+        return redirect()->route('admin.employees.show', $employeeId)
             ->with('success', 'تم تعديل الموظف بنجاح');
     }
 

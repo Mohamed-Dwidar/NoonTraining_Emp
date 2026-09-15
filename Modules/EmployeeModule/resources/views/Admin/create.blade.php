@@ -189,47 +189,61 @@
                                             </div>
                                         </div>
 
-                                        @if ($commissions->isNotEmpty())
-                                            <div class="row">
-                                                <div class="col-12">
-                                                    <h5 class="mt-2 mb-1">العمولات</h5>
+                                        <div class="row">
+                                            <div class="col-lg-6 col-sm-12 col-xs-12 col-12">
+                                                <div class="form-group mt-1">
+                                                    <label>
+                                                        <input type="checkbox" name="can_view_work_regulations" value="1"
+                                                            {{ old('can_view_work_regulations', true) ? 'checked' : '' }}>
+                                                        &nbsp; السماح للموظف بعرض لائحة العمل
+                                                    </label>
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-lg-8 col-12">
-                                                    <table class="table table-sm table-bordered">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>العمولة</th>
-                                                                <th style="width:200px">النوع</th>
-                                                                <th style="width:160px">القيمة</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            @foreach ($commissions as $commission)
+                                        </div>
+
+                                        @if ($commissions->isNotEmpty())
+                                            <div id="commissionsSection" style="display:none;">
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <h5 class="mt-2 mb-1">العمولات</h5>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-8 col-12">
+                                                        <table class="table table-sm table-bordered">
+                                                            <thead>
                                                                 <tr>
-                                                                    <td class="align-middle">{{ $commission->name }}</td>
-                                                                    <td>
-                                                                        <select class="form-control form-control-sm"
-                                                                            name="commissions[{{ $commission->id }}][type]">
-                                                                            <option value="fixed"
-                                                                                {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'fixed' ? 'selected' : '' }}>
-                                                                                قيمة ثابتة</option>
-                                                                            <option value="percentage"
-                                                                                {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'percentage' ? 'selected' : '' }}>
-                                                                                نسبة مئوية</option>
-                                                                        </select>
-                                                                    </td>
-                                                                    <td>
-                                                                        <input type="number" step="0.01" min="0"
-                                                                            class="form-control form-control-sm"
-                                                                            name="commissions[{{ $commission->id }}][value]"
-                                                                            value="{{ old('commissions.' . $commission->id . '.value', $commission->value) }}">
-                                                                    </td>
+                                                                    <th>العمولة</th>
+                                                                    <th style="width:200px">النوع</th>
+                                                                    <th style="width:160px">القيمة</th>
                                                                 </tr>
-                                                            @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach ($commissions as $commission)
+                                                                    <tr>
+                                                                        <td class="align-middle">{{ $commission->name }}</td>
+                                                                        <td>
+                                                                            <select class="form-control form-control-sm"
+                                                                                name="commissions[{{ $commission->id }}][type]">
+                                                                                <option value="fixed"
+                                                                                    {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'fixed' ? 'selected' : '' }}>
+                                                                                    قيمة ثابتة</option>
+                                                                                <option value="percentage"
+                                                                                    {{ old('commissions.' . $commission->id . '.type', $commission->type) == 'percentage' ? 'selected' : '' }}>
+                                                                                    نسبة مئوية</option>
+                                                                            </select>
+                                                                        </td>
+                                                                        <td>
+                                                                            <input type="number" step="0.01" min="0"
+                                                                                class="form-control form-control-sm"
+                                                                                name="commissions[{{ $commission->id }}][value]"
+                                                                                value="{{ old('commissions.' . $commission->id . '.value', $commission->value) }}">
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
@@ -292,6 +306,10 @@
         const opt = branchSelect.options[branchSelect.selectedIndex];
         const isTraining = opt && opt.dataset.type === 'training';
         document.getElementById('commission-row').style.display = isTraining ? '' : 'none';
+        const commissionsSection = document.getElementById('commissionsSection');
+        if (commissionsSection) {
+            commissionsSection.style.display = isTraining ? '' : 'none';
+        }
     }
 
     branchSelect.addEventListener('change', function () {

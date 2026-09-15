@@ -1,8 +1,9 @@
 <table class="table mb-0">
     <thead>
         <tr class="head">
-            <th style="font-weight: bold">الطالب</th>
+            <th style="font-weight: bold">الاسم</th>
             <th style="font-weight: bold">رقم الجوال</th>
+            <th style="font-weight: bold">رقم الهوية الوطنية</th>
             <th style="font-weight: bold">اسم الدورة</th>
             <th style="font-weight: bold">المبلغ كامل</th>
             <th style="font-weight: bold">المدفوع</th>
@@ -23,6 +24,11 @@
                 <td class="strong">
                     <label>
                         {{ $student->mobile }}
+                    </label>
+                </td>
+                <td class="strong">
+                    <label>
+                        {{ $student->national_id }}
                     </label>
                 </td>
                 <td class="strong">

@@ -18,6 +18,12 @@ use Modules\ReportModule\app\Http\Controllers\ReportModuleController;
 // Route::group(['prefix' => 'admin/reports', 'as' => 'admin.reports.' ,'middleware' => ['auth:admin']], function () {
 Route::prefix('admin/reports')->name('admin.reports.')->middleware(['auth:admin'])->group(function () {
     Route::get('salary-report', 'Admin\ReportAdminController@ReportSalary')->name('salary-report');
+
+    Route::get('employee-performance', 'Admin\ReportAdminController@employeePerformance')->name('employee-performance');
+    Route::get('employee-performance/data', 'Admin\ReportAdminController@employeePerformanceData')->name('employee-performance.data');
+    Route::get('employee-performance/{employeeId}', 'Admin\ReportAdminController@employeePerformanceShow')
+        ->where('employeeId', '[0-9]+')
+        ->name('employee-performance.show');
 });
 
 Route::group(['prefix' => 'user/reports', 'middleware' => ['auth:user']], function () {

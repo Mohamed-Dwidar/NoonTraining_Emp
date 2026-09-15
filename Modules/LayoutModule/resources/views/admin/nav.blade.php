@@ -66,12 +66,13 @@
                 </li>
 
                 {{--  التقارير --}}
-                {{-- <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item">
+                    <a href="{{ route('admin.reports.employee-performance') }}"
+                        class="@if (Request::segment(2) == 'reports') active @endif">
                         <i class="fa fa-bar-chart"></i>
                         <span class="menu-title">تقارير الأداء</span>
                     </a>
-                </li> --}}
+                </li>
 
                 {{-- الإعدادات --}}
                 <li class="nav-item">

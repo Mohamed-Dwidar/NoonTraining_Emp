@@ -20,6 +20,10 @@ class Payroll extends Model {
             $query->where('month', $request['month']);
         }
 
+        if (!empty($request['employee_id'])) {
+            $query->where('employee_id', $request['employee_id']);
+        }
+
         if (!empty($request['branch_id'])) {
             $query->whereHas('employee', function ($q) use ($request) {
                 $q->where('branch_id', $request['branch_id']);
