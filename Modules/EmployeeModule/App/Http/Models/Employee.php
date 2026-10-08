@@ -27,7 +27,7 @@ class Employee extends Model {
     }
 
     public function commissions() {
-        return $this->hasMany(EmployeeCommission::class, 'student_id');
+        return $this->hasMany(EmployeeCommission::class, 'employee_id');
     }
 
     public function getTotalWorkingHoursAttribute() {

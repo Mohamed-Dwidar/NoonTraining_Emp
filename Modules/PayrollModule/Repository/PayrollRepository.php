@@ -93,7 +93,7 @@ class PayrollRepository extends BaseRepository {
         $commissionIds = $students->pluck('commission_id')->filter()->unique();
 
         // Employee-specific overrides take priority; fall back to the commission's default rate.
-        $employeeRates = EmployeeCommission::where('student_id', $employeeId)
+        $employeeRates = EmployeeCommission::where('employee_id', $employeeId)
                                             ->whereIn('commission_id', $commissionIds)
                                             ->get()
                                             ->keyBy('commission_id');

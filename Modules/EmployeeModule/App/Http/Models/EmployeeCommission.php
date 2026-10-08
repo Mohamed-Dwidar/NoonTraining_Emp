@@ -11,7 +11,7 @@ class EmployeeCommission extends Model {
     protected $guarded = [];
 
     public function employee() {
-        return $this->belongsTo(Employee::class, 'student_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     public function commission() {

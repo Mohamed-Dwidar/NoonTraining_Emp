@@ -93,7 +93,7 @@ class EmployeeService {
     }
 
     public function deleteEmployee($id) {
-        EmployeeCommission::where('student_id', $id)->delete();
+        EmployeeCommission::where('employee_id', $id)->delete();
         return $this->employeeRepository->delete($id);
     }
 
@@ -105,7 +105,7 @@ class EmployeeService {
         $branch = Branch::find($branchId);
 
         if (!$branch || $branch->type !== 'training') {
-            EmployeeCommission::where('student_id', $employeeId)->delete();
+            EmployeeCommission::where('employee_id', $employeeId)->delete();
             return;
         }
 
@@ -119,7 +119,7 @@ class EmployeeService {
             }
 
             EmployeeCommission::updateOrCreate(
-                ['student_id' => $employeeId, 'commission_id' => $commissionId],
+                ['employee_id' => $employeeId, 'commission_id' => $commissionId],
                 ['type' => $row['type'] ?? 'fixed', 'value' => $row['value']]
             );
         }
