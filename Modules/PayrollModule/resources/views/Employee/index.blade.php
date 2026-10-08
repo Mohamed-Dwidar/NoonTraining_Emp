@@ -217,15 +217,22 @@
                         // students summary (training only)
                         var studentsSection = '';
                         if (d.branch_type === 'training') {
+                            var commissionRows = d.commissions.length
+                                ? d.commissions.map(function(c) {
+                                    return '<tr><td>' + c.name + '</td><td>' + c.rate + '</td><td>' + c.students_count + ' طالب</td>'
+                                        + '<td class="font-weight-bold text-success">' + c.total + ' ر.س</td></tr>';
+                                }).join('')
+                                : emptyRow(4, 'لا توجد عمولات');
                             studentsSection =
-                                '<h6 class="font-weight-bold mt-3 mb-1" style="color:#6f42c1;"><i class="fa fa-graduation-cap"></i> عمولة الطلاب</h6>'
+                                '<h6 class="font-weight-bold mt-3 mb-1" style="color:#6f42c1;"><i class="fa fa-graduation-cap"></i> عمولة الطلاب (' + d.commissions.length + ')</h6>'
                                 + '<table class="table table-sm table-bordered mb-0">'
-                                + '<thead class="thead-light"><tr><th>عدد الطلاب</th><th>العمولة لكل طالب</th><th>إجمالي العمولة</th></tr></thead>'
-                                + '<tbody><tr>'
-                                + '<td class="font-weight-bold">' + d.students_count + ' طالب</td>'
-                                + '<td class="font-weight-bold">' + d.stu_commission_per + ' ر.س</td>'
-                                + '<td class="font-weight-bold text-success">' + d.students_commission_total + ' ر.س</td>'
-                                + '</tr></tbody></table>';
+                                + '<thead class="thead-light"><tr><th>العمولة</th><th>القيمة</th><th>عدد الطلاب</th><th>إجمالي العمولة</th></tr></thead>'
+                                + '<tbody>' + commissionRows + '</tbody>'
+                                + '<tfoot><tr class="font-weight-bold" style="background:#f3eefc;">'
+                                + '<td colspan="2">الإجمالي</td>'
+                                + '<td>' + d.commissions_students_count + ' طالب</td>'
+                                + '<td class="text-success">' + d.students_commission_total + ' ر.س</td>'
+                                + '</tr></tfoot></table>';
                         }
 
                         body.innerHTML =

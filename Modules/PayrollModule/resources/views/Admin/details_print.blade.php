@@ -318,19 +318,38 @@
 
     {{-- Students — training only --}}
     @if ($isTraining)
-        <div class="sec-title-purple">عمولة الطلاب</div>
+        <div class="sec-title-purple">عمولة الطلاب ({{ count($commissions) }})</div>
         <table class="dtable">
             <thead>
                 <tr>
+                    <th>العمولة</th>
+                    <th>القيمة</th>
                     <th>عدد الطلاب</th>
-                    <th>العمولة لكل طالب</th>
                     <th>إجمالي العمولة</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td><strong>{{ $students->count() }} طالب</strong></td>
-                    <td><strong>{{ number_format((float) $emp->stu_commission, 2) }} ر.س</strong></td>
+                @forelse ($commissions as $c)
+                    <tr>
+                        <td>{{ $c['name'] }}</td>
+                        <td>
+                            @if ($c['type'] === 'percentage')
+                                {{ rtrim(rtrim(number_format($c['value'], 2), '0'), '.') }}%
+                            @else
+                                {{ number_format($c['value'], 2) }} ر.س
+                            @endif
+                        </td>
+                        <td>{{ $c['students_count'] }} طالب</td>
+                        <td class="amt-pos">{{ number_format($c['total'], 2) }} ر.س</td>
+                    </tr>
+                @empty
+                    <tr class="empty-row">
+                        <td colspan="4">لا توجد عمولات</td>
+                    </tr>
+                @endforelse
+                <tr style="background:#f3eefc;">
+                    <td colspan="2"><strong>الإجمالي</strong></td>
+                    <td><strong>{{ array_sum(array_column($commissions, 'students_count')) }} طالب</strong></td>
                     <td class="amt-pos">{{ number_format($payroll->students_commission, 2) }} ر.س</td>
                 </tr>
             </tbody>

@@ -38,6 +38,10 @@ class PayrollService {
         return $this->payrollRepository->find($id);
     }
 
+    public function studentsCommissionBreakdown(int $employeeId, string $month): array {
+        return $this->payrollRepository->studentsCommissionBreakdown($employeeId, $month);
+    }
+
     /**
      * For each employee ensure a record exists for the given month.
      * Does nothing if the record already exists.

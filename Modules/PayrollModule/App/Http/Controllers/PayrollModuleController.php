@@ -96,6 +96,7 @@ class PayrollModuleController extends Controller
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
         $students   = Student::where('employee_id', $empId)->paidInMonth($month)->get();
+        $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         return response()->json([
             'employee_name'             => $emp->name ?? '—',
@@ -136,6 +137,15 @@ class PayrollModuleController extends Controller
                 'course' => $s->course_name,
             ]),
             'students_count' => $students->count(),
+            'commissions' => array_map(fn($c) => [
+                'name'           => $c['name'],
+                'rate'           => $c['type'] === 'percentage'
+                    ? rtrim(rtrim(number_format($c['value'], 2), '0'), '.') . '%'
+                    : number_format($c['value'], 2) . ' ر.س',
+                'students_count' => $c['students_count'],
+                'total'          => number_format($c['total'], 2),
+            ], $commissions),
+            'commissions_students_count' => array_sum(array_column($commissions, 'students_count')),
         ]);
     }
 
@@ -154,6 +164,7 @@ class PayrollModuleController extends Controller
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
         $students   = Student::where('employee_id', $empId)->paidInMonth($month)->get();
+        $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         $fileName = 'details-' . ($emp->name ?? $id) . '-' . $month . '.pdf';
 
@@ -163,7 +174,8 @@ class PayrollModuleController extends Controller
             'bonuses',
             'deductions',
             'leaves',
-            'students'
+            'students',
+            'commissions'
         ));
 
         return $pdf->download($fileName);

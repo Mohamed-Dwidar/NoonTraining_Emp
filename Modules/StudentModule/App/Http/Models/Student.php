@@ -26,6 +26,13 @@ class Student extends Model {
         ]);
     }
 
+    public function scopeRegisteredInMonth($query, string $month) {
+        return $query->whereBetween('created_at', [
+            $month . '-01',
+            date('Y-m-t', strtotime($month . '-01')),
+        ]);
+    }
+
     public function scopeFilter($query, $request = []) {
         if (isset($request['branch_id']) && $request['branch_id']) {
             $query->whereHas('employee', fn($q) => $q->where('branch_id', $request['branch_id']));

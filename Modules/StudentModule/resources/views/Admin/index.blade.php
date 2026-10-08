@@ -106,6 +106,7 @@
                                     <th>المتبقي</th>
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
+                                    <th>تاريخ تسجيل الطالب</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -146,6 +147,7 @@
                                         </td>
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
+                                        <td>{{ $student->created_at->format('Y-m-d') }}</td>
                                         <td>
                                             <a href="{{ route('admin.students.edit', $student->id) }}"
                                                 class="btn btn-sm btn-warning">

@@ -62,6 +62,7 @@
                                     <th>المتبقي</th>
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
+                                    <th>تاريخ تسجيل الطالب</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -93,6 +94,7 @@
                                         </td>
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
+                                        <td>{{ $student->created_at->format('Y-m-d') }}</td>
                                         <td>
                                             <form method="POST"
                                                 action="{{ route('employee.students.destroy', $student->id) }}"
