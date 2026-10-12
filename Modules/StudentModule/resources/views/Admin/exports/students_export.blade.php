@@ -5,10 +5,12 @@
             <th style="font-weight: bold">رقم الجوال</th>
             <th style="font-weight: bold">رقم الهوية الوطنية</th>
             <th style="font-weight: bold">اسم الدورة</th>
+            <th style="font-weight: bold">العمولة</th>
             <th style="font-weight: bold">المبلغ كامل</th>
             <th style="font-weight: bold">المدفوع</th>
             <th style="font-weight: bold">طريقة الدفع</th>
             <th style="font-weight: bold">تاريخ الدفع</th>
+            <th style="font-weight: bold">تاريخ التسجيل</th>
             <th style="font-weight: bold">الطالب سابقاً تبع مين</th>
         </tr>
     </thead>
@@ -38,6 +40,11 @@
                 </td>
                 <td class="strong">
                     <label>
+                        {{ isset($commissions[$student->id]) ? number_format($commissions[$student->id]['amount'], 2) : '' }}
+                    </label>
+                </td>
+                <td class="strong">
+                    <label>
                         {{ number_format($student->total_amount) }}
                     </label>
                 </td>
@@ -54,6 +61,11 @@
                 <td class="strong">
                     <label>
                         {{ $student->payment_date }}
+                    </label>
+                </td>
+                <td class="strong">
+                    <label>
+                        {{ $student->created_at?->format('Y-m-d') }}
                     </label>
                 </td>
                 <td class="strong">

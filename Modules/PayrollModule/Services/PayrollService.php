@@ -42,6 +42,10 @@ class PayrollService {
         return $this->payrollRepository->studentsCommissionBreakdown($employeeId, $month);
     }
 
+    public function studentsCommissionAmounts(iterable $students): array {
+        return $this->payrollRepository->studentsCommissionAmounts($students);
+    }
+
     /**
      * For each employee ensure a record exists for the given month.
      * Does nothing if the record already exists.

@@ -95,7 +95,7 @@ class PayrollModuleController extends Controller
         $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->paidInMonth($month)->get();
+        $students   = Student::where('employee_id', $empId)->registeredInMonth($month)->get();
         $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         return response()->json([
@@ -163,7 +163,7 @@ class PayrollModuleController extends Controller
         $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->paidInMonth($month)->get();
+        $students   = Student::where('employee_id', $empId)->registeredInMonth($month)->get();
         $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         $fileName = 'details-' . ($emp->name ?? $id) . '-' . $month . '.pdf';

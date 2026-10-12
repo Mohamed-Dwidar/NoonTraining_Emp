@@ -53,6 +53,12 @@ class Student extends Model {
         if (!empty($request['month'])) {
             $query->where('month', $request['month']);
         }
+        if (!empty($request['date_from'])) {
+            $query->whereDate('created_at', '>=', $request['date_from']);
+        }
+        if (!empty($request['date_to'])) {
+            $query->whereDate('created_at', '<=', $request['date_to']);
+        }
 
         return $query;
     }

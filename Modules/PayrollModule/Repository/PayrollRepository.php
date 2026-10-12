@@ -90,42 +90,69 @@ class PayrollRepository extends BaseRepository {
                             ->registeredInMonth($month)
                             ->get();
 
+        $amounts = $this->studentsCommissionAmounts($students);
+
+        $breakdown = [];
+        foreach ($students as $student) {
+            $row = $amounts[$student->id] ?? null;
+
+            if (!$row) {
+                continue;
+            }
+
+            $breakdown[$student->commission_id] ??= [
+                'name'           => $row['name'],
+                'type'           => $row['type'],
+                'value'          => $row['value'],
+                'students_count' => 0,
+                'total'          => 0.0,
+            ];
+            $breakdown[$student->commission_id]['students_count']++;
+            $breakdown[$student->commission_id]['total'] += $row['amount'];
+        }
+
+        return array_values($breakdown);
+    }
+
+    /**
+     * Commission earned per student, keyed by student id.
+     * Students may belong to different employees. A student with no matching rate is left out.
+     * Each row: name, type, value, amount.
+     */
+    public function studentsCommissionAmounts(iterable $students): array {
+        $students      = collect($students);
         $commissionIds = $students->pluck('commission_id')->filter()->unique();
 
         // Employee-specific overrides take priority; fall back to the commission's default rate.
-        $employeeRates = EmployeeCommission::where('employee_id', $employeeId)
+        $employeeRates = EmployeeCommission::whereIn('employee_id', $students->pluck('employee_id')->filter()->unique())
                                             ->whereIn('commission_id', $commissionIds)
                                             ->get()
-                                            ->keyBy('commission_id');
+                                            ->keyBy(fn($r) => $r->employee_id . '-' . $r->commission_id);
 
         $defaultRates = Commission::whereIn('id', $commissionIds)
                                    ->get()
                                    ->keyBy('id');
 
-        $breakdown = [];
+        $amounts = [];
         foreach ($students as $student) {
-            $rate = $employeeRates->get($student->commission_id) ?? $defaultRates->get($student->commission_id);
+            $rate = $employeeRates->get($student->employee_id . '-' . $student->commission_id)
+                 ?? $defaultRates->get($student->commission_id);
 
             if (!$rate) {
                 continue;
             }
 
-            $amount = $rate->type === 'percentage'
-                ? (float) $student->paid_amount * ((float) $rate->value / 100)
-                : (float) $rate->value;
-
-            $breakdown[$student->commission_id] ??= [
-                'name'           => $defaultRates->get($student->commission_id)?->name ?? '—',
-                'type'           => $rate->type,
-                'value'          => (float) $rate->value,
-                'students_count' => 0,
-                'total'          => 0.0,
+            $amounts[$student->id] = [
+                'name'   => $defaultRates->get($student->commission_id)?->name ?? '—',
+                'type'   => $rate->type,
+                'value'  => (float) $rate->value,
+                'amount' => $rate->type === 'percentage'
+                    ? (float) $student->paid_amount * ((float) $rate->value / 100)
+                    : (float) $rate->value,
             ];
-            $breakdown[$student->commission_id]['students_count']++;
-            $breakdown[$student->commission_id]['total'] += $amount;
         }
 
-        return array_values($breakdown);
+        return $amounts;
     }
 
     public function filter(array $request = []) {

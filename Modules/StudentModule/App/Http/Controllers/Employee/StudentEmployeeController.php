@@ -9,6 +9,7 @@ use Modules\StudentModule\Services\StudentService;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
+use Modules\PayrollModule\Services\PayrollService;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\StudentModule\App\Imports\StudentImport;
 use Modules\StudentModule\Exports\StudentsExport;
@@ -19,17 +20,20 @@ class StudentEmployeeController extends Controller {
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
     protected EmployeeService $employeeService;
+    protected PayrollService $payrollService;
 
     public function __construct(
         StudentService $studentService,
         BranchService $branchService,
         DepartmentService $departmentService,
-        EmployeeService $employeeService
+        EmployeeService $employeeService,
+        PayrollService $payrollService
     ) {
         $this->studentService    = $studentService;
         $this->branchService     = $branchService;
         $this->departmentService = $departmentService;
         $this->employeeService   = $employeeService;
+        $this->payrollService    = $payrollService;
     }
 
     public function index(Request $request) {
@@ -65,7 +69,9 @@ class StudentEmployeeController extends Controller {
             }
 
             $fileName = 'طلاب - ' . $label . now()->format('Y-m-d') . '.xlsx';
-            return Excel::download(new StudentsExport($students_query->get()), $fileName);
+            $students    = $students_query->get();
+            $commissions = $this->payrollService->studentsCommissionAmounts($students);
+            return Excel::download(new StudentsExport($students, $commissions), $fileName);
         }
 
         $students = $students_query->paginate(50);

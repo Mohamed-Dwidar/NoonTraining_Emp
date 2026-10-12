@@ -10,16 +10,19 @@ use Maatwebsite\Excel\Events\AfterSheet;
 class StudentsExport implements FromView, WithEvents
 {
     private $students;
+    private $commissions;
 
-    function __construct($students)
+    function __construct($students, array $commissions = [])
     {
-        $this->students = $students;
+        $this->students    = $students;
+        $this->commissions = $commissions;
     }
 
     public function view(): View
     {
-        $students = $this->students;
-        return view('studentmodule::Admin.exports.students_export',  compact('students'));
+        $students    = $this->students;
+        $commissions = $this->commissions;
+        return view('studentmodule::Admin.exports.students_export',  compact('students', 'commissions'));
     }
 
     public function registerEvents(): array

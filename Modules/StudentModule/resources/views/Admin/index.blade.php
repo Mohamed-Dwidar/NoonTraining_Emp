@@ -20,7 +20,7 @@
             <div class="card-body py-2 px-2">
                 <form method="GET" action="{{ route('admin.students.index') }}" id="filterForm">
                     <div class="row align-items-end">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="d-block mb-1"><strong>الفرع</strong></label>
                             <select name="branch_id" id="branchSelect" class="form-control">
                                 <option value="">-- كل الفروع --</option>
@@ -31,7 +31,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="d-block mb-1"><strong>القسم</strong></label>
                             <select name="department_id" id="deptSelect" class="form-control">
                                 <option value="">-- كل الأقسام --</option>
@@ -42,6 +42,14 @@
                             <select name="employee_id" id="empSelect" class="form-control">
                                 <option value="">-- كل الموظفين --</option>
                             </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="d-block mb-1"><strong>تاريخ التسجيل من</strong></label>
+                            <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="d-block mb-1"><strong>تاريخ التسجيل إلى</strong></label>
+                            <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                         </div>
                         <div class="col-md-1">
                             <label class="d-block mb-1">&nbsp;</label>
