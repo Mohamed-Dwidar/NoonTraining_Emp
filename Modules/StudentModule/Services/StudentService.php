@@ -37,7 +37,7 @@ class StudentService {
     public function create(array $data) {
         return $this->studentRepository->create([
             'employee_id' => $data['employee_id'],
-            'month'       => $data['month'],
+            'month'       => $data['month'] ?? now()->format('Y-m'),
             'name'        => $data['name'],
             'mobile'      => $data['mobile'],
             'national_id' => $data['national_id'] ?? null,

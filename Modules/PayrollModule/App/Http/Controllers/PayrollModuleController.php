@@ -31,9 +31,27 @@ class PayrollModuleController extends Controller
      */
     public function myPayrolls()
     {
-        $payrolls = $this->payrollService->filter(['employee_id' => $this->currentEmployeeId()])
+        $employeeId = $this->currentEmployeeId();
+        $query      = fn() => $this->payrollService->filter(['employee_id' => $employeeId])
             ->orderByDesc('month')
             ->paginate(15);
+
+        // Ensure a payroll exists for every month from the employee's first student up to now.
+        $months       = [];
+        $firstMonth   = Student::where('employee_id', $employeeId)->min('month');
+        $currentMonth = now()->format('Y-m');
+        for ($m = $firstMonth; $m && $m <= $currentMonth; $m = date('Y-m', strtotime($m . '-01 +1 month'))) {
+            $months[] = $m;
+        }
+
+        // Also recalculate the months on this page so the employee always sees up-to-date figures.
+        $months = array_unique(array_merge($months, $query()->pluck('month')->all()));
+
+        foreach ($months as $month) {
+            $this->payrollService->recalculateForEmployee($employeeId, $month);
+        }
+
+        $payrolls = $query();
 
         return view('payrollmodule::Employee.index', compact('payrolls'));
     }
@@ -95,7 +113,7 @@ class PayrollModuleController extends Controller
         $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->registeredInMonth($month)->get();
+        $students   = Student::where('employee_id', $empId)->where('month', $month)->get();
         $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         return response()->json([
@@ -163,7 +181,7 @@ class PayrollModuleController extends Controller
         $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
         $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
         $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->registeredInMonth($month)->get();
+        $students   = Student::where('employee_id', $empId)->where('month', $month)->get();
         $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
 
         $fileName = 'details-' . ($emp->name ?? $id) . '-' . $month . '.pdf';

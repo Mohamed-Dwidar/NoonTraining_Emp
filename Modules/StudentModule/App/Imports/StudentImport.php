@@ -11,11 +11,13 @@ use Modules\StudentModule\Services\StudentService;
 class StudentImport implements ToCollection, WithEvents {
     protected $studentService;
     protected int $employeeId;
+    protected string $month;
     protected ?int $commissionId = null;
 
-    public function __construct(StudentService $studentService, int $employeeId) {
+    public function __construct(StudentService $studentService, int $employeeId, string $month) {
         $this->studentService = $studentService;
         $this->employeeId     = $employeeId;
+        $this->month          = $month;
     }
 
     public function registerEvents(): array {
@@ -58,7 +60,7 @@ class StudentImport implements ToCollection, WithEvents {
 
             $data = [
                 'employee_id'         => $this->employeeId,
-                'month'               => date('Y-m'),
+                'month'               => $this->month,
                 'name'                => $row[0],
                 'mobile'              => $row[1],
                 'national_id'         => $row[2],

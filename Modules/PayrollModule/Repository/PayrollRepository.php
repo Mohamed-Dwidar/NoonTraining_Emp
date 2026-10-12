@@ -85,9 +85,9 @@ class PayrollRepository extends BaseRepository {
         //                     ->paidInMonth($month)
         //                     ->get();
 
-        // Commission applies only to students who registered in the active payroll month.
+        // Commission applies only to students imported for the active payroll month.
         $students = Student::where('employee_id', $employeeId)
-                            ->registeredInMonth($month)
+                            ->where('month', $month)
                             ->get();
 
         $amounts = $this->studentsCommissionAmounts($students);

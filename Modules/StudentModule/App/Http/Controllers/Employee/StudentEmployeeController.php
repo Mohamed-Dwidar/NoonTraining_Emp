@@ -93,11 +93,12 @@ class StudentEmployeeController extends Controller {
         $employee_id = auth()->guard('employee')->user()->userable_id;
         $request->validate([
             //'employee_id' => 'required|exists:employees,id',
+            'month'       => 'required|date_format:Y-m',
             'file'        => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
         Excel::import(
-            new StudentImport($this->studentService, $employee_id),
+            new StudentImport($this->studentService, $employee_id, $request->input('month')),
             $request->file('file')
         );
 

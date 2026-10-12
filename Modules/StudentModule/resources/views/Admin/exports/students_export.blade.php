@@ -10,7 +10,7 @@
             <th style="font-weight: bold">المدفوع</th>
             <th style="font-weight: bold">طريقة الدفع</th>
             <th style="font-weight: bold">تاريخ الدفع</th>
-            <th style="font-weight: bold">تاريخ التسجيل</th>
+            <th style="font-weight: bold">تاريخ الرفع</th>
             <th style="font-weight: bold">الطالب سابقاً تبع مين</th>
         </tr>
     </thead>
@@ -65,7 +65,7 @@
                 </td>
                 <td class="strong">
                     <label>
-                        {{ $student->created_at?->format('Y-m-d') }}
+                        {{ $student->month }}
                     </label>
                 </td>
                 <td class="strong">

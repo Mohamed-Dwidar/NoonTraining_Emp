@@ -44,11 +44,11 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="d-block mb-1"><strong>تاريخ التسجيل من</strong></label>
+                            <label class="d-block mb-1"><strong>تاريخ المحاسبة من</strong></label>
                             <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
                         </div>
                         <div class="col-md-2">
-                            <label class="d-block mb-1"><strong>تاريخ التسجيل إلى</strong></label>
+                            <label class="d-block mb-1"><strong>تاريخ المحاسبة إلى</strong></label>
                             <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                         </div>
                         <div class="col-md-1">
@@ -114,7 +114,7 @@
                                     <th>المتبقي</th>
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
-                                    <th>تاريخ تسجيل الطالب</th>
+                                    <th>شهر المحاسبة</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -155,7 +155,7 @@
                                         </td>
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
-                                        <td>{{ $student->created_at->format('Y-m-d') }}</td>
+                                        <td>{{ $student->month }}</td>
                                         <td>
                                             <a href="{{ route('admin.students.edit', $student->id) }}"
                                                 class="btn btn-sm btn-warning">
@@ -224,6 +224,10 @@
                                 </select>
                             </div>
                             <hr>
+                            <div class="form-group">
+                                <label for="importMonth">شهر الرفع <span class="text-danger">*</span></label>
+                                @include('studentmodule::partials.month_select', ['name' => 'month', 'id' => 'importMonth', 'required' => true])
+                            </div>
                             <div class="form-group">
                                 <label for="fileInput">اختر ملف Excel لاستيراد الطلاب</label>
                                 <input type="file" name="file" id="fileInput" class="form-control"
