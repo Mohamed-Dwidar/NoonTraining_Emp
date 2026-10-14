@@ -22,7 +22,7 @@
                     <div class="row align-items-end">
                         <div class="col-md-3">
                             <label class="d-block mb-1"><strong>الشهر</strong></label>
-                            <input type="month" name="month" class="form-control" value="{{ $month }}" required>
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month', 'selected' => $month, 'required' => true])
                         </div>
                         <div class="col-md-3">
                             <label class="d-block mb-1"><strong>الفرع</strong></label>

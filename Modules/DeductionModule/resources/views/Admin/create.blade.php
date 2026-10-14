@@ -63,9 +63,7 @@
                         <div class="col-lg-3 col-sm-12 col-6">
                             <label for="month">الشهر <span class="text-danger">*</span></label>
                             <div class="form-group">
-                                <input type="month" id="month" name="month"
-                                    class="form-control @error('month') is-invalid @enderror"
-                                    value="{{ old('month', $month) }}">
+                                @include('layoutmodule::layouts.month_select', ['name' => 'month', 'id' => 'month', 'selected' => old('month', $month), 'class' => $errors->has('month') ? 'is-invalid' : ''])
                                 @error('month')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

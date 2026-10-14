@@ -36,6 +36,7 @@ class PayrollAdminController extends Controller {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $month    = $request->input('month',         session('payroll_month',     now()->format('Y-m')));
+        $month    = min($month, now()->format('Y-m')); // never build payroll for a future month
         $branchId = $request->input('branch_id',     session('payroll_branch_id', null));
         $deptId   = $request->input('department_id', null);
 

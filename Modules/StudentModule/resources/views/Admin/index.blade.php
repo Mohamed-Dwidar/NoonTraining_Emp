@@ -226,7 +226,7 @@
                             <hr>
                             <div class="form-group">
                                 <label for="importMonth">شهر الرفع <span class="text-danger">*</span></label>
-                                @include('studentmodule::partials.month_select', ['name' => 'month', 'id' => 'importMonth', 'required' => true])
+                                @include('layoutmodule::layouts.month_select', ['name' => 'month', 'id' => 'importMonth', 'required' => true])
                             </div>
                             <div class="form-group">
                                 <label for="fileInput">اختر ملف Excel لاستيراد الطلاب</label>

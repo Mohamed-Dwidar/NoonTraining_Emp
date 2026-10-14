@@ -22,8 +22,7 @@
                     <div class="col-lg-3 col-sm-12 col-6">
                         <label for="monthPicker">الشهر</label>
                         <div class="form-group">
-                            <input type="month" id="monthPicker" class="form-control"
-                                   value="{{ old('month', $month) }}">
+                            @include('layoutmodule::layouts.month_select', ['id' => 'monthPicker', 'selected' => old('month', $month)])
                             <small class="text-muted">يحدد نطاق التواريخ المسموح به أدناه</small>
                         </div>
                     </div>

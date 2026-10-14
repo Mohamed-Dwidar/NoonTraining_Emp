@@ -27,7 +27,7 @@
                                 placeholder="بحث عن طالب..." value="{{ request()->query('search') }}" style="width: 220px">
                         </div>
                         <div class="col-lg-2">
-                            @include('studentmodule::partials.month_select', ['name' => 'month', 'selected' => request()->query('month', now()->format('Y-m')), 'style' => 'width: 200px'])
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month', 'selected' => request()->query('month', now()->format('Y-m')), 'style' => 'width: 200px'])
                         </div>
                         <div class="col-lg-2">
                             <button class="btn btn-outline-secondary" type="submit">بحث</button>
@@ -160,7 +160,7 @@
                             <hr> --}}
                             <div class="form-group">
                                 <label for="importMonth">شهر الرفع <span class="text-danger">*</span></label>
-                                @include('studentmodule::partials.month_select', ['name' => 'month', 'id' => 'importMonth', 'required' => true])
+                                @include('layoutmodule::layouts.month_select', ['name' => 'month', 'id' => 'importMonth', 'required' => true])
                             </div>
                             <div class="form-group">
                                 <label for="fileInput">اختر ملف Excel لاستيراد الطلاب</label>

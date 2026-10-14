@@ -29,7 +29,7 @@
                         </div>
                         <div class="col-md-2" id="monthField" style="display:none;">
                             <label class="d-block mb-1"><strong>الشهر</strong></label>
-                            <input type="month" name="month" class="form-control" value="{{ $filters['month'] ?? now()->format('Y-m') }}">
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month', 'selected' => $filters['month'] ?? now()->format('Y-m')])
                         </div>
                         <div class="col-md-2 custom-date-field" style="display:none;">
                             <label class="d-block mb-1"><strong>من تاريخ</strong></label>
