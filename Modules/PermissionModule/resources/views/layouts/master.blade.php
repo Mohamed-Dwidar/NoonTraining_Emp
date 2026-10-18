@@ -7,13 +7,11 @@
         <title>Module PermissionModule</title>
 
        {{-- Laravel Vite - CSS File --}}
-       {{-- {{ module_vite('build-permissionmodule', 'Resources/assets/sass/app.scss') }} --}}
 
     </head>
     <body>
         @yield('content')
 
         {{-- Laravel Vite - JS File --}}
-        {{-- {{ module_vite('build-permissionmodule', 'Resources/assets/js/app.js') }} --}}
     </body>
 </html>

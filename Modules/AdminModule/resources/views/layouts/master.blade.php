@@ -18,12 +18,10 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
     {{-- Vite CSS --}}
-    {{-- {{ module_vite('build-adminmodule', 'resources/assets/sass/app.scss') }} --}}
 </head>
 
 <body>
     @yield('content')
 
     {{-- Vite JS --}}
-    {{-- {{ module_vite('build-adminmodule', 'resources/assets/js/app.js') }} --}}
 </body>

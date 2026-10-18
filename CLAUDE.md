@@ -1,4 +1,4 @@
-# Project: Noon Training HR (Hr_NoonTraining) (?)
+# Project: Noon Training HR
 
 @docs/progress.md
 
@@ -21,15 +21,15 @@ Then suggest a commit message.
 ## Stack
 - Framework: Laravel 12 / PHP ^8.2, modular via `nwidart/laravel-modules` ^12
 - Database: MySQL (`DB_CONNECTION`; `.env.example` still has the sqlite default). Raw SQL uses MySQL `REGEXP`/`CONCAT`.
-- Frontend: Blade + Bootstrap/jQuery admin theme (`public/admin-assets/`, select2 from CDN) loaded by LayoutModule; Vite 7 + Tailwind 4 configured but unused — root `resources/` is the stock skeleton (?)
+- Frontend: Blade + Bootstrap/jQuery admin theme (`public/admin-assets/`, select2 from CDN) loaded by LayoutModule. No build step — Vite/Tailwind were removed (2026-10-18); add JS/CSS as static files under `public/admin-assets/`.
 - Auth: custom session guards `admin` / `employee` (+ default `web`), all on one `users` provider (`UserModule` `User` model, polymorphic `userable` → `Admin` | `Employee`)
-- Permissions: custom roles/permissions tables in PermissionModule + `User::hasPermission()`; `spatie/laravel-permission` is installed but not used (?)
+- Permissions: custom roles/permissions tables in PermissionModule + `User::hasPermission()`; `spatie/laravel-permission` is installed but not used — kept on purpose (owner's call)
 - Key packages: `prettus/l5-repository` (repositories), `maatwebsite/excel` (student import/export), `niklasravnsborg/laravel-pdf` (payslip / work-regulations PDFs), `laravel/sanctum`
 - Env vars of note: `APP_*`, `DB_*`, `MAIL_*`, `QUEUE_CONNECTION`, `FILESYSTEM_DISK`, `AWS_*`
 
 ## Commands
-- Dev server: `php artisan serve` (or `composer dev` = serve + queue + pail + vite)
-- Assets: `npm run dev` / `npm run build`
+- Dev server: `php artisan serve` (or `composer dev` = serve + queue + pail)
+- Assets: none to build (static files in `public/admin-assets/`)
 - Migrate: `php artisan migrate` (module migrations auto-loaded); seed a module: `php artisan module:seed <Module>`
 - Tests: `php artisan test` (only Laravel example tests exist)
 - Clear caches: `php artisan optimize:clear`
@@ -42,9 +42,11 @@ Then suggest a commit message.
   - `Services/<X>Service.php` — business logic; `Repository/<X>Repository.php` — prettus `BaseRepository`
   - `routes/web.php`, `database/migrations`, `database/seeders`, `resources/views/{Admin,Employee}/`
 - `Modules/LayoutModule/resources/views/` — shared layout: `layouts/home_layout` (RTL master), `admin/nav`, `employee/nav`, `layouts/flash`, `layouts/month_select`, `layouts/custom_pagination`
-- `app/Http/Middleware/CheckPermission.php` — `permission:<name>` middleware (?) see Known issues
-- `app/Helpers/` — `UploaderHelper`, `ApiResponseHelper`, `FcmHelper` (likely carried over from another project (?))
+- `app/Http/Middleware/CheckPermission.php` — `permission:<name>` middleware; alias registered in `bootstrap/app.php`. Must run after `auth:<guard>` (that sets the default guard `Auth::user()` reads). Checks direct user permissions only, not role-inherited ones.
+- `bootstrap/app.php` — middleware aliases live here. `app/Http/Kernel.php` is a Laravel 10 leftover that Laravel 12 never loads; don't register anything there.
+- `app/Helpers/` — `UploaderHelper`, `ApiResponseHelper`
 - `routes/web.php` — empty; all routes live in modules
+- `resources/views/` — intentionally empty (`.gitkeep`); keep the folder — `view:cache` / `optimize` fail without it
 
 ## Conventions
 - Layering: Controller → Service → Repository → Model. Cross-module calls go through the other module's Repository/Service (e.g. Bonuse/Deduction/Leave services call `PayrollRepository::recalculateForEmployee`).

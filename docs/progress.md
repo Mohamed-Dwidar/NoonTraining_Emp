@@ -8,13 +8,13 @@
 
 ## Current status
 - **Working on:** Month handling across payroll / students / reports. Last commits (2026-10-12 → 10-14): "exported file for students", "payroll by month", "months fix" — student commission now counts students by `students.month` (not `payment_date`), shared `layouts/month_select` dropdown replaced `<input type="month">`, `employee_commissions.student_id` renamed to `employee_id`.
-- **Branch / working tree:** `main`, clean except the new memory files (CLAUDE.md, docs/).
-- **Next up:** [to confirm with owner] (?). Owner still has to confirm the "(?)" items and "(proposed)" conventions in CLAUDE.md / this file, and supply project description + planned modules (none recorded yet).
+- **Branch / working tree:** `main`; uncommitted: permission-alias fix, FcmHelper + Vite/Tailwind removal (see session log 2026-10-18).
+- **Next up:** [to confirm with owner] (?). Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
-  - `permission` middleware alias is registered only in `app/Http/Kernel.php` (Laravel 10 style, with a lowercase `\app\...` namespace); Laravel 12 uses `bootstrap/app.php`, so the alias is probably not active (?). Only used by an empty route group in ReportModule.
+  - `app/Http/Kernel.php` is dead (Laravel 12 binds the framework kernel). Its `permission` entry was never active; now registered in `bootstrap/app.php` (2026-10-18).
   - ReportModule `user/reports` group uses `auth:user` — no such guard (empty group, harmless for now).
-  - Dead/leftover code (?): `ReportUserController` + `CourseExport`/`CourseRegExport`/`LogExport` (course-system leftovers, no routes); `EmployeeComission` model (misspelt duplicate of `EmployeeCommission`); `employees.stu_commission` still validated/edited though commission now comes from CommissionModule; `app/Helpers/FcmHelper.php`.
+  - Dead/leftover code (?): `ReportUserController` + `CourseExport`/`CourseRegExport`/`LogExport` (course-system leftovers, no routes); `EmployeeComission` model (misspelt duplicate of `EmployeeCommission`); `employees.stu_commission` still validated/edited though commission now comes from CommissionModule.
   - No real tests (only Laravel example tests).
 
 ---
@@ -36,11 +36,15 @@
 ### Permission
 - **Files:** `Modules/PermissionModule/` (models in both `App/Http/Models` and `Entities`), seeders for roles/permissions, `app/Http/Middleware/CheckPermission.php`
 - **How it works:** Custom `roles`, `permissions`, `model_has_*`, `role_has_permissions` tables.
-- **Pending:** Not enforced on any live route; middleware alias likely unregistered (see Known issues). No UI.
+- **Last updated:** 2026-10-18
+- **Decisions:**
+  - `permission` alias registered in `bootstrap/app.php` — because Laravel 12 never loads `app/Http/Kernel.php`.
+  - Keep `spatie/laravel-permission` installed even though the custom tables are used — owner's call.
+- **Pending:** Not enforced on any live route yet (only the empty ReportModule `user/reports` group). `hasPermission()` ignores role-inherited permissions (`getAllPermissions()` exists if needed). No UI.
 
 ### Layout
 - **Files:** `Modules/LayoutModule/resources/views/` — `layouts/home_layout` (RTL), `layout_main`, `header`, `footer`, `flash`, `month_select`, `custom_pagination`; `admin/nav`, `admin/modals`, `employee/nav`
-- **How it works:** Shared Blade layout and navigation for both portals; theme assets in `public/admin-assets/`.
+- **How it works:** Shared Blade layout and navigation for both portals; theme assets are static files in `public/admin-assets/` (no Vite/npm build).
 
 ### Branch
 - **Files:** `Modules/BranchModule/` — `BranchAdminController`, `Branch` model, views incl. `work_regulations*`
@@ -89,7 +93,8 @@
 - **How it works:** Commission types assigned to students; employee-specific rates override defaults.
 
 ### Student
-- **Last updated:** 2026-10-12
+- **Last updated:** 2026-10-18
+- **Import (validate-then-save):** `StudentImport::collection()` only collects rows (sheet title + Excel row number); controllers call `errors()` → if any, `back()->withErrors()` listing «sheet» + row + messages (max 50) and nothing is saved; else `save()` inserts all rows in one `DB::transaction`. Used by both Admin and Employee `importStudents`. Fully empty rows are skipped; required: name, mobile, national_id, course_name, payment_method, payment_date (valid date); amounts integer ≥ 0 (empty → 0).
 - **Files:** `Modules/StudentModule/` — `StudentAdminController`, `Employee/StudentEmployeeController`, `StudentService`, `App/Imports/StudentImport.php`, `Exports/Students*Export.php`
 - **How it works:** Student registrations (course, amounts, payment, `national_id`, `commission_id`, `month`) attributed to the registering employee. Admin: CRUD, Excel import/template, export. Employee portal: list/edit/delete/import own students (no create route despite `Employee/create` view (?)).
 - **Pending:** `payment_date` is a free-text string (Report guards it with REGEXP).
@@ -117,8 +122,20 @@
 
 ## Session log
 
+### 2026-10-18 — Student import: validate whole file before saving
+- **Changed:** `StudentModule/App/Imports/StudentImport.php` (collect → `errors()` → `save()`), `Employee/StudentEmployeeController::importStudents`, `Admin/StudentAdminController::importStudents`
+- **Why:** Errors should be reported per sheet/row with nothing saved. Before, partially-filled rows were silently skipped, and an empty payment method/date (NOT NULL columns) threw a SQL error mid-file, leaving earlier rows saved.
+- **Affects:** PayrollModule (only valid rows reach commission calc), ReportModule
+- **Commit:** (not committed yet)
+
+### 2026-10-18 — Confirm memory items, fix permission alias, remove Vite/Tailwind
+- **Changed:** `bootstrap/app.php` — registered `permission` → `CheckPermission`; deleted unused `app/Helpers/FcmHelper.php`; removed Vite/Tailwind: root `vite.config.js`, `resources/css`, `resources/js`, `welcome.blade.php`, every module's `vite.config.js` + `package.json` + empty `resources/assets/*` stubs, commented `module_vite(...)` lines in module stub layouts; root `package.json` now only `concurrently`; `composer dev`/`setup` scripts no longer run vite / `npm run build`; kept empty `resources/views/.gitkeep`. `CLAUDE.md` updated.
+- **Why:** Owner reviewed the "(?)" items; alias was never active under Laravel 12; Vite/Tailwind were unused (UI uses static `public/admin-assets/`)
+- **Affects:** PermissionModule, ReportModule (`permission:show_reports` group), Layout/all module stub layouts, dev tooling. Run `npm install` again to prune `node_modules` (not tracked) if present.
+- **Commit:** (not committed yet)
+
 ### 2026-10-17 — Initial project memory setup
 - **Changed:** `CLAUDE.md`, `docs/progress.md` — filled from codebase exploration (no code changes)
 - **Why:** Give each session reliable project context
 - **Affects:** —
-- **Commit:** (not committed yet)
+- **Commit:** ca65c0f "CLAUDE.md"

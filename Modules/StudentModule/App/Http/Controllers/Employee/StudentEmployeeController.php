@@ -97,10 +97,15 @@ class StudentEmployeeController extends Controller {
             'file'        => 'required|file|mimes:xlsx,xls,csv',
         ]);
 
-        Excel::import(
-            new StudentImport($this->studentService, $employee_id, $request->input('month')),
-            $request->file('file')
-        );
+        $import = new StudentImport($this->studentService, $employee_id, $request->input('month'));
+        Excel::import($import, $request->file('file'));
+
+        // Validate the whole file first; nothing is saved if any row has an error
+        if ($errors = $import->errors()) {
+            return back()->withErrors($errors);
+        }
+
+        $import->save();
 
         return back()->with('success', 'تم الاستيراد بنجاح!');
     }
