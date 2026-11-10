@@ -80,6 +80,7 @@
                                         <th>المكافات</th>
                                         <th>عمولة الطلاب</th>
                                         <th>المرتب النهائي</th>
+                                        <th class="transfer-col">حالة التحويل</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -104,6 +105,27 @@
                                             <td>{{ number_format($payroll->bonuses, 2) }}</td>
                                             <td>{{ number_format($payroll->students_commission, 2) }}</td>
                                             <td>{{ number_format($payroll->total_salary, 2) }}</td>
+                                            <td class="transfer-cell {{ $payroll->isTransferred() ? 'transfer-sent' : '' }}">
+                                                <span class="badge badge-{{ $payroll->isTransferred() ? 'success' : 'secondary' }}">
+                                                    {{ $payroll->transferStatusLabel() }}
+                                                </span>
+                                                @if ($payroll->isTransferred() && $payroll->transfer_date)
+                                                    <div class="transfer-date">
+                                                        <i class="fa fa-calendar"></i> {{ $payroll->transfer_date->format('Y-m-d') }}
+                                                    </div>
+                                                @endif
+                                                <div>
+                                                    <a href="#" class="transfer-btn"
+                                                        data-url="{{ route('admin.payrolls.transfer', $payroll->id) }}"
+                                                        data-name="{{ $emp->name ?? '' }}"
+                                                        data-month="{{ $payroll->month }}"
+                                                        data-salary="{{ number_format($payroll->total_salary, 2) }}"
+                                                        data-sent="{{ $payroll->isTransferred() ? 1 : 0 }}"
+                                                        data-date="{{ $payroll->transfer_date?->format('Y-m-d') }}">
+                                                        <i class="fa fa-exchange"></i> تغيير
+                                                    </a>
+                                                </div>
+                                            </td>
                                             <td>
                                                 <button type="button"
                                                     class="btn btn-sm btn-info payslip-btn"
@@ -154,6 +176,43 @@
     </div>
 </div>
 
+{{-- ========== Transfer Modal ========== --}}
+<div class="modal fade" id="transferModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST" id="transferForm" action="#">
+                @csrf
+                <div class="modal-header" style="background:#28a745; color:#fff;">
+                    <h5 class="modal-title"><i class="fa fa-exchange"></i> تحويل الراتب &mdash; <span id="transferEmpName"></span></h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color:#fff;"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background:#f5f7fa; border-radius:4px;">
+                        <div>الشهر: <strong id="transferMonth"></strong></div>
+                        <div>المرتب النهائي: <strong id="transferSalary" style="font-size:1.15rem; color:#28a745;"></strong> ر.س</div>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="transferDate">تاريخ الحوالة <span class="text-danger">*</span></label>
+                        <input type="date" id="transferDate" name="transfer_date" class="form-control" style="max-width:200px;" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    {{-- the clicked button sends transfer_status --}}
+                    <button type="submit" name="transfer_status" value="sent" class="btn btn-success">
+                        <i class="fa fa-check"></i> حفظ - تم التحويل
+                    </button>
+                    <button type="submit" name="transfer_status" value="pending" id="transferCancelBtn"
+                        class="btn btn-outline-danger" formnovalidate
+                        onclick="return confirm('هل تريد إلغاء تحويل هذا الراتب؟')">
+                        <i class="fa fa-undo"></i> إلغاء التحويل
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">إغلاق</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 {{-- ========== Details Modal ========== --}}
 <div class="modal fade" id="detailsModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
@@ -175,6 +234,26 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+    <style>
+        /* Theme pads every cell 0.75rem 2rem — too wide for this many columns; payroll table only. */
+        #payrollTable th, #payrollTable td { padding: .6rem .5rem; vertical-align: middle; }
+        #payrollTable td { white-space: nowrap; }          /* numbers / names stay on one line */
+        #payrollTable thead th { white-space: normal; }    /* long headers may wrap to 2 lines */
+        #payrollTable td:first-child { white-space: normal; min-width: 140px; } /* employee + branch */
+
+        /* حالة التحويل: exactly as wide as its content */
+        #payrollTable th.transfer-col, #payrollTable td.transfer-cell { width: 1%; white-space: nowrap; text-align: center; }
+        #payrollTable td.transfer-sent { background: #d4edda; }
+        #payrollTable .transfer-date { font-size: 12px; color: #155724; margin-top: 3px; }
+        #payrollTable .transfer-btn { font-size: 12px; }
+
+        /* action buttons: one under the other instead of side by side */
+        #payrollTable td:last-child .btn { display: block; width: 100%; margin-bottom: 4px; }
+        #payrollTable td:last-child .btn:last-child { margin-bottom: 0; }
+    </style>
+@endpush
 
 @push('scripts')
     <script>
@@ -216,6 +295,22 @@
                     });
                 });
             }
+
+        // ── Transfer modal ──
+        document.querySelectorAll('.transfer-btn').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var sent = this.dataset.sent === '1';
+                document.getElementById('transferForm').action = this.dataset.url;
+                document.getElementById('transferEmpName').textContent = this.dataset.name;
+                document.getElementById('transferMonth').textContent = this.dataset.month;
+                document.getElementById('transferSalary').textContent = this.dataset.salary;
+                // already sent → show its date; otherwise suggest today
+                document.getElementById('transferDate').value = this.dataset.date || new Date().toISOString().slice(0, 10);
+                document.getElementById('transferCancelBtn').style.display = sent ? '' : 'none';
+                $('#transferModal').modal('show');
+            });
+        });
 
         // ── Payslip modal ──
         document.querySelectorAll('.payslip-btn').forEach(function(btn) {

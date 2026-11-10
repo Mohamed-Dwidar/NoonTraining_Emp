@@ -19,7 +19,7 @@
                     <p class="text-center py-4 mt-2">لا توجد مرتبات مسجلة بعد</p>
                 @else
                     <div class="table-responsive">
-                        <table class="table mb-0">
+                        <table class="table mb-0" id="myPayrollTable">
                             <thead>
                                 <tr class="head">
                                     <th>الشهر</th>
@@ -30,6 +30,7 @@
                                     <th>المكافات</th>
                                     <th>عمولة الطلاب</th>
                                     <th>المرتب النهائي</th>
+                                    <th class="transfer-col">حالة التحويل</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -44,6 +45,16 @@
                                         <td>{{ number_format($payroll->bonuses, 2) }}</td>
                                         <td>{{ number_format($payroll->students_commission, 2) }}</td>
                                         <td>{{ number_format($payroll->total_salary, 2) }}</td>
+                                        <td class="transfer-cell {{ $payroll->isTransferred() ? 'transfer-sent' : 'transfer-pending' }}">
+                                            <span class="badge badge-{{ $payroll->isTransferred() ? 'success' : 'danger' }}">
+                                                {{ $payroll->transferStatusLabel() }}
+                                            </span>
+                                            @if ($payroll->isTransferred() && $payroll->transfer_date)
+                                                <div class="transfer-date">
+                                                    <i class="fa fa-calendar"></i> {{ $payroll->transfer_date->format('Y-m-d') }}
+                                                </div>
+                                            @endif
+                                        </td>
                                         <td>
                                             <button type="button"
                                                 class="btn btn-sm btn-info payslip-btn"
@@ -114,6 +125,15 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+    <style>
+        #myPayrollTable th.transfer-col, #myPayrollTable td.transfer-cell { width: 1%; white-space: nowrap; text-align: center; vertical-align: middle; }
+        #myPayrollTable td.transfer-sent { background: #d4edda; }
+        #myPayrollTable td.transfer-pending { background: #f8d7da; }
+        #myPayrollTable .transfer-date { font-size: 12px; color: #155724; margin-top: 3px; }
+    </style>
+@endpush
 
 @push('scripts')
     <script>

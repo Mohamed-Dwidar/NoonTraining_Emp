@@ -42,6 +42,11 @@ class PayrollService {
         return $this->payrollRepository->find($id);
     }
 
+    /** Salary transfer: 'sent' needs تاريخ الحوالة; 'pending' clears it. */
+    public function updateTransfer(int $id, string $status, ?string $date) {
+        return $this->payrollRepository->updateTransfer($id, $status, $date);
+    }
+
     public function studentsCommissionBreakdown(int $employeeId, string $month): array {
         return $this->payrollRepository->studentsCommissionBreakdown($employeeId, $month);
     }

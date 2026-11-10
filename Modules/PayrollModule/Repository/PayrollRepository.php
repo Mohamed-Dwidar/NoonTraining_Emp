@@ -158,4 +158,15 @@ class PayrollRepository extends BaseRepository {
     public function filter(array $request = []) {
         return Payroll::filter($request);
     }
+
+    /** Set the salary transfer status; the date is kept only when sent. */
+    public function updateTransfer(int $id, string $status, ?string $date): Payroll
+    {
+        $payroll = Payroll::findOrFail($id);
+        $payroll->update([
+            'transfer_status' => $status,
+            'transfer_date'   => $status === Payroll::TRANSFER_SENT ? $date : null,
+        ]);
+        return $payroll;
+    }
 }

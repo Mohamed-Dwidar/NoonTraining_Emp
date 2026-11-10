@@ -7,9 +7,9 @@
 ---
 
 ## Current status
-- **Working on:** Employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
+- **Working on:** Payroll salary transfer status (تم التحويل + تاريخ الحوالة) on the admin payroll list — done 2026-11-11. Before that: employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
 - **Branch / working tree:** `main`; through c63ee4b committed. Uncommitted: layering refactor, student bulk delete + redirect, spatie permissions, CLAUDE.md/progress.md updates.
-- **Before deploying permissions:** commit the new PermissionModule files under **both** `Database/...` and `database/...` (git tracks both cases; the provider loads `Database/migrations`, seeders namespace `Database\Seeders`) — e.g. `git add Modules/PermissionModule/Database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php Modules/PermissionModule/database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php` (same for `2026_11_10_000002_rename_student_permissions.php` and the two seeders). On the server: `php artisan migrate` → `php artisan permission:cache-reset` → `php artisan optimize:clear`.
+- **Before deploying permissions:** commit the new PermissionModule files under **both** `Database/...` and `database/...` (git tracks both cases; the provider loads `Database/migrations`, seeders namespace `Database\Seeders`) — e.g. `git add Modules/PermissionModule/Database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php Modules/PermissionModule/database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php` (same for `2026_11_10_000002_rename_student_permissions.php` and the two seeders). Same for `Modules/PayrollModule/{Database,database}/migrations/2026_11_11_000001_add_transfer_status_to_payrolls_table.php`. On the server: `php artisan migrate` → `php artisan permission:cache-reset` → `php artisan optimize:clear`.
 - **Next up:** Answer the date-format question for imports. Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
@@ -112,13 +112,14 @@
   - `payment_date` is a free-text string (Report guards it with REGEXP).
 
 ### Payroll
-- **Last updated:** 2026-11-10
+- **Last updated:** 2026-11-11
+- **Salary transfer:** `payrolls.transfer_status` (`pending` | `sent`, `Payroll::TRANSFER_STATUSES` with Arabic labels) + `transfer_date` (تاريخ الحوالة). Admin list column «حالة التحويل»: badge, date under it and green cell when sent; «تغيير» opens a modal → `POST admin/payroll/{id}/transfer` (`admin.payrolls.transfer`) → `PayrollService::updateTransfer` → `PayrollRepository::updateTransfer`. Saving = sent, date required; «إلغاء التحويل» (shown when sent) = pending, clears the date. Redirects back (keeps month/branch/page). Recalculation does not touch these columns. List table has its own compact CSS (`@push('styles')`: cell padding .6rem .5rem instead of the theme's 2rem, transfer column width = content, action buttons stacked).
 - **Files:** `Modules/PayrollModule/` — `PayrollAdminController`, `PayrollModuleController` (employee), `PayrollService`, `PayrollRepository`, views `payslip_print`, `details_print`
 - **How it works:** Details popup/PDF data comes from `PayrollService::monthDetails()` (bonuses, deductions, leaves, students, commission breakdown via each module's repository `getByEmployeeAndMonth`); employee "my payrolls" months from `monthsSinceFirstStudent()`. One row per employee + `YYYY-MM`. Opening the payroll page (per branch/month) recalculates every active/on-leave employee. `total = max(0, basic − (deductions + leave_days × daily_salary) + bonuses + students_commission)`. Commission = students of that `month` × (employee override ?? default rate; percentage applies to `paid_amount`). Payslip + details views and PDF for admin and employee.
 - **Decisions:**
   - Recalc on read, not stored snapshots — because inputs change often; means past months change if rates/salary change (?).
   - Commission by `students.month` instead of `payment_date` — commit "payroll by month" (old logic left commented).
-- **Pending:** `create`/`edit` views exist but no routes (?). No month locking/closing.
+- **Pending:** `create`/`edit` views exist but no routes (?). No month locking/closing — a payroll marked «تم التحويل» is still recalculated on view, so its total can change after the money was sent (?). Transfer status not shown in the employee portal yet.
 
 ### Setting
 - **Last updated:** 2026-11-10
@@ -134,6 +135,12 @@
 ---
 
 ## Session log
+
+### 2026-11-11 — Payroll salary transfer status
+- **Changed:** new migration `PayrollModule/.../2026_11_11_000001_add_transfer_status_to_payrolls_table.php`; `Payroll` model (constants, `isTransferred()`, `transferStatusLabel()`, date cast); `PayrollRepository/PayrollService::updateTransfer`; `PayrollAdminController::updateTransfer`; route `admin.payrolls.transfer`; `Admin/index.blade.php` (status column, green highlight + date, transfer modal; compact column widths)
+- **Why:** Owner request — see and change whether each salary was transferred, with a required transfer date.
+- **Affects:** PayrollModule only. Verified via HTTP: date required, sent shows date + green, cancel clears, invalid status rejected, recalculation keeps the status.
+- **Commit:** — (not committed yet)
 
 ### 2026-11-10 — Rename student permissions; employees can edit their students
 - **Changed:** new migration `PermissionModule/.../2026_11_10_000002_rename_student_permissions.php`; seeder names; `StudentModule/routes/web.php`; `Employee/index.blade.php` (edit button, `@canany` actions column); `Employee/edit.blade.php` (employee routes, pickers removed, `redirect_to`); `StudentEmployeeController::edit/update` (own students only, `employee_id` forced); `StudentService/StudentRepository::findForEmployee`; trait `studentListUrl()`

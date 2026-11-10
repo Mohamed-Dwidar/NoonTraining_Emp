@@ -11,6 +11,26 @@ class Payroll extends Model {
 
     protected $guarded = [];
 
+    public const TRANSFER_PENDING = 'pending';
+    public const TRANSFER_SENT    = 'sent';
+
+    public const TRANSFER_STATUSES = [
+        self::TRANSFER_PENDING => 'لم يتم التحويل',
+        self::TRANSFER_SENT    => 'تم التحويل',
+    ];
+
+    protected $casts = [
+        'transfer_date' => 'date',
+    ];
+
+    public function isTransferred(): bool {
+        return $this->transfer_status === self::TRANSFER_SENT;
+    }
+
+    public function transferStatusLabel(): string {
+        return self::TRANSFER_STATUSES[$this->transfer_status] ?? self::TRANSFER_STATUSES[self::TRANSFER_PENDING];
+    }
+
     public function employee() {
         return $this->belongsTo(Employee::class, 'employee_id');
     }

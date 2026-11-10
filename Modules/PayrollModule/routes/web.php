@@ -10,6 +10,7 @@ Route::prefix('admin/payroll')->name('admin.payrolls.')->middleware(['auth:admin
     Route::get('/{id}/payslip/print',     [PayrollAdminController::class, 'payslipPrint'])->name('payslip.print');
     Route::get('/{id}/details',           [PayrollAdminController::class, 'payrollDetails'])->name('details');
     Route::get('/{id}/details/pdf',       [PayrollAdminController::class, 'payrollDetailsPdf'])->name('details.pdf');
+    Route::post('/{id}/transfer',         [PayrollAdminController::class, 'updateTransfer'])->name('transfer');
 });
 
 Route::prefix('employee/payroll')->name('employee.payrolls.')->middleware(['auth:employee'])->group(function () {

@@ -5,6 +5,8 @@ namespace Modules\PayrollModule\App\Http\Controllers\Admin;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
+use Modules\PayrollModule\App\Http\Models\Payroll;
 use Modules\PayrollModule\Services\PayrollService;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
@@ -63,6 +65,26 @@ class PayrollAdminController extends Controller {
             'branchId',
             'deptId'
         ));
+    }
+
+    public function updateTransfer(Request $request, int $id) {
+        $request->validate([
+            'transfer_status' => ['required', Rule::in(array_keys(Payroll::TRANSFER_STATUSES))],
+            'transfer_date'   => 'required_if:transfer_status,' . Payroll::TRANSFER_SENT . '|nullable|date',
+        ], [
+            'transfer_status.required' => 'حالة التحويل مطلوبة',
+            'transfer_status.in'       => 'حالة التحويل غير صحيحة',
+            'transfer_date.required_if' => 'تاريخ الحوالة مطلوب',
+            'transfer_date.date'       => 'تاريخ الحوالة غير صحيح',
+        ]);
+
+        $payroll = $this->payrollService->updateTransfer($id, $request->input('transfer_status'), $request->input('transfer_date'));
+
+        $message = $payroll->isTransferred()
+            ? 'تم تسجيل تحويل راتب ' . ($payroll->employee->name ?? '') . ' بتاريخ ' . $payroll->transfer_date->format('Y-m-d')
+            : 'تم إلغاء تحويل راتب ' . ($payroll->employee->name ?? '');
+
+        return redirect()->back()->with('success', $message); // back() keeps month/branch/page
     }
 
     public function payslip($id) {
