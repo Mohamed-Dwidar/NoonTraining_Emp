@@ -220,6 +220,21 @@ class StudentAdminController extends Controller {
         return redirect()->route('admin.students.index')->with('success', 'تم حذف الطالب بنجاح');
     }
 
+    public function bulkDestroy(Request $request) {
+        $request->validate([
+            'ids'   => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ], [
+            'ids.required' => 'اختر طالباً واحداً على الأقل للحذف',
+            'ids.min'      => 'اختر طالباً واحداً على الأقل للحذف',
+        ]);
+
+        $count = $this->studentService->deleteMany(array_map('intval', $request->input('ids')));
+
+        // back() keeps the current filters/page
+        return redirect()->back()->with('success', 'تم حذف ' . $count . ' طالب بنجاح');
+    }
+
     public function importStudents(Request $request) {
         $request->validate([
             'employee_id' => 'required|exists:employees,id',

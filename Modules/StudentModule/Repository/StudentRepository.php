@@ -127,4 +127,12 @@ class StudentRepository extends BaseRepository
             ->orderByDesc('payment_date')
             ->get();
     }
+
+    /** Delete many students at once (optionally only those of one employee); returns the number deleted. */
+    public function deleteByIds(array $ids, ?int $employeeId = null): int
+    {
+        return Student::whereIn('id', $ids)
+            ->when($employeeId, fn($q) => $q->where('employee_id', $employeeId))
+            ->delete();
+    }
 }

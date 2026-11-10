@@ -75,6 +75,14 @@ class StudentService {
         $this->studentRepository->delete($id);
     }
 
+    /**
+     * $employeeId given → only that employee's students are deleted (employee portal).
+     * Payroll is recalculated on view, so no recalc is needed here (same as delete()).
+     */
+    public function deleteMany(array $ids, ?int $employeeId = null): int {
+        return $this->studentRepository->deleteByIds($ids, $employeeId);
+    }
+
     public function duplicateNationalIdCounts(): Collection {
         return $this->studentRepository->duplicateNationalIdCounts();
     }

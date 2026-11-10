@@ -7,8 +7,8 @@
 ---
 
 ## Current status
-- **Working on:** Enforcing Controller → Service → Repository in every module (2026-11-10). Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
-- **Branch / working tree:** `main`; through c63ee4b committed. Uncommitted: layering refactor + CLAUDE.md/progress.md updates.
+- **Working on:** Bulk delete of students (select some / select all on the page) for admin and employee — done 2026-11-10. Flagged: employee single edit/update/destroy lack ownership checks (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
+- **Branch / working tree:** `main`; through c63ee4b committed. Uncommitted: layering refactor, student bulk delete, CLAUDE.md/progress.md updates.
 - **Next up:** Answer the date-format question for imports. Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
@@ -93,13 +93,15 @@
 - **How it works:** Commission types assigned to students; employee-specific rates override defaults.
 
 ### Student
-- **Last updated:** 2026-10-18
+- **Last updated:** 2026-11-10
+- **Bulk delete (admin + employee):** checkbox per row + "select all" (current page) on `Admin/index` and `Employee/index` → `DELETE admin|employee/student/bulk` (`*.students.bulk-destroy`, declared before `/{id}`) → `StudentService::deleteMany($ids, ?$employeeId)` → `StudentRepository::deleteByIds` (one `whereIn` delete; Student has no soft deletes/events). Employee side passes its own `employee_id`, so other employees' students are never deleted. Redirects back keeping filters.
 - **Import (validate-then-save):** `StudentImport::collection()` only collects rows (sheet title + Excel row number); controllers call `errors()` → if any, `back()->withErrors()` listing «sheet» + row + messages (max 50) and nothing is saved; else `save()` inserts all rows in one `DB::transaction`. Used by both Admin and Employee `importStudents`. Fully empty rows are skipped; required: name, mobile, national_id, course_name, payment_method, payment_date (valid date); amounts integer ≥ 0 (empty → 0). Each error shows the first message per field + a valid example from `StudentImport::EXAMPLES` (based on real data: 9-digit mobile starting 5, 10-digit national ID starting 1, methods كاش/حوالة/تمارا/تابي, date `02/08/2026`).
 - **Decisions:**
   - Validate the whole file before saving anything, all-or-nothing — owner request, 2026-10-18.
 - **Files:** `Modules/StudentModule/` — `StudentAdminController`, `Employee/StudentEmployeeController`, `StudentService`, `App/Imports/StudentImport.php`, `Exports/Students*Export.php`
 - **How it works:** Student registrations (course, amounts, payment, `national_id`, `commission_id`, `month`) attributed to the registering employee. Admin: CRUD, Excel import/template, export. Employee portal: list/edit/delete/import own students (no create route despite `Employee/create` view (?)).
 - **Pending:**
+  - **Security gap:** employee `edit` / `update` / `destroy` (single) don't check that the student belongs to the logged-in employee — any id can be edited/deleted. Bulk delete is scoped. Fix suggested, not done yet.
   - **Open question (asked owner, no answer yet):** `parseDate()` uses `Carbon::parse`, which reads text dates with slashes as m/d/Y — `02/08/2026` → 8 Feb, and `25/08/2026` is rejected. If the example means 2 August (d/m/Y), switch text parsing to `d/m/Y` (Excel date cells and `Y-m-d` text are unaffected).
   - `payment_date` is a free-text string (Report guards it with REGEXP).
 
@@ -126,6 +128,12 @@
 ---
 
 ## Session log
+
+### 2026-11-10 — Bulk delete of students (admin + employee)
+- **Changed:** `StudentModule/routes/web.php` (`admin.students.bulk-destroy`, `employee.students.bulk-destroy`), `bulkDestroy` in `Admin/StudentAdminController` and `Employee/StudentEmployeeController`, `StudentService::deleteMany`, `StudentRepository::deleteByIds` (optional employee scope), `resources/views/{Admin,Employee}/index.blade.php` (checkbox column, select-all with indeterminate state, "حذف المحدد (n)" button + confirm)
+- **Why:** Owner request — delete many students at once, in both portals. Employee bulk delete only touches the employee's own students.
+- **Affects:** PayrollModule / ReportModule (fewer students → commission/metrics; payroll recalcs on view, as with single delete)
+- **Commit:** — (not committed yet)
 
 ### 2026-11-10 — Enforce Controller → Service → Repository in all modules
 - **Changed:** Controllers no longer touch models: `PayrollAdminController`, `PayrollModuleController` (→ `PayrollService::monthDetails`, `monthsSinceFirstStudent`), `DeductionAdminController::violationAmount` (→ `DeductionService::violationAmount`), `SettingAdminController` (→ `SettingService`); unused model imports dropped in Leave/Task/Report admin controllers. Services no longer query models: `ReportService`, `EmployeeService`, `DeductionService`, `StudentService`, `UserService`. New repository methods: `getByEmployeeAndMonth` (Bonuse/Deduction/Leave/Student), `StudentRepository::firstMonthForEmployee/duplicateNationalIdCounts/performanceByEmployee/performanceTotals/trainingRecordsByPaymentDate`, `EmployeeRepository::findWithTrashedByIds/deleteCommissions/saveCommission`, `ViolationRepository::getRepeats`, `PermissionRepository::idsByNames`, `SettingRepository::updateValueByKey`. CLAUDE.md Conventions → layering rule spelled out.

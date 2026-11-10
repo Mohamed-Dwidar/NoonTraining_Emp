@@ -101,10 +101,22 @@
                 @if ($students->isEmpty())
                     <p class="text-center py-4 mt-2 text-muted">لا يوجد طلاب</p>
                 @else
+                    {{-- Bulk delete: row checkboxes join this form via form="bulkDeleteForm" (no nested forms) --}}
+                    <form id="bulkDeleteForm" method="POST" action="{{ route('admin.students.bulk-destroy') }}"
+                        class="px-2 pt-2" onsubmit="return confirmBulkDelete()">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" id="bulkDeleteBtn" class="btn btn-sm btn-danger" disabled>
+                            <i class="fa fa-trash"></i> حذف المحدد (<span id="selectedCount">0</span>)
+                        </button>
+                    </form>
                     <div class="table-responsive">
                         <table class="table mb-0">
                             <thead>
                                 <tr class="head">
+                                    <th style="width:30px">
+                                        <input type="checkbox" id="selectAll" title="تحديد الكل">
+                                    </th>
                                     <th>اسم الطالب</th>
                                     <th>الموظف المسؤول</th>
                                     <th>رقم الهوية</th>
@@ -122,6 +134,10 @@
                                 @foreach ($students as $i => $student)
                                     @php $emp = $student->employee; @endphp
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" class="row-check" name="ids[]"
+                                                value="{{ $student->id }}" form="bulkDeleteForm">
+                                        </td>
                                         <td>
                                             <div>{{ $student->name }}</div>
                                             @if ($student->national_id && ($duplicateNationalIds[$student->national_id] ?? 0) > 1)
@@ -385,6 +401,25 @@
                 params.set('export', 'yes');
                 window.location.href = window.location.pathname + '?' + params.toString();
             });
+
+            // Bulk delete: select all / select some
+            function updateBulkState() {
+                var total = $('.row-check').length;
+                var checked = $('.row-check:checked').length;
+                $('#selectedCount').text(checked);
+                $('#bulkDeleteBtn').prop('disabled', checked === 0);
+                $('#selectAll').prop('checked', total > 0 && checked === total)
+                    .prop('indeterminate', checked > 0 && checked < total);
+            }
+            $('#selectAll').on('change', function() {
+                $('.row-check').prop('checked', this.checked);
+                updateBulkState();
+            });
+            $(document).on('change', '.row-check', updateBulkState);
+            window.confirmBulkDelete = function() {
+                var n = $('.row-check:checked').length;
+                return n > 0 && confirm('هل تريد حذف ' + n + ' طالب؟ لا يمكن التراجع عن هذا الإجراء.');
+            };
 
             // Clear search button
             $('#clearBtn').on('click', function() {

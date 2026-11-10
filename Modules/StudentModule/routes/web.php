@@ -10,6 +10,7 @@ Route::prefix('admin/student')->name('admin.students.')->middleware(['auth:admin
     Route::post('/',         [StudentAdminController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [StudentAdminController::class, 'edit'])->name('edit');
     Route::post('/{id}',     [StudentAdminController::class, 'update'])->name('update');
+    Route::delete('/bulk',   [StudentAdminController::class, 'bulkDestroy'])->name('bulk-destroy'); // before /{id}
     Route::delete('/{id}',   [StudentAdminController::class, 'destroy'])->name('destroy');
     Route::post('/students/import', [StudentAdminController::class, 'importStudents'])->name('import');
     Route::get('/students/template', [StudentAdminController::class, 'downloadTemplate'])->name('template');
@@ -19,6 +20,7 @@ Route::prefix('employee/student')->name('employee.students.')->middleware(['auth
     Route::get('/',          [StudentEmployeeController::class, 'index'])->name('index');
     Route::get('/{id}/edit', [StudentEmployeeController::class, 'edit'])->name('edit');
     Route::post('/{id}',     [StudentEmployeeController::class, 'update'])->name('update');
+    Route::delete('/bulk',   [StudentEmployeeController::class, 'bulkDestroy'])->name('bulk-destroy'); // before /{id}
     Route::delete('/{id}',   [StudentEmployeeController::class, 'destroy'])->name('destroy');
     Route::post('/students/import', [StudentEmployeeController::class, 'importStudents'])->name('import');
     Route::get('/students/template', [StudentEmployeeController::class, 'downloadTemplate'])->name('template');

@@ -184,4 +184,21 @@ class StudentEmployeeController extends Controller {
         $this->studentService->delete($id);
         return redirect()->route('employee.students.index')->with('success', 'تم حذف الطالب بنجاح');
     }
+
+    public function bulkDestroy(Request $request) {
+        $request->validate([
+            'ids'   => 'required|array|min:1',
+            'ids.*' => 'integer',
+        ], [
+            'ids.required' => 'اختر طالباً واحداً على الأقل للحذف',
+            'ids.min'      => 'اختر طالباً واحداً على الأقل للحذف',
+        ]);
+
+        // Only the logged-in employee's own students can be deleted
+        $employeeId = (int) auth()->guard('employee')->user()->userable_id;
+        $count      = $this->studentService->deleteMany(array_map('intval', $request->input('ids')), $employeeId);
+
+        // back() keeps the current filters/page
+        return redirect()->back()->with('success', 'تم حذف ' . $count . ' طالب بنجاح');
+    }
 }
