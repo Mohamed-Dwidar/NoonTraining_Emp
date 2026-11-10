@@ -17,6 +17,11 @@ class StudentService {
         return $this->studentRepository->find($id);
     }
 
+    /** Employee portal: the student only if it is the employee's own (null otherwise). */
+    public function findForEmployee(int $id, int $employeeId) {
+        return $this->studentRepository->findForEmployee($id, $employeeId);
+    }
+
     public function findStudent(int $id) {
         return $this->studentRepository->with(['employee.branch', 'employee.department'])->find($id);
     }

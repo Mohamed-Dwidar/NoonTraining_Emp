@@ -135,4 +135,10 @@ class StudentRepository extends BaseRepository
             ->when($employeeId, fn($q) => $q->where('employee_id', $employeeId))
             ->delete();
     }
+
+    /** One student only if it belongs to the employee (null otherwise). */
+    public function findForEmployee(int $id, int $employeeId)
+    {
+        return Student::where('id', $id)->where('employee_id', $employeeId)->first();
+    }
 }

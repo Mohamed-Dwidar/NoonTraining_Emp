@@ -23,7 +23,7 @@ Then suggest a commit message.
 - Database: MySQL (`DB_CONNECTION`; `.env.example` still has the sqlite default). Raw SQL uses MySQL `REGEXP`/`CONCAT`.
 - Frontend: Blade + Bootstrap/jQuery admin theme (`public/admin-assets/`, select2 from CDN) loaded by LayoutModule. No build step — Vite/Tailwind were removed (2026-10-18); add JS/CSS as static files under `public/admin-assets/`.
 - Auth: custom session guards `admin` / `employee` (+ default `web`), all on one `users` provider (`UserModule` `User` model, polymorphic `userable` → `Admin` | `Employee`)
-- Permissions: custom roles/permissions tables in PermissionModule + `User::hasPermission()`; `spatie/laravel-permission` is installed but not used — kept on purpose (owner's call)
+- Permissions: `spatie/laravel-permission` v6 (same approach as the owner's Acc_NoonTraining project) — per-employee permissions on guard `employee` (`User::$guard_name`), no roles in use; admins bypass every check (`Gate::before` in `PermissionModuleServiceProvider`). Tables are the older custom PermissionModule ones (spatie-compatible; `permissions.label` = Arabic name, required)
 - Key packages: `prettus/l5-repository` (repositories), `maatwebsite/excel` (student import/export), `niklasravnsborg/laravel-pdf` (payslip / work-regulations PDFs), `laravel/sanctum`
 - Env vars of note: `APP_*`, `DB_*`, `MAIL_*`, `QUEUE_CONNECTION`, `FILESYSTEM_DISK`, `AWS_*`
 
@@ -32,7 +32,8 @@ Then suggest a commit message.
 - Assets: none to build (static files in `public/admin-assets/`)
 - Migrate: `php artisan migrate` (module migrations auto-loaded); seed a module: `php artisan module:seed <Module>`
 - Tests: `php artisan test` (only Laravel example tests exist)
-- Clear caches: `php artisan optimize:clear`
+- Clear caches: `php artisan optimize:clear` (+ `php artisan permission:cache-reset` after changing permissions in the DB by hand)
+- Permissions: `php artisan module:seed PermissionModule` — idempotent, creates the employee permissions
 - Enable/disable modules: `modules_statuses.json`
 
 ## Project structure
@@ -42,7 +43,7 @@ Then suggest a commit message.
   - `Services/<X>Service.php` — business logic; `Repository/<X>Repository.php` — prettus `BaseRepository`
   - `routes/web.php`, `database/migrations`, `database/seeders`, `resources/views/{Admin,Employee}/`
 - `Modules/LayoutModule/resources/views/` — shared layout: `layouts/home_layout` (RTL master), `admin/nav`, `employee/nav`, `layouts/flash`, `layouts/month_select`, `layouts/custom_pagination`
-- `app/Http/Middleware/CheckPermission.php` — `permission:<name>` middleware; alias registered in `bootstrap/app.php`. Must run after `auth:<guard>` (that sets the default guard `Auth::user()` reads). Checks direct user permissions only, not role-inherited ones.
+- `permission:<name>` middleware = spatie `PermissionMiddleware` (alias in `bootstrap/app.php`, also `role`, `role_or_permission`). Must run after `auth:<guard>` (that sets the default guard). `app/Http/Middleware/CheckPermission.php` is the old custom one — no longer used.
 - `bootstrap/app.php` — middleware aliases live here. `app/Http/Kernel.php` is a Laravel 10 leftover that Laravel 12 never loads; don't register anything there.
 - `app/Helpers/` — `UploaderHelper`, `ApiResponseHelper`
 - `routes/web.php` — empty; all routes live in modules
@@ -62,11 +63,12 @@ Then suggest a commit message.
 - Views: `<module>::Admin.index` etc. Folder case is inconsistent (`Admin` vs `admin`) — match the module you're in.
 - Language / direction: UI text, flash and validation messages in Arabic, RTL layout; code identifiers and DB columns in English.
 - Naming: DB columns snake_case; module names keep historical spellings (`BonuseModule`, `Bonuse` model) — don't "fix" without a full rename.
+- Permission checks: route middleware `permission:<name>` for access, `@can('<name>')` / `$user->can('<name>')` to show/hide UI — never a boolean column on `employees` (that's how `can_view_work_regulations` used to work).
 - Selected filters (month/branch) persisted in session (`payroll_month`, `attendance_branch_id`, …).
 
 ## Dependencies map (what affects what)
 - **UserModule** ↔ AdminModule, EmployeeModule: `users.userable` morph; `UserAuthController::login` routes to `admin` or `employee` guard by `userable_type`; blocks suspended/resigned/terminated employees.
-- **PermissionModule** ↔ UserModule: `User::roles()/permissions()` via `model_has_*` tables; `CheckPermission` middleware.
+- **PermissionModule** ↔ UserModule, EmployeeModule, StudentModule, LayoutModule: spatie `HasRoles` on `User` (guard `employee`). Permissions are assigned per employee on the admin employee create/edit form (checkboxes listed from the DB → `EmployeeService` → `UserRepository::syncPermissions`). Checks: route `permission:<name>` (employee student edit/update = `can_edit_students`, delete/bulk delete = `can_delete_students`, work regulations + PDF = `can_view_work_regulations`), `@can` in Blade (employee nav, employee students page). New permission = add to `PermissionSeederTableSeeder::PERMISSIONS` (+ a data migration for existing DBs) and a check; the form picks it up automatically.
 - **BranchModule** ↔ Employee, Attendance, Payroll, Report: branch `type` (`normal`|`training`) — student commissions/reports apply to training branches; branch holds work regulations shown to employees.
 - **DepartmentModule** ↔ BranchModule, EmployeeModule (departments-by-branch lookup).
 - **EmployeeModule** ↔ almost everything: `basic_salary`, `monthly_working_days`, `status`; `employee_commissions` (per-employee rate overrides of CommissionModule).

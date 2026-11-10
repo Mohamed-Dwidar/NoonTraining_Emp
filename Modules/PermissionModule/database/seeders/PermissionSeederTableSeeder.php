@@ -3,63 +3,33 @@
 namespace Modules\PermissionModule\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
+/**
+ * Employee-portal permissions (spatie, guard `employee`). Safe to re-run (firstOrCreate).
+ * Add a new permission here + a check (route `permission:<name>` / @can) — the employee
+ * create/edit form lists every `employee`-guard permission automatically, with its label.
+ */
 class PermissionSeederTableSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
+    public const GUARD = 'employee';
+
+    public const PERMISSIONS = [
+        'can_edit_students'         => 'امكانية تعديل الطلاب',
+        'can_delete_students'       => 'امكانية حذف الطلاب',
+        'can_view_work_regulations' => 'عرض لائحة العمل',
+    ];
+
     public function run()
     {
-        // Clear old permissions
-        DB::table('permissions')->truncate();
-
-        // Define permissions (key => label)
-        $permissions = [
-            'create_exam' => 'إنشاء اختبار',
-            'create_questions' => 'إنشاء أسئلة',
-            'create_student' => 'إنشاء طالب',
-        ];
-
-        // Insert permissions into the DB
-        foreach ($permissions as $name => $label) {
-            DB::table('permissions')->insert([
-                'name' => $name,     // internal name
-                'label' => $label,   // human-readable label
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        foreach (self::PERMISSIONS as $name => $label) {
+            Permission::firstOrCreate(
+                ['name' => $name, 'guard_name' => self::GUARD],
+                ['label' => $label]
+            );
         }
 
-        // DB::table('roles')->truncate();
-        // DB::table('role_has_permissions')->truncate();
-
-        $roles = [
-            'Admin' => ['create_exam', 'create_questions', 'create_student'],
-            'Moderator' => ['create_exam', 'create_questions', 'create_student'], 
-        ];
-
-        foreach ($roles as $roleName => $rolePermissions) {
-            $roleId = DB::table('roles')->insertGetId([
-                'name' => $roleName,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            foreach ($rolePermissions as $permissionName) {
-                $permissionId = DB::table('permissions')->where('name', $permissionName)->value('id');
-                if ($permissionId) {
-                    DB::table('role_has_permissions')->insert([
-                        'role_id' => $roleId,
-                        'permission_id' => $permissionId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            }
-        }
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

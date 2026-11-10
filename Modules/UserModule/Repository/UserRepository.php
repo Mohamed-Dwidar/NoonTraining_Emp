@@ -29,4 +29,9 @@ class UserRepository extends BaseRepository
     //         ->update(['email' => $email]);
     // }
 
+    /** Replace the user's direct permissions (spatie; names on the model's guard). Clears spatie's cache. */
+    public function syncPermissions(User $user, array $names): void
+    {
+        $user->syncPermissions($names);
+    }
 }

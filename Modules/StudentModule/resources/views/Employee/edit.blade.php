@@ -14,46 +14,9 @@
     <div class="card">
         <div class="card-content">
             <form class="card-form side-form" method="POST"
-                  action="{{ route('admin.students.update', $student->id) }}">
+                  action="{{ route('employee.students.update', $student->id) }}">
                 @csrf
-
-                {{-- Employee responsible --}}
-                <div class="row">
-                    <div class="col-lg-3 col-sm-12 col-6">
-                        <label for="branchSelect">الفرع <span class="text-danger">*</span></label>
-                        <div class="form-group">
-                            <select id="branchSelect" name="branch_id" class="form-control">
-                                <option value="">-- اختر الفرع --</option>
-                                @foreach($branches as $branch)
-                                    <option value="{{ $branch->id }}"
-                                        {{ old('branch_id', $student->employee->branch_id ?? '') == $branch->id ? 'selected' : '' }}>
-                                        {{ $branch->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-12 col-6">
-                        <label for="deptSelect">القسم <span class="text-danger">*</span></label>
-                        <div class="form-group">
-                            <select id="deptSelect" name="department_id" class="form-control" disabled>
-                                <option value="">-- اختر الفرع أولاً --</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-sm-12 col-6">
-                        <label for="employee_id">الموظف المسؤول <span class="text-danger">*</span></label>
-                        <div class="form-group">
-                            <select id="employee_id" name="employee_id"
-                                    class="form-control @error('employee_id') is-invalid @enderror" disabled>
-                                <option value="">-- اختر القسم أولاً --</option>
-                            </select>
-                            @error('employee_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
+                <input type="hidden" name="redirect_to" value="{{ old('redirect_to', $backUrl) }}">
 
                 {{-- Student info --}}
                 <div class="row">
@@ -176,7 +139,7 @@
                 </div>
 
                 <div class="col-12 mt-1">
-                    <a href="{{ route('admin.students.index') }}" class="btn btn-secondary">إلغاء</a>
+                    <a href="{{ old('redirect_to', $backUrl) }}" class="btn btn-secondary">إلغاء</a>
                     <button type="submit" class="btn btn-primary">حفظ التعديلات</button>
                 </div>
             </form>
@@ -189,64 +152,9 @@
 @push('scripts')
 <script>
 (function () {
-    var deptsByBranch = @json(
-        $departments->groupBy('branch_id')->map(fn($g) =>
-            $g->map(fn($d) => ['id' => $d->id, 'name' => $d->name])->values()
-        )
-    );
-    var empsByDept = @json(
-        $employees->groupBy('department_id')->map(fn($g) =>
-            $g->map(fn($e) => ['id' => $e->id, 'name' => $e->name])->values()
-        )
-    );
-
-    var branchSelect     = document.getElementById('branchSelect');
-    var deptSelect       = document.getElementById('deptSelect');
-    var empSelect        = document.getElementById('employee_id');
     var totalInput       = document.getElementById('total_amount');
     var paidInput        = document.getElementById('paid_amount');
     var remainingDisplay = document.getElementById('remainingDisplay');
-
-    var oldBranchId = "{{ old('branch_id', $student->employee->branch_id ?? '') }}";
-    var oldDeptId   = "{{ old('department_id', $student->employee->department_id ?? '') }}";
-    var oldEmpId    = "{{ old('employee_id', $student->employee_id) }}";
-
-    function populateDepts(branchId, selectedDeptId) {
-        var list = deptsByBranch[branchId] || [];
-        if (!branchId || list.length === 0) {
-            deptSelect.innerHTML = '<option value="">-- اختر الفرع أولاً --</option>';
-            deptSelect.disabled = true; resetEmployees(); return;
-        }
-        var opts = '<option value="">-- اختر القسم --</option>';
-        list.forEach(function (d) {
-            var sel = String(d.id) === String(selectedDeptId) ? ' selected' : '';
-            opts += '<option value="' + d.id + '"' + sel + '>' + d.name + '</option>';
-        });
-        deptSelect.innerHTML = opts;
-        deptSelect.disabled = false;
-        if (selectedDeptId) populateEmployees(selectedDeptId, oldEmpId);
-        else resetEmployees();
-    }
-
-    function populateEmployees(deptId, selectedEmpId) {
-        var list = empsByDept[deptId] || [];
-        if (!deptId || list.length === 0) {
-            empSelect.innerHTML = '<option value="">لا يوجد موظفون</option>';
-            empSelect.disabled = true; return;
-        }
-        var opts = '<option value="">-- اختر الموظف --</option>';
-        list.forEach(function (e) {
-            var sel = String(e.id) === String(selectedEmpId) ? ' selected' : '';
-            opts += '<option value="' + e.id + '"' + sel + '>' + e.name + '</option>';
-        });
-        empSelect.innerHTML = opts;
-        empSelect.disabled = false;
-    }
-
-    function resetEmployees() {
-        empSelect.innerHTML = '<option value="">-- اختر القسم أولاً --</option>';
-        empSelect.disabled = true;
-    }
 
     function updateRemaining() {
         var total = parseInt(totalInput.value) || 0;
@@ -254,12 +162,8 @@
         remainingDisplay.textContent = (total - paid).toLocaleString('ar-SA');
     }
 
-    branchSelect.addEventListener('change', function () { populateDepts(this.value, ''); });
-    deptSelect.addEventListener('change',   function () { populateEmployees(this.value, ''); });
-    totalInput.addEventListener('input',    updateRemaining);
-    paidInput.addEventListener('input',     updateRemaining);
-
-    if (oldBranchId) populateDepts(oldBranchId, oldDeptId);
+    totalInput.addEventListener('input', updateRemaining);
+    paidInput.addEventListener('input',  updateRemaining);
     updateRemaining();
 })();
 </script>

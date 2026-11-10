@@ -28,7 +28,7 @@ Route::group(['prefix' => 'employee', 'middleware' => ['auth:employee']], functi
     Route::get('logout', [EmployeeModuleController::class, 'logout'])->name('employee.logout');
     Route::get('changePassword', [EmployeeModuleController::class, 'changePassword'])->name('employee.changePassword');
     Route::post('updatePassword', [EmployeeModuleController::class, 'updatePassword'])->name('employee.updatePassword');
-    Route::get('work-regulations', [EmployeeModuleController::class, 'showWorkRegulations'])->name('employee.show_work_regulations');
-    Route::get('work-regulations/pdf', [EmployeeModuleController::class, 'downloadWorkRegulationsPdf'])->name('employee.work_regulations.pdf');
+    Route::get('work-regulations', [EmployeeModuleController::class, 'showWorkRegulations'])->name('employee.show_work_regulations')->middleware('permission:can_view_work_regulations');
+    Route::get('work-regulations/pdf', [EmployeeModuleController::class, 'downloadWorkRegulationsPdf'])->name('employee.work_regulations.pdf')->middleware('permission:can_view_work_regulations');
     Route::get('my-info', [EmployeeModuleController::class, 'showMyInfo'])->name('employee.my_info');
 });

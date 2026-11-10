@@ -183,7 +183,7 @@
                                                 class="d-inline" onsubmit="return confirm('هل تريد حذف هذا الطالب؟')">
                                                 @csrf
                                                 @method('DELETE')
-                        <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
+                                                <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
                                                 <button type="submit" class="btn btn-sm btn-danger">
                                                     <i class="fa fa-trash"></i>
                                                 </button>

@@ -18,10 +18,10 @@ Route::prefix('admin/student')->name('admin.students.')->middleware(['auth:admin
 
 Route::prefix('employee/student')->name('employee.students.')->middleware(['auth:employee'])->group(function () {
     Route::get('/',          [StudentEmployeeController::class, 'index'])->name('index');
-    Route::get('/{id}/edit', [StudentEmployeeController::class, 'edit'])->name('edit');
-    Route::post('/{id}',     [StudentEmployeeController::class, 'update'])->name('update');
-    Route::delete('/bulk',   [StudentEmployeeController::class, 'bulkDestroy'])->name('bulk-destroy'); // before /{id}
-    Route::delete('/{id}',   [StudentEmployeeController::class, 'destroy'])->name('destroy');
+    Route::get('/{id}/edit', [StudentEmployeeController::class, 'edit'])->name('edit')->middleware('permission:can_edit_students');
+    Route::post('/{id}',     [StudentEmployeeController::class, 'update'])->name('update')->middleware('permission:can_edit_students');
+    Route::delete('/bulk',   [StudentEmployeeController::class, 'bulkDestroy'])->name('bulk-destroy')->middleware('permission:can_delete_students'); // before /{id}
+    Route::delete('/{id}',   [StudentEmployeeController::class, 'destroy'])->name('destroy')->middleware('permission:can_delete_students');
     Route::post('/students/import', [StudentEmployeeController::class, 'importStudents'])->name('import');
     Route::get('/students/template', [StudentEmployeeController::class, 'downloadTemplate'])->name('template');
 });

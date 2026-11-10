@@ -3,6 +3,8 @@
 namespace Modules\PermissionModule\App\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
+use Modules\AdminModule\App\Http\Models\Admin;
 use Illuminate\Support\ServiceProvider;
 
 class PermissionModuleServiceProvider extends ServiceProvider
@@ -22,6 +24,10 @@ class PermissionModuleServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'Database/migrations'));
+
+        // Admins skip every permission check (like Acc_NoonTraining, where admins have their own guard).
+        // Returning null lets spatie decide for employees.
+        Gate::before(fn($user) => ($user->userable_type ?? null) === Admin::class ? true : null);
     }
 
     /**

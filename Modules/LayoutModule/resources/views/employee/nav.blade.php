@@ -9,7 +9,7 @@
                         <span class="menu-title">تسجيل الطلاب </span>
                     </a>
                 </li>
-                @if (auth()->guard('employee')->user()?->userable?->can_view_work_regulations)
+                @if (auth()->guard('employee')->user()?->can('can_view_work_regulations'))
                     <li class="nav-item">
                         <a href="{{ route('employee.show_work_regulations') }}" class="nav-monthly-ops">
                             <i class="fa fa-file-text-o"></i>

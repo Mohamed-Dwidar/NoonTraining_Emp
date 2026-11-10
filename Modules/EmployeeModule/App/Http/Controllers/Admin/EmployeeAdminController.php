@@ -5,6 +5,7 @@ namespace Modules\EmployeeModule\App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
@@ -46,7 +47,8 @@ class EmployeeAdminController extends Controller {
         $branches    = $this->branchService->getAllBranches();
         $departments = $this->departmentService->getAllDepartments();
         $commissions = $this->commissionService->getAllCommissions();
-        return view('employeemodule::Admin.create', compact('branches', 'departments', 'commissions'));
+        $permissions = $this->employeeService->employeePermissions();
+        return view('employeemodule::Admin.create', compact('branches', 'departments', 'commissions', 'permissions'));
     }
 
     public function store(Request $request) {
@@ -67,6 +69,8 @@ class EmployeeAdminController extends Controller {
                 'terminated_at'        => 'nullable|date',
                 'password'             => 'required|string|min:6',
                 'commissions.*.type'   => 'nullable|in:fixed,percentage',
+                'permissions'          => 'nullable|array',
+                'permissions.*'        => Rule::exists('permissions', 'name')->where('guard_name', EmployeeService::PERMISSION_GUARD),
                 'commissions.*.value'  => 'nullable|numeric|min:0',
             ],
             [
@@ -92,6 +96,7 @@ class EmployeeAdminController extends Controller {
                 'password.required'             => 'كلمة المرور مطلوبة',
                 'password.min'                  => 'كلمة المرور يجب أن تكون 6 حرف على الأقل',
                 'commissions.*.value.numeric'   => 'قيمة العمولة يجب أن تكون رقماً',
+                'permissions.*.exists'          => 'صلاحية غير معروفة',
             ]
         );
 
@@ -100,7 +105,6 @@ class EmployeeAdminController extends Controller {
         }
 
         $data = $request->all();
-        $data['can_view_work_regulations'] = $request->boolean('can_view_work_regulations');
 
         $this->employeeService->create($data);
 
@@ -114,7 +118,9 @@ class EmployeeAdminController extends Controller {
         $departments         = $this->departmentService->getAllDepartments();
         $commissions         = $this->commissionService->getAllCommissions();
         $employeeCommissions = $employee->commissions->keyBy('commission_id');
-        return view('employeemodule::Admin.edit', compact('employee', 'branches', 'departments', 'commissions', 'employeeCommissions'));
+        $permissions         = $this->employeeService->employeePermissions();
+        $employeePermissions = $this->employeeService->permissionNamesOf($employee);
+        return view('employeemodule::Admin.edit', compact('employee', 'branches', 'departments', 'commissions', 'employeeCommissions', 'permissions', 'employeePermissions'));
     }
 
     public function update(Request $request) {
@@ -137,6 +143,8 @@ class EmployeeAdminController extends Controller {
             'password'             => $changePassword ? 'required|string|min:6' : 'nullable',
             'commissions.*.type'   => 'nullable|in:fixed,percentage',
             'commissions.*.value'  => 'nullable|numeric|min:0',
+            'permissions'          => 'nullable|array',
+            'permissions.*'        => Rule::exists('permissions', 'name')->where('guard_name', EmployeeService::PERMISSION_GUARD),
         ];
 
         $messages = [
@@ -162,6 +170,7 @@ class EmployeeAdminController extends Controller {
             'password.required'             => 'كلمة المرور الجديدة مطلوبة عند تفعيل تغيير كلمة المرور',
             'password.min'                  => 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
             'commissions.*.value.numeric'   => 'قيمة العمولة يجب أن تكون رقماً',
+            'permissions.*.exists'          => 'صلاحية غير معروفة',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -171,7 +180,6 @@ class EmployeeAdminController extends Controller {
         }
 
         $data = $request->all();
-        $data['can_view_work_regulations'] = $request->boolean('can_view_work_regulations');
 
         $this->employeeService->update($data);
 

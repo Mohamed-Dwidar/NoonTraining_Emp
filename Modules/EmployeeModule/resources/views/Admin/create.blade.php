@@ -189,16 +189,29 @@
                                             </div>
                                         </div>
 
+                                        {{-- Permissions (spatie, guard employee) — listed from the DB, value = permission name --}}
+                                        @php
+                                            // After a failed submit use exactly what was ticked (even none); otherwise the default.
+                                            $checkedPermissions = old('_token') ? old('permissions', []) : $permissions->pluck('name')->all();
+                                        @endphp
                                         <div class="row">
-                                            <div class="col-lg-6 col-sm-12 col-xs-12 col-12">
-                                                <div class="form-group mt-1">
-                                                    <label>
-                                                        <input type="checkbox" name="can_view_work_regulations" value="1"
-                                                            {{ old('can_view_work_regulations', true) ? 'checked' : '' }}>
-                                                        &nbsp; السماح للموظف بعرض لائحة العمل
-                                                    </label>
-                                                </div>
+                                            <div class="col-12">
+                                                <h5 class="mt-2 mb-1">الصلاحيات</h5>
                                             </div>
+                                            @foreach ($permissions as $permission)
+                                                <div class="col-lg-3 col-sm-6 col-12">
+                                                    <div class="form-group mb-1">
+                                                        <label>
+                                                            <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                                                {{ in_array($permission->name, $checkedPermissions) ? 'checked' : '' }}>
+                                                            &nbsp; {{ $permission->label ?: $permission->name }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                            @error('permissions.*')
+                                                <div class="col-12 text-danger">{{ $message }}</div>
+                                            @enderror
                                         </div>
 
                                         @if ($commissions->isNotEmpty())

@@ -49,6 +49,7 @@
                 @if ($students->isEmpty())
                     <p class="text-center py-4 mt-2 text-muted">لا يوجد طلاب</p>
                 @else
+                    @can('can_delete_students')
                     {{-- Bulk delete: row checkboxes join this form via form="bulkDeleteForm" (no nested forms) --}}
                     <form id="bulkDeleteForm" method="POST" action="{{ route('employee.students.bulk-destroy') }}"
                         class="px-2 pt-2" onsubmit="return confirmBulkDelete()">
@@ -59,13 +60,16 @@
                             <i class="fa fa-trash"></i> حذف المحدد (<span id="selectedCount">0</span>)
                         </button>
                     </form>
+                    @endcan
                     <div class="table-responsive">
                         <table class="table mb-0">
                             <thead>
                                 <tr class="head">
+                                    @can('can_delete_students')
                                     <th style="width:30px">
                                         <input type="checkbox" id="selectAll" title="تحديد الكل">
                                     </th>
+                                    @endcan
                                     <th>اسم الطالب</th>
                                     <th>رقم الهوية</th>
                                     <th>الكورس</th>
@@ -75,17 +79,21 @@
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
                                     <th>تاريخ تسجيل الطالب</th>
-                                    <th>الإجراءات</th>
+                                    @canany(['can_edit_students', 'can_delete_students'])
+                                        <th>الإجراءات</th>
+                                    @endcanany
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($students as $i => $student)
                                     @php $emp = $student->employee; @endphp
                                     <tr>
+                                        @can('can_delete_students')
                                         <td>
                                             <input type="checkbox" class="row-check" name="ids[]"
                                                 value="{{ $student->id }}" form="bulkDeleteForm">
                                         </td>
+                                        @endcan
                                         <td>
                                             <div>{{ $student->name }}</div>
                                             @if ($student->national_id && ($duplicateNationalIds[$student->national_id] ?? 0) > 1)
@@ -111,18 +119,28 @@
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
                                         <td>{{ $student->created_at->format('Y-m-d') }}</td>
+                                        @canany(['can_edit_students', 'can_delete_students'])
                                         <td>
+                                            @can('can_edit_students')
+                                                <a href="{{ route('employee.students.edit', ['id' => $student->id, 'redirect_to' => request()->fullUrl()]) }}"
+                                                    class="btn btn-sm btn-warning" title="تعديل">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
+                                            @endcan
+                                            @can('can_delete_students')
                                             <form method="POST"
                                                 action="{{ route('employee.students.destroy', $student->id) }}"
                                                 class="d-inline" onsubmit="return confirm('هل تريد حذف هذا الطالب؟')">
                                                 @csrf
                                                 @method('DELETE')
-                        <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
+                                                <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
                                                 <button type="submit" class="btn btn-sm btn-danger">
                                                     <i class="fa fa-trash"></i>
                                                 </button>
                                             </form>
+                                            @endcan
                                         </td>
+                                        @endcanany
                                     </tr>
                                 @endforeach
                             </tbody>

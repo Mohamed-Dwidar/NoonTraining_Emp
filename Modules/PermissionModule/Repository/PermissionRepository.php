@@ -22,4 +22,10 @@ class PermissionRepository extends BaseRepository
     {
         return Permission::whereIn('name', $names)->pluck('id')->toArray();
     }
+
+    /** Permissions of one guard (e.g. 'employee'), in creation order. */
+    public function forGuard(string $guard)
+    {
+        return Permission::where('guard_name', $guard)->orderBy('id')->get();
+    }
 }

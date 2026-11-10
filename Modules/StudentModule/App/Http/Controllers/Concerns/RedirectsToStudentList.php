@@ -15,12 +15,15 @@ trait RedirectsToStudentList {
      * Only URLs of this portal's students list are accepted (no open redirect).
      */
     protected function redirectToStudentList(Request $request, string $indexRoute) {
+        return redirect($this->studentListUrl($request, $indexRoute));
+    }
+
+    /** `redirect_to` (input or query) if it is this portal's students list URL, else the plain index. */
+    protected function studentListUrl(Request $request, string $indexRoute): string {
         $index = route($indexRoute);
         $to    = (string) $request->input('redirect_to', '');
 
-        $isList = $to === $index || str_starts_with($to, $index . '?');
-
-        return redirect($isList ? $to : $index);
+        return ($to === $index || str_starts_with($to, $index . '?')) ? $to : $index;
     }
 
     /**

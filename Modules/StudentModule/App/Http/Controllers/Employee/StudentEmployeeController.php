@@ -120,25 +120,30 @@ class StudentEmployeeController extends Controller {
         return Excel::download(new StudentsTemplateExport(), 'نموذج استيراد الطلاب.xlsx');
     }
 
-    public function edit(int $id) {
-        $student     = $this->studentService->findStudent($id);
-        $branches    = $this->branchService->getAllBranches();
-        $departments = $this->departmentService->getAllDepartments();
-        $employees   = $this->employeeService->getAllEmployees();
+    private function currentEmployeeId(): int {
+        return (int) auth()->guard('employee')->user()->userable_id;
+    }
 
-        return view('studentmodule::Employee.edit', compact(
-            'student',
-            'branches',
-            'departments',
-            'employees'
-        ));
+    /** The student if it is the logged-in employee's own; 404 otherwise. */
+    private function ownStudentOrFail(int $id) {
+        $student = $this->studentService->findForEmployee($id, $this->currentEmployeeId());
+        abort_unless($student, 404);
+        return $student;
+    }
+
+    public function edit(int $id) {
+        $student = $this->ownStudentOrFail($id); // access: route permission:can_edit_students
+        $backUrl = $this->studentListUrl(request(), 'employee.students.index'); // list with its filters/page
+
+        return view('studentmodule::Employee.edit', compact('student', 'backUrl'));
     }
 
     public function update(Request $request, int $id) {
+        $this->ownStudentOrFail($id);
+
         $validator = Validator::make(
             $request->all(),
             [
-                'employee_id'          => 'required|exists:employees,id',
                 'name'                 => 'required|string|max:255',
                 'mobile'               => 'required|string|max:20',
                 'national_id'          => 'required|string|max:20',
@@ -150,8 +155,6 @@ class StudentEmployeeController extends Controller {
                 'previous_student_of'  => 'nullable|string|max:255',
             ],
             [
-                'employee_id.required'    => 'الموظف المسؤول مطلوب',
-                'employee_id.exists'      => 'الموظف غير موجود',
                 'name.required'           => 'اسم الطالب مطلوب',
                 'mobile.required'         => 'رقم الجوال مطلوب',
                 'national_id.required'    => 'رقم الهوية مطلوب',
@@ -167,23 +170,22 @@ class StudentEmployeeController extends Controller {
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        $this->studentService->update(
-            $id,
-            $request->only(
-                'employee_id',
-                'name',
-                'mobile',
-                'national_id',
-                'course_name',
-                'total_amount',
-                'paid_amount',
-                'payment_method',
-                'payment_date',
-                'previous_student_of'
-            )
+        $data = $request->only(
+            'name',
+            'mobile',
+            'national_id',
+            'course_name',
+            'total_amount',
+            'paid_amount',
+            'payment_method',
+            'payment_date',
+            'previous_student_of'
         );
+        $data['employee_id'] = $this->currentEmployeeId(); // the student always stays with this employee
 
-        return redirect()->route('employee.students.index')->with('success', 'تم تحديث بيانات الطالب بنجاح');
+        $this->studentService->update($id, $data);
+
+        return $this->redirectToStudentList($request, 'employee.students.index')->with('success', 'تم تحديث بيانات الطالب بنجاح');
     }
 
     public function destroy(Request $request, int $id) {

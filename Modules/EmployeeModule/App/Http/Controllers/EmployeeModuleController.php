@@ -42,16 +42,14 @@ class EmployeeModuleController extends Controller
 
     public function showWorkRegulations()
     {
-        $employee = auth()->guard('employee')->user()->userable;
-        abort_unless($employee->can_view_work_regulations, 403);
+        $employee = auth()->guard('employee')->user()->userable; // access: route permission:can_view_work_regulations
         $branch   = $employee->branch;
         return view('employeemodule::employee.work_regulations', compact('branch'));
     }
 
     public function downloadWorkRegulationsPdf()
     {
-        $employee = auth()->guard('employee')->user()->userable;
-        abort_unless($employee->can_view_work_regulations, 403);
+        $employee = auth()->guard('employee')->user()->userable; // access: route permission:can_view_work_regulations
         $branch   = $employee->branch;
 
         $fileName = 'لائحة العمل' . ($branch ? ' - ' . $branch->name : '') . '.pdf';

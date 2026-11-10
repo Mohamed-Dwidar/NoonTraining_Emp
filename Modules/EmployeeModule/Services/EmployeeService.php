@@ -4,15 +4,40 @@ namespace Modules\EmployeeModule\Services;
 
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 use Modules\BranchModule\Repository\BranchRepository;
+use Modules\PermissionModule\Repository\PermissionRepository;
+use Modules\UserModule\Repository\UserRepository;
 
 class EmployeeService {
 
+    /** spatie guard of employee permissions (see User::$guard_name) */
+    public const PERMISSION_GUARD = 'employee';
+
     protected EmployeeRepository $employeeRepository;
     protected BranchRepository $branchRepository;
+    protected PermissionRepository $permissionRepository;
+    protected UserRepository $userRepository;
 
-    public function __construct(EmployeeRepository $employeeRepository, BranchRepository $branchRepository) {
-        $this->employeeRepository = $employeeRepository;
-        $this->branchRepository   = $branchRepository;
+    public function __construct(
+        EmployeeRepository $employeeRepository,
+        BranchRepository $branchRepository,
+        PermissionRepository $permissionRepository,
+        UserRepository $userRepository
+    ) {
+        $this->employeeRepository   = $employeeRepository;
+        $this->branchRepository     = $branchRepository;
+        $this->permissionRepository = $permissionRepository;
+        $this->userRepository       = $userRepository;
+    }
+
+    /** All permissions the admin can give an employee (checkboxes on create/edit). */
+    public function employeePermissions() {
+        return $this->permissionRepository->forGuard(self::PERMISSION_GUARD);
+    }
+
+    /** Permission names the employee's login user currently has. */
+    public function permissionNamesOf($employee): array {
+        $user = $employee->user->first(); // Employee::user() is morphMany — one login user in practice
+        return $user ? $user->getPermissionNames()->all() : [];
     }
 
     public function getAllEmployees() {
@@ -44,13 +69,13 @@ class EmployeeService {
             'hired_at'             => $data['hired_at']         ?? null,
             'contract_ends_at'     => $data['contract_ends_at'] ?? null,
             'terminated_at'        => $data['terminated_at']    ?? null,
-            'can_view_work_regulations' => $data['can_view_work_regulations'] ?? true,
         ]);
 
-        $employee->user()->create([
+        $user = $employee->user()->create([
             'email'    => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+        $this->userRepository->syncPermissions($user, $data['permissions'] ?? []);
 
         $this->syncCommissionsForBranch($employee->id, $data['branch_id'], $data['commissions'] ?? []);
 
@@ -74,7 +99,6 @@ class EmployeeService {
             'hired_at'             => $data['hired_at']         ?? $employee->hired_at,
             'contract_ends_at'     => $data['contract_ends_at'] ?? $employee->contract_ends_at,
             'terminated_at'        => $data['terminated_at']    ?? $employee->terminated_at,
-            'can_view_work_regulations' => $data['can_view_work_regulations'] ?? $employee->can_view_work_regulations,
         ], $id);
 
         $userUpdate = [];
@@ -86,6 +110,9 @@ class EmployeeService {
         }
         if (!empty($userUpdate)) {
             $employee->user()->update($userUpdate);
+        }
+        if ($user = $employee->user()->first()) {
+            $this->userRepository->syncPermissions($user, $data['permissions'] ?? []);
         }
 
         $this->syncCommissionsForBranch($id, $data['branch_id'], $data['commissions'] ?? []);
