@@ -35,12 +35,12 @@
                             @include('layoutmodule::layouts.month_select', ['name' => 'month', 'selected' => $filters['month'] ?? now()->format('Y-m')])
                         </div>
                         <div class="col-md-2 custom-date-field" style="display:none;">
-                            <label class="d-block mb-1"><strong>من تاريخ</strong></label>
-                            <input type="date" name="date_from" class="form-control" value="{{ $filters['date_from'] ?? $from }}">
+                            <label class="d-block mb-1"><strong>من شهر</strong></label>
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month_from', 'selected' => $filters['month_from'] ?? $from])
                         </div>
                         <div class="col-md-2 custom-date-field" style="display:none;">
-                            <label class="d-block mb-1"><strong>إلى تاريخ</strong></label>
-                            <input type="date" name="date_to" class="form-control" value="{{ $filters['date_to'] ?? $to }}">
+                            <label class="d-block mb-1"><strong>إلى شهر</strong></label>
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month_to', 'selected' => $filters['month_to'] ?? $to])
                         </div>
                         <div class="col-md-2">
                              <label class="d-block mb-1"><strong>&nbsp;</strong></label>
@@ -171,6 +171,7 @@
                                     <th>الإجمالي</th>
                                     <th>المدفوع</th>
                                     <th>تاريخ الدفع</th>
+                                    <th>شهر المحاسبة</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -183,6 +184,7 @@
                                         <td>{{ number_format($record->total_amount) }}</td>
                                         <td>{{ number_format($record->paid_amount) }}</td>
                                         <td>{{ $record->payment_date }}</td>
+                                        <td>{{ $record->month }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

@@ -2,7 +2,6 @@
 
 namespace Modules\ReportModule\Services;
 
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 use Modules\StudentModule\Repository\StudentRepository;
@@ -16,7 +15,10 @@ use Modules\StudentModule\Repository\StudentRepository;
  * in the app.
  *
  * Metrics are derived entirely from Student registrations (StudentModule),
- * attributed to the employee who registered them (students.employee_id):
+ * attributed to the employee who registered them (students.employee_id).
+ * Period = students.month (شهر المحاسبة, the month the students were uploaded for) — same as
+ * payroll commission. Not payment_date: employees often upload last month's payments.
+ *
  *
  * - Students   = distinct individuals (by national_id) an employee registered.
  *                A student with no national_id on file is counted as their own
@@ -40,41 +42,45 @@ class ReportService {
         $this->employeeRepository = $employeeRepository;
     }
 
-    public function resolveDateRange(array $filters): array {
-        $period = $filters['period'] ?? 'current_month';
+    /**
+     * Period → [fromMonth, toMonth] ('YYYY-MM'), compared with students.month (شهر المحاسبة) —
+     * the same month uploads and payroll use. custom = month_from..month_to (swapped if reversed).
+     */
+    public function resolveMonthRange(array $filters): array {
+        $valid   = fn($m) => is_string($m) && preg_match('/^\d{4}-\d{2}$/', $m);
+        $current = now()->format('Y-m');
 
-        switch ($period) {
+        switch ($filters['period'] ?? 'current_month') {
             case 'previous_month':
-                $from = now()->subMonthNoOverflow()->startOfMonth();
-                $to   = now()->subMonthNoOverflow()->endOfMonth();
+                $from = $to = now()->subMonthNoOverflow()->format('Y-m');
                 break;
 
             case 'month':
-                $month = $filters['month'] ?? now()->format('Y-m');
-                $from  = Carbon::parse($month . '-01')->startOfMonth();
-                $to    = Carbon::parse($month . '-01')->endOfMonth();
+                $from = $to = $valid($filters['month'] ?? null) ? $filters['month'] : $current;
                 break;
 
             case 'custom':
-                $from = !empty($filters['date_from']) ? Carbon::parse($filters['date_from']) : now()->startOfMonth();
-                $to   = !empty($filters['date_to'])   ? Carbon::parse($filters['date_to'])   : now()->endOfMonth();
+                $from = $valid($filters['month_from'] ?? null) ? $filters['month_from'] : $current;
+                $to   = $valid($filters['month_to'] ?? null)   ? $filters['month_to']   : $current;
+                if ($from > $to) {
+                    [$from, $to] = [$to, $from];
+                }
                 break;
 
             case 'current_month':
             default:
-                $from = now()->startOfMonth();
-                $to   = now()->endOfMonth();
+                $from = $to = $current;
                 break;
         }
 
-        return [$from->format('Y-m-d'), $to->format('Y-m-d')];
+        return [$from, $to];
     }
 
     /**
      * One row per employee with their students/admissions/revenue for the period.
      */
     public function employeePerformance(array $filters): Collection {
-        [$from, $to] = $this->resolveDateRange($filters);
+        [$from, $to] = $this->resolveMonthRange($filters);
 
         $rows      = $this->studentRepository->performanceByEmployee($from, $to, $filters);
         $employees = $this->employeeRepository->findWithTrashedByIds($rows->pluck('employee_id'));
@@ -130,19 +136,17 @@ class ReportService {
         $result = collect();
 
         for ($i = $months - 1; $i >= 0; $i--) {
-            $monthDate = now()->subMonthsNoOverflow($i);
-            $from = $monthDate->copy()->startOfMonth()->format('Y-m-d');
-            $to   = $monthDate->copy()->endOfMonth()->format('Y-m-d');
+            $month = now()->subMonthsNoOverflow($i)->format('Y-m');
 
             // One employee → that employee only; otherwise only the branch filter applies.
             $scope = $employeeId
                 ? ['employee_id' => $employeeId]
                 : ['branch_id' => $filters['branch_id'] ?? null];
 
-            $agg = $this->studentRepository->performanceTotals($from, $to, $scope);
+            $agg = $this->studentRepository->performanceTotals($month, $month, $scope);
 
             $result->push((object) [
-                'month'      => $monthDate->format('Y-m'),
+                'month'      => $month,
                 'students'   => (int) $agg->students_count,
                 'admissions' => (int) $agg->admissions_count,
                 'revenue'    => (float) $agg->revenue,
@@ -157,9 +161,9 @@ class ReportService {
      */
     public function employeeDrilldown(int $employeeId, array $filters): array {
         $filters['employee_id'] = $employeeId;
-        [$from, $to] = $this->resolveDateRange($filters);
+        [$from, $to] = $this->resolveMonthRange($filters);
 
-        $students = $this->studentRepository->trainingRecordsByPaymentDate($from, $to, ['employee_id' => $employeeId]);
+        $students = $this->studentRepository->trainingRecordsByMonth($from, $to, ['employee_id' => $employeeId]);
 
         $uniqueStudents = $students->unique(fn($s) => $s->national_id ?: 'row-' . $s->id)->count();
 

@@ -10,9 +10,6 @@ class StudentRepository extends BaseRepository
     /** A student without a national_id counts as their own unique person. */
     private const DISTINCT_STUDENT_EXPR = "COUNT(DISTINCT COALESCE(NULLIF(national_id, ''), CONCAT('row-', id)))";
 
-    /** payment_date is a free-text string column; skip malformed values (e.g. a raw Excel serial). */
-    private const VALID_DATE_EXPR = "payment_date REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'";
-
     public function model()
     {
         return Student::class;
@@ -83,15 +80,14 @@ class StudentRepository extends BaseRepository
     }
 
     /**
-     * Students of training-branch employees with a valid payment_date in [$from, $to].
+     * Students of training-branch employees whose month (شهر المحاسبة, 'YYYY-MM') is in [$fromMonth, $toMonth].
      * Used by ReportModule (performance metrics).
      * $filters: employee_id, branch_id, department_id (all optional).
      */
-    public function trainingQueryByPaymentDate(string $from, string $to, array $filters = [])
+    public function trainingQueryByMonth(string $fromMonth, string $toMonth, array $filters = [])
     {
         return Student::query()
-            ->whereRaw(self::VALID_DATE_EXPR)
-            ->whereBetween('payment_date', [$from, $to])
+            ->whereBetween('month', [$fromMonth, $toMonth])
             ->whereHas('employee.branch', fn($q) => $q->where('type', 'training'))
             ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
             ->when(!empty($filters['branch_id']), fn($q) => $q->whereHas('employee', fn($q2) => $q2->where('branch_id', $filters['branch_id'])))
@@ -101,7 +97,7 @@ class StudentRepository extends BaseRepository
     /** Per-employee students/admissions/revenue rows. */
     public function performanceByEmployee(string $from, string $to, array $filters = [])
     {
-        return $this->trainingQueryByPaymentDate($from, $to, $filters)
+        return $this->trainingQueryByMonth($from, $to, $filters)
             ->selectRaw('employee_id,'
                 . self::DISTINCT_STUDENT_EXPR . ' as students_count,'
                 . 'COUNT(*) as admissions_count,'
@@ -113,17 +109,18 @@ class StudentRepository extends BaseRepository
     /** One aggregate row (students_count, admissions_count, revenue). */
     public function performanceTotals(string $from, string $to, array $filters = [])
     {
-        return $this->trainingQueryByPaymentDate($from, $to, $filters)
+        return $this->trainingQueryByMonth($from, $to, $filters)
             ->selectRaw(self::DISTINCT_STUDENT_EXPR . ' as students_count,'
                 . 'COUNT(*) as admissions_count,'
                 . 'COALESCE(SUM(paid_amount), 0) as revenue')
             ->first();
     }
 
-    /** The underlying registration rows, newest payment first. */
-    public function trainingRecordsByPaymentDate(string $from, string $to, array $filters = [])
+    /** The underlying registration rows, newest month first, then newest payment. */
+    public function trainingRecordsByMonth(string $from, string $to, array $filters = [])
     {
-        return $this->trainingQueryByPaymentDate($from, $to, $filters)
+        return $this->trainingQueryByMonth($from, $to, $filters)
+            ->orderByDesc('month')
             ->orderByDesc('payment_date')
             ->get();
     }

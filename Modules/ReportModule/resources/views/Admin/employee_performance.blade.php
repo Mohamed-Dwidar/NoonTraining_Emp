@@ -32,12 +32,12 @@
                             @include('layoutmodule::layouts.month_select', ['name' => 'month', 'selected' => $filters['month'] ?? now()->format('Y-m')])
                         </div>
                         <div class="col-md-2 custom-date-field" style="display:none;">
-                            <label class="d-block mb-1"><strong>من تاريخ</strong></label>
-                            <input type="date" name="date_from" class="form-control" value="{{ $filters['date_from'] ?? $from }}">
+                            <label class="d-block mb-1"><strong>من شهر</strong></label>
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month_from', 'selected' => $filters['month_from'] ?? $from])
                         </div>
                         <div class="col-md-2 custom-date-field" style="display:none;">
-                            <label class="d-block mb-1"><strong>إلى تاريخ</strong></label>
-                            <input type="date" name="date_to" class="form-control" value="{{ $filters['date_to'] ?? $to }}">
+                            <label class="d-block mb-1"><strong>إلى شهر</strong></label>
+                            @include('layoutmodule::layouts.month_select', ['name' => 'month_to', 'selected' => $filters['month_to'] ?? $to])
                         </div>
                     </div>
 
@@ -227,7 +227,7 @@
                                         <td>{{ number_format($row->revenue, 2) }}</td>
                                         <td>
                                             <a class="btn btn-sm btn-info"
-                                                href="{{ route('admin.reports.employee-performance.show', [$row->employee_id, 'period' => $filters['period'], 'month' => $filters['month'], 'date_from' => $filters['date_from'], 'date_to' => $filters['date_to']]) }}">
+                                                href="{{ route('admin.reports.employee-performance.show', [$row->employee_id, 'period' => $filters['period'], 'month' => $filters['month'], 'month_from' => $filters['month_from'], 'month_to' => $filters['month_to']]) }}">
                                                 <i class="fa fa-list-alt"></i> التفاصيل
                                             </a>
                                         </td>

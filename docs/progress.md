@@ -110,7 +110,7 @@
 - **Pending:**
   - **Security gap:** employee single `destroy` doesn't check that the student belongs to the logged-in employee (needs `can_delete_students`). Edit/update (2026-11-10) and bulk delete are scoped. Fix suggested, not done yet.
   - **Open question (asked owner, no answer yet):** `parseDate()` uses `Carbon::parse`, which reads text dates with slashes as m/d/Y — `02/08/2026` → 8 Feb, and `25/08/2026` is rejected. If the example means 2 August (d/m/Y), switch text parsing to `d/m/Y` (Excel date cells and `Y-m-d` text are unaffected).
-  - `payment_date` is a free-text string (Report guards it with REGEXP).
+  - `payment_date` is a free-text string. Data issues seen 2026-11-11: Alaa's (employee 32) imported dates are day/month-swapped (e.g. 2026-12-08), one of Sara's is 2029-09-17. Owner: don't change the import parsing now.
 
 ### Payroll
 - **Last updated:** 2026-11-11
@@ -128,14 +128,22 @@
 - **How it works:** Key/value settings edited in one form (e.g. default monthly working days / daily hours). Controller → `SettingService` (`findAll`, `create`, `updateValues`) → `SettingRepository::updateValueByKey`.
 
 ### Report
-- **Last updated:** 2026-11-10
+- **Last updated:** 2026-11-11
 - **Files:** `Modules/ReportModule/` — `ReportAdminController`, `ReportService`, views `salary_report`, `employee_performance`, `employee_drilldown`
-- **How it works:** `ReportService` holds the logic; the student queries (training-branch filter, valid `payment_date` REGEXP, distinct-student SQL) live in `StudentRepository` (`performanceByEmployee`, `performanceTotals`, `trainingRecordsByPaymentDate`), employee lookup in `EmployeeRepository::findWithTrashedByIds`. Salary report (per month/branch) and employee performance for training-branch staff: distinct students (by `national_id`), admissions, revenue (`paid_amount`), rankings, 6-month trend, drill-down.
+- **How it works:** Performance period = **`students.month` (شهر المحاسبة)**, like payroll: `ReportService::resolveMonthRange()` → [fromMonth, toMonth] for الشهر الحالي / السابق / شهر محدد / فترة مخصصة (`month_from`/`month_to` month lists, swapped if reversed). `ReportService` holds the logic; the student queries (training-branch filter, month range, distinct-student SQL) live in `StudentRepository` (`trainingQueryByMonth`, `performanceByEmployee`, `performanceTotals`, `trainingRecordsByMonth`), employee lookup in `EmployeeRepository::findWithTrashedByIds`. Salary report (per month/branch) and employee performance for training-branch staff: distinct students (by `national_id`), admissions, revenue (`paid_amount`), rankings, 6-month trend, drill-down.
+- **Decisions:**
+  - Period by `students.month`, not `payment_date` — owner, 2026-11-11. Employees upload last month's payments (Esraa's October upload = September payments), so by payment date they appeared partly or not at all; Alaa's imported dates are also day/month-swapped.
 - **Pending:** Clean up legacy `User/ReportUserController` and course exports (?).
 
 ---
 
 ## Session log
+
+### 2026-11-11 — Performance report by accounting month; payroll/student list tweaks
+- **Changed:** `ReportService` (`resolveMonthRange` replaces `resolveDateRange`, trend + drilldown by month), `StudentRepository` (payment-date report queries → month), `ReportAdminController` (`month_from`/`month_to`), `employee_performance` + `employee_drilldown` views (custom period = month lists, drilldown shows «شهر المحاسبة»). Same day: employee payroll list transfer status (green + date / red), transfer popup shows salary, student lists: admin period filter = month lists on `students.month`, «تاريخ تسجيل الطالب» column in admin list, «شهر المحاسبة» column in employee list.
+- **Why:** Owner: performance report showed only part of the employees (Esraa missing) — it grouped by payment date while uploads/payroll use شهر المحاسبة.
+- **Affects:** ReportModule, StudentModule (repository), PayrollModule (employee view). Verified by rendering: October = Esraa 45, Kirollos 6, Sara 4; 08–10 = all 245 students; drilldown/data/salary pages 200.
+- **Commit:** — (not committed yet)
 
 ### 2026-11-11 — Payroll salary transfer status
 - **Changed:** new migration `PayrollModule/.../2026_11_11_000001_add_transfer_status_to_payrolls_table.php`; `Payroll` model (constants, `isTransferred()`, `transferStatusLabel()`, date cast); `PayrollRepository/PayrollService::updateTransfer`; `PayrollAdminController::updateTransfer`; route `admin.payrolls.transfer`; `Admin/index.blade.php` (status column, green highlight + date, transfer modal; compact column widths)

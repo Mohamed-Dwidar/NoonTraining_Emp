@@ -76,7 +76,7 @@ class ReportAdminController extends Controller {
         $rankings = $this->reportService->rankings($rows);
         $trend    = $this->reportService->monthlyTrend($filters, $filters['employee_id'] ?: null);
 
-        [$from, $to] = $this->reportService->resolveDateRange($filters);
+        [$from, $to] = $this->reportService->resolveMonthRange($filters);
 
         [$branches, $departments, $employees] = $this->trainingFilterOptions();
 
@@ -102,7 +102,7 @@ class ReportAdminController extends Controller {
         $rankings = $this->reportService->rankings($rows);
         $trend    = $this->reportService->monthlyTrend($filters, $filters['employee_id'] ?: null);
 
-        [$from, $to] = $this->reportService->resolveDateRange($filters);
+        [$from, $to] = $this->reportService->resolveMonthRange($filters);
 
         return response()->json([
             'from'     => $from,
@@ -154,8 +154,8 @@ class ReportAdminController extends Controller {
         return [
             'period'        => $request->input('period', 'current_month'),
             'month'         => $request->input('month'),
-            'date_from'     => $request->input('date_from'),
-            'date_to'       => $request->input('date_to'),
+            'month_from'    => $request->input('month_from'),
+            'month_to'      => $request->input('month_to'),
             'employee_id'   => $request->input('employee_id'),
             'branch_id'     => $request->input('branch_id'),
             'department_id' => $request->input('department_id'),

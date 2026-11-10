@@ -73,7 +73,7 @@ Then suggest a commit message.
 - **DepartmentModule** ↔ BranchModule, EmployeeModule (departments-by-branch lookup).
 - **EmployeeModule** ↔ almost everything: `basic_salary`, `monthly_working_days`, `status`; `employee_commissions` (per-employee rate overrides of CommissionModule).
 - **PayrollModule** ← Deduction, Bonuse, Leave, Student, Commission, Employee: `PayrollRepository::recalculateForEmployee($employeeId, 'YYYY-MM')` is the single formula. Called on create/update/delete in Bonuse/Deduction/Leave services and on payroll page load.
-- **StudentModule** → PayrollModule (commission by `students.month` + `commission_id`), ReportModule (performance metrics). Student changes do **not** trigger recalc directly — payroll recalcs on view.
+- **StudentModule** → PayrollModule (commission by `students.month` + `commission_id`), ReportModule (performance metrics, also by `students.month` — not `payment_date`). Student changes do **not** trigger recalc directly — payroll recalcs on view.
 - **CommissionModule** → StudentModule (`students.commission_id`), EmployeeModule (overrides), PayrollModule.
 - **ViolationModule** → DeductionModule (`resolveViolationDeduction` picks amount by repeat count).
 - **AttendanceModule** — monthly records per branch; not yet feeding payroll (`days_late` hard-coded 0).
