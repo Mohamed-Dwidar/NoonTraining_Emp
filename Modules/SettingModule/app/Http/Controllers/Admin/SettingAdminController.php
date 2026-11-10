@@ -4,13 +4,20 @@ namespace Modules\SettingModule\app\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\SettingModule\app\Models\Setting;
+use Modules\SettingModule\app\Services\SettingService;
 
 class SettingAdminController extends Controller
 {
+    protected SettingService $settingService;
+
+    public function __construct(SettingService $settingService)
+    {
+        $this->settingService = $settingService;
+    }
+
     public function index()
     {
-        $settings = Setting::get();
+        $settings = $this->settingService->findAll();
         return view('settingmodule::admin.index', compact('settings'));
     }
 
@@ -27,7 +34,7 @@ class SettingAdminController extends Controller
             'label' => 'nullable|string',
         ]);
 
-        Setting::create([
+        $this->settingService->create((object) [
             'key'   => $request->key,
             'value' => $request->value ?? '0',
             'label' => $request->label ?? '',
@@ -39,10 +46,7 @@ class SettingAdminController extends Controller
 
     public function update(Request $request)
     {
-        $values = $request->input('settings', []);
-        foreach ($values as $key => $value) {
-            Setting::where('key', $key)->update(['value' => $value]);
-        }
+        $this->settingService->updateValues($request->input('settings', []));
 
         return redirect()->route('admin.settings.index')
             ->with('success', 'تم تعديل الاعدادات بنجاح');

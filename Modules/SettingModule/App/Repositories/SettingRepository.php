@@ -10,4 +10,9 @@ class SettingRepository extends BaseRepository {
     public function model() {
         return Setting::class;
     }
+
+    public function updateValueByKey(string $key, $value): void
+    {
+        Setting::where('key', $key)->update(['value' => $value]);
+    }
 }

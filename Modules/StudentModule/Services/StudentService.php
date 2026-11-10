@@ -4,7 +4,6 @@ namespace Modules\StudentModule\Services;
 
 use Illuminate\Support\Collection;
 use Modules\StudentModule\Repository\StudentRepository;
-use Modules\StudentModule\App\Http\Models\Student;
 
 class StudentService {
 
@@ -77,11 +76,6 @@ class StudentService {
     }
 
     public function duplicateNationalIdCounts(): Collection {
-        return Student::whereNotNull('national_id')
-            ->where('national_id', '!=', '')
-            ->selectRaw('national_id, COUNT(*) as cnt')
-            ->groupBy('national_id')
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('cnt', 'national_id');
+        return $this->studentRepository->duplicateNationalIdCounts();
     }
 }

@@ -8,6 +8,7 @@ use Modules\BonuseModule\Repository\BonuseRepository;
 use Modules\DeductionModule\Repository\DeductionRepository;
 use Modules\EmployeeModule\Repository\EmployeeRepository;
 use Modules\LeaveModule\Repository\LeaveRepository;
+use Modules\StudentModule\Repository\StudentRepository;
 
 class PayrollService {
     protected PayrollRepository $payrollRepository;
@@ -15,19 +16,22 @@ class PayrollService {
     protected DeductionRepository $deductionRepository;
     protected BonuseRepository $bonuseRepository;
     protected LeaveRepository $leaveRepository;
+    protected StudentRepository $studentRepository;
 
     public function __construct(
         PayrollRepository $payrollRepository,
         EmployeeRepository $employeeRepository,
         DeductionRepository $deductionRepository,
         BonuseRepository $bonuseRepository,
-        LeaveRepository $leaveRepository
+        LeaveRepository $leaveRepository,
+        StudentRepository $studentRepository
     ) {
         $this->payrollRepository   = $payrollRepository;
         $this->employeeRepository  = $employeeRepository;
         $this->deductionRepository = $deductionRepository;
         $this->bonuseRepository    = $bonuseRepository;
         $this->leaveRepository     = $leaveRepository;
+        $this->studentRepository   = $studentRepository;
     }
 
     public function filter($request = []) {
@@ -40,6 +44,33 @@ class PayrollService {
 
     public function studentsCommissionBreakdown(int $employeeId, string $month): array {
         return $this->payrollRepository->studentsCommissionBreakdown($employeeId, $month);
+    }
+
+    /**
+     * Everything behind one employee's payroll for a month
+     * (used by the details popup and details PDF in both portals).
+     */
+    public function monthDetails(int $employeeId, string $month): array {
+        return [
+            'bonuses'     => $this->bonuseRepository->getByEmployeeAndMonth($employeeId, $month),
+            'deductions'  => $this->deductionRepository->getByEmployeeAndMonth($employeeId, $month),
+            'leaves'      => $this->leaveRepository->getByEmployeeAndMonth($employeeId, $month),
+            'students'    => $this->studentRepository->getByEmployeeAndMonth($employeeId, $month),
+            'commissions' => $this->studentsCommissionBreakdown($employeeId, $month),
+        ];
+    }
+
+    /**
+     * Months from the employee's first student registration up to the current month.
+     */
+    public function monthsSinceFirstStudent(int $employeeId): array {
+        $months       = [];
+        $firstMonth   = $this->studentRepository->firstMonthForEmployee($employeeId);
+        $currentMonth = now()->format('Y-m');
+        for ($m = $firstMonth; $m && $m <= $currentMonth; $m = date('Y-m', strtotime($m . '-01 +1 month'))) {
+            $months[] = $m;
+        }
+        return $months;
     }
 
     public function studentsCommissionAmounts(iterable $students): array {

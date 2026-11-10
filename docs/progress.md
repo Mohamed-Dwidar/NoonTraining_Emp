@@ -7,9 +7,9 @@
 ---
 
 ## Current status
-- **Working on:** Month handling across payroll / students / reports. Last commits (2026-10-12 → 10-14): "exported file for students", "payroll by month", "months fix" — student commission now counts students by `students.month` (not `payment_date`), shared `layouts/month_select` dropdown replaced `<input type="month">`, `employee_commissions.student_id` renamed to `employee_id`.
-- **Branch / working tree:** `main`; uncommitted: permission-alias fix, FcmHelper + Vite/Tailwind removal (see session log 2026-10-18).
-- **Next up:** [to confirm with owner] (?). Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
+- **Working on:** Enforcing Controller → Service → Repository in every module (2026-11-10). Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
+- **Branch / working tree:** `main`; through c63ee4b committed. Uncommitted: layering refactor + CLAUDE.md/progress.md updates.
+- **Next up:** Answer the date-format question for imports. Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
   - `app/Http/Kernel.php` is dead (Laravel 12 binds the framework kernel). Its `permission` entry was never active; now registered in `bootstrap/app.php` (2026-10-18).
@@ -57,7 +57,7 @@
 ### Employee
 - **Last updated:** 2026-10-08
 - **Files:** `Modules/EmployeeModule/` — `EmployeeAdminController`, `EmployeeModuleController` (employee portal), `EmployeeService`, models `Employee`, `EmployeeCommission`
-- **How it works:** Admin CRUD + status change + commission edit. Fields: salary, monthly working days, daily hours, status (`active`, `on_leave`, …), `hired_at`/`contract_ends_at`/`terminated_at`. Per-employee commission overrides synced into `employee_commissions` (only for training branches (?)). Employee portal: dashboard, my info, change password, work regulations (+PDF).
+- **How it works:** Admin CRUD + status change + commission edit. Fields: salary, monthly working days, daily hours, status (`active`, `on_leave`, …), `hired_at`/`contract_ends_at`/`terminated_at`. Per-employee commission overrides synced into `employee_commissions` (only for training branches (?); via `EmployeeRepository::deleteCommissions/saveCommission`, branch via `BranchRepository`). Employee portal: dashboard, my info, change password, work regulations (+PDF).
 - **Pending:** Remove/clarify `stu_commission` and `EmployeeComission` (?).
 
 ### Attendance
@@ -76,7 +76,7 @@
 
 ### Deduction
 - **Files:** `Modules/DeductionModule/` — `DeductionAdminController`, `DeductionService`, `Deduction` model
-- **How it works:** CRUD of monthly deductions; can be linked to a Violation — amount auto-resolved from the violation's repeat tiers (`violation-amount` AJAX). Triggers payroll recalc.
+- **How it works:** CRUD of monthly deductions; can be linked to a Violation — amount auto-resolved from the violation's repeat tiers (`violation-amount` AJAX → `DeductionService::violationAmount`, tiers via `ViolationRepository::getRepeats`). Triggers payroll recalc.
 
 ### Violation
 - **Files:** `Modules/ViolationModule/` — `ViolationAdminController`, `ViolationService`, models `Violation`, `ViolationRepeat`
@@ -94,45 +94,56 @@
 
 ### Student
 - **Last updated:** 2026-10-18
-- **Import (validate-then-save):** `StudentImport::collection()` only collects rows (sheet title + Excel row number); controllers call `errors()` → if any, `back()->withErrors()` listing «sheet» + row + messages (max 50) and nothing is saved; else `save()` inserts all rows in one `DB::transaction`. Used by both Admin and Employee `importStudents`. Fully empty rows are skipped; required: name, mobile, national_id, course_name, payment_method, payment_date (valid date); amounts integer ≥ 0 (empty → 0).
+- **Import (validate-then-save):** `StudentImport::collection()` only collects rows (sheet title + Excel row number); controllers call `errors()` → if any, `back()->withErrors()` listing «sheet» + row + messages (max 50) and nothing is saved; else `save()` inserts all rows in one `DB::transaction`. Used by both Admin and Employee `importStudents`. Fully empty rows are skipped; required: name, mobile, national_id, course_name, payment_method, payment_date (valid date); amounts integer ≥ 0 (empty → 0). Each error shows the first message per field + a valid example from `StudentImport::EXAMPLES` (based on real data: 9-digit mobile starting 5, 10-digit national ID starting 1, methods كاش/حوالة/تمارا/تابي, date `02/08/2026`).
+- **Decisions:**
+  - Validate the whole file before saving anything, all-or-nothing — owner request, 2026-10-18.
 - **Files:** `Modules/StudentModule/` — `StudentAdminController`, `Employee/StudentEmployeeController`, `StudentService`, `App/Imports/StudentImport.php`, `Exports/Students*Export.php`
 - **How it works:** Student registrations (course, amounts, payment, `national_id`, `commission_id`, `month`) attributed to the registering employee. Admin: CRUD, Excel import/template, export. Employee portal: list/edit/delete/import own students (no create route despite `Employee/create` view (?)).
-- **Pending:** `payment_date` is a free-text string (Report guards it with REGEXP).
+- **Pending:**
+  - **Open question (asked owner, no answer yet):** `parseDate()` uses `Carbon::parse`, which reads text dates with slashes as m/d/Y — `02/08/2026` → 8 Feb, and `25/08/2026` is rejected. If the example means 2 August (d/m/Y), switch text parsing to `d/m/Y` (Excel date cells and `Y-m-d` text are unaffected).
+  - `payment_date` is a free-text string (Report guards it with REGEXP).
 
 ### Payroll
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-11-10
 - **Files:** `Modules/PayrollModule/` — `PayrollAdminController`, `PayrollModuleController` (employee), `PayrollService`, `PayrollRepository`, views `payslip_print`, `details_print`
-- **How it works:** One row per employee + `YYYY-MM`. Opening the payroll page (per branch/month) recalculates every active/on-leave employee. `total = max(0, basic − (deductions + leave_days × daily_salary) + bonuses + students_commission)`. Commission = students of that `month` × (employee override ?? default rate; percentage applies to `paid_amount`). Payslip + details views and PDF for admin and employee.
+- **How it works:** Details popup/PDF data comes from `PayrollService::monthDetails()` (bonuses, deductions, leaves, students, commission breakdown via each module's repository `getByEmployeeAndMonth`); employee "my payrolls" months from `monthsSinceFirstStudent()`. One row per employee + `YYYY-MM`. Opening the payroll page (per branch/month) recalculates every active/on-leave employee. `total = max(0, basic − (deductions + leave_days × daily_salary) + bonuses + students_commission)`. Commission = students of that `month` × (employee override ?? default rate; percentage applies to `paid_amount`). Payslip + details views and PDF for admin and employee.
 - **Decisions:**
   - Recalc on read, not stored snapshots — because inputs change often; means past months change if rates/salary change (?).
   - Commission by `students.month` instead of `payment_date` — commit "payroll by month" (old logic left commented).
 - **Pending:** `create`/`edit` views exist but no routes (?). No month locking/closing.
 
 ### Setting
+- **Last updated:** 2026-11-10
 - **Files:** `Modules/SettingModule/` — `SettingAdminController`, `Setting`, `Country` models, seeder
-- **How it works:** Key/value settings edited in one form (e.g. default monthly working days / daily hours).
+- **How it works:** Key/value settings edited in one form (e.g. default monthly working days / daily hours). Controller → `SettingService` (`findAll`, `create`, `updateValues`) → `SettingRepository::updateValueByKey`.
 
 ### Report
-- **Last updated:** 2026-10-14
+- **Last updated:** 2026-11-10
 - **Files:** `Modules/ReportModule/` — `ReportAdminController`, `ReportService`, views `salary_report`, `employee_performance`, `employee_drilldown`
-- **How it works:** Salary report (per month/branch) and employee performance for training-branch staff: distinct students (by `national_id`), admissions, revenue (`paid_amount`), rankings, 6-month trend, drill-down.
+- **How it works:** `ReportService` holds the logic; the student queries (training-branch filter, valid `payment_date` REGEXP, distinct-student SQL) live in `StudentRepository` (`performanceByEmployee`, `performanceTotals`, `trainingRecordsByPaymentDate`), employee lookup in `EmployeeRepository::findWithTrashedByIds`. Salary report (per month/branch) and employee performance for training-branch staff: distinct students (by `national_id`), admissions, revenue (`paid_amount`), rankings, 6-month trend, drill-down.
 - **Pending:** Clean up legacy `User/ReportUserController` and course exports (?).
 
 ---
 
 ## Session log
 
+### 2026-11-10 — Enforce Controller → Service → Repository in all modules
+- **Changed:** Controllers no longer touch models: `PayrollAdminController`, `PayrollModuleController` (→ `PayrollService::monthDetails`, `monthsSinceFirstStudent`), `DeductionAdminController::violationAmount` (→ `DeductionService::violationAmount`), `SettingAdminController` (→ `SettingService`); unused model imports dropped in Leave/Task/Report admin controllers. Services no longer query models: `ReportService`, `EmployeeService`, `DeductionService`, `StudentService`, `UserService`. New repository methods: `getByEmployeeAndMonth` (Bonuse/Deduction/Leave/Student), `StudentRepository::firstMonthForEmployee/duplicateNationalIdCounts/performanceByEmployee/performanceTotals/trainingRecordsByPaymentDate`, `EmployeeRepository::findWithTrashedByIds/deleteCommissions/saveCommission`, `ViolationRepository::getRepeats`, `PermissionRepository::idsByNames`, `SettingRepository::updateValueByKey`. CLAUDE.md Conventions → layering rule spelled out.
+- **Why:** Owner wants the same structure in every module: controller calls service, service calls repository.
+- **Affects:** Payroll, Report, Deduction/Violation, Employee/Branch, Student, User/Permission, Setting. No behaviour change intended; verified services/controllers resolve and the new paths return data (payroll details, reports, violation amount, settings).
+- **Commit:** — (not committed yet)
+
 ### 2026-10-18 — Student import: validate whole file before saving
-- **Changed:** `StudentModule/App/Imports/StudentImport.php` (collect → `errors()` → `save()`), `Employee/StudentEmployeeController::importStudents`, `Admin/StudentAdminController::importStudents`
+- **Changed:** `StudentModule/App/Imports/StudentImport.php` (collect → `errors()` → `save()`, per-field valid examples in error messages), `Employee/StudentEmployeeController::importStudents`, `Admin/StudentAdminController::importStudents`
 - **Why:** Errors should be reported per sheet/row with nothing saved. Before, partially-filled rows were silently skipped, and an empty payment method/date (NOT NULL columns) threw a SQL error mid-file, leaving earlier rows saved.
 - **Affects:** PayrollModule (only valid rows reach commission calc), ReportModule
-- **Commit:** (not committed yet)
+- **Commit:** c63ee4b (follow-up doc update not yet committed)
 
 ### 2026-10-18 — Confirm memory items, fix permission alias, remove Vite/Tailwind
 - **Changed:** `bootstrap/app.php` — registered `permission` → `CheckPermission`; deleted unused `app/Helpers/FcmHelper.php`; removed Vite/Tailwind: root `vite.config.js`, `resources/css`, `resources/js`, `welcome.blade.php`, every module's `vite.config.js` + `package.json` + empty `resources/assets/*` stubs, commented `module_vite(...)` lines in module stub layouts; root `package.json` now only `concurrently`; `composer dev`/`setup` scripts no longer run vite / `npm run build`; kept empty `resources/views/.gitkeep`. `CLAUDE.md` updated.
 - **Why:** Owner reviewed the "(?)" items; alias was never active under Laravel 12; Vite/Tailwind were unused (UI uses static `public/admin-assets/`)
 - **Affects:** PermissionModule, ReportModule (`permission:show_reports` group), Layout/all module stub layouts, dev tooling. Run `npm install` again to prune `node_modules` (not tracked) if present.
-- **Commit:** (not committed yet)
+- **Commit:** c63ee4b
 
 ### 2026-10-17 — Initial project memory setup
 - **Changed:** `CLAUDE.md`, `docs/progress.md` — filled from codebase exploration (no code changes)

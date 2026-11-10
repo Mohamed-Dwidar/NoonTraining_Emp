@@ -32,6 +32,13 @@ class SettingService {
         return $this->settingRepository->create($setting_data);
     }
 
+    /** Save the settings form: [key => value, ...]. */
+    public function updateValues(array $values): void {
+        foreach ($values as $key => $value) {
+            $this->settingRepository->updateValueByKey($key, $value);
+        }
+    }
+
     public function update($data) {
         $setting_data = [
             'key' => $data->key,

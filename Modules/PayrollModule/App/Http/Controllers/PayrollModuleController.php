@@ -5,10 +5,6 @@ namespace Modules\PayrollModule\App\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\BonuseModule\App\Http\Models\Bonuse;
-use Modules\DeductionModule\App\Http\Models\Deduction;
-use Modules\LeaveModule\App\Http\Models\Leave;
-use Modules\StudentModule\App\Http\Models\Student;
 use Modules\PayrollModule\Services\PayrollService;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 
@@ -37,12 +33,7 @@ class PayrollModuleController extends Controller
             ->paginate(15);
 
         // Ensure a payroll exists for every month from the employee's first student up to now.
-        $months       = [];
-        $firstMonth   = Student::where('employee_id', $employeeId)->min('month');
-        $currentMonth = now()->format('Y-m');
-        for ($m = $firstMonth; $m && $m <= $currentMonth; $m = date('Y-m', strtotime($m . '-01 +1 month'))) {
-            $months[] = $m;
-        }
+        $months = $this->payrollService->monthsSinceFirstStudent($employeeId);
 
         // Also recalculate the months on this page so the employee always sees up-to-date figures.
         $months = array_unique(array_merge($months, $query()->pluck('month')->all()));
@@ -110,11 +101,13 @@ class PayrollModuleController extends Controller
         $empId = $emp->id;
         $month = $payroll->month;
 
-        $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
-        $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
-        $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->where('month', $month)->get();
-        $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
+        [
+            'bonuses'     => $bonuses,
+            'deductions'  => $deductions,
+            'leaves'      => $leaves,
+            'students'    => $students,
+            'commissions' => $commissions,
+        ] = $this->payrollService->monthDetails($empId, $month);
 
         return response()->json([
             'employee_name'             => $emp->name ?? '—',
@@ -178,11 +171,13 @@ class PayrollModuleController extends Controller
         $empId = $emp->id;
         $month = $payroll->month;
 
-        $bonuses    = Bonuse::where('employee_id', $empId)->where('month', $month)->get();
-        $deductions = Deduction::where('employee_id', $empId)->where('month', $month)->get();
-        $leaves     = Leave::where('employee_id', $empId)->where('month', $month)->get();
-        $students   = Student::where('employee_id', $empId)->where('month', $month)->get();
-        $commissions = $this->payrollService->studentsCommissionBreakdown($empId, $month);
+        [
+            'bonuses'     => $bonuses,
+            'deductions'  => $deductions,
+            'leaves'      => $leaves,
+            'students'    => $students,
+            'commissions' => $commissions,
+        ] = $this->payrollService->monthDetails($empId, $month);
 
         $fileName = 'details-' . ($emp->name ?? $id) . '-' . $month . '.pdf';
 

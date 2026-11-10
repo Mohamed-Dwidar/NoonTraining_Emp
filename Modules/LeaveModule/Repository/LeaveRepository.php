@@ -23,4 +23,9 @@ class LeaveRepository extends BaseRepository
                           ->where('month', $month)
                           ->sum('days');
     }
+
+    public function getByEmployeeAndMonth(int $employeeId, string $month)
+    {
+        return Leave::where('employee_id', $employeeId)->where('month', $month)->get();
+    }
 }

@@ -49,7 +49,11 @@ Then suggest a commit message.
 - `resources/views/` — intentionally empty (`.gitkeep`); keep the folder — `view:cache` / `optimize` fail without it
 
 ## Conventions
-- Layering: Controller → Service → Repository → Model. Cross-module calls go through the other module's Repository/Service (e.g. Bonuse/Deduction/Leave services call `PayrollRepository::recalculateForEmployee`).
+- **Layering (required, every module): Controller → Service → Repository → Model.**
+  - Controllers: validate the request, call **services only**, return view/redirect/JSON. No `Model::where/find/create…`, no `DB::`, no repositories injected. Using `Model::class` as a constant (morph type checks, validation rules) is fine.
+  - Services: business logic; inject **repositories** (own module + other modules' repositories for cross-module data, e.g. Bonuse/Deduction/Leave services call `PayrollRepository::recalculateForEmployee`). No direct model queries — model constants / pure static helpers (e.g. `Attendance::computeRate`) are fine.
+  - Repositories: the only layer that queries models (prettus `BaseRepository`). Any new query = a named repository method (e.g. `getByEmployeeAndMonth`, `duplicateNationalIdCounts`). Use `findWhere([...])->first()` when "not found" must return null — prettus `find()` throws.
+  - Constructor injection everywhere (resolved by the container) — never `new XService`.
 - Models: `$guarded = []`; filtering via `scopeFilter($query, $request = [])` on the model, exposed as `Service::filter()`.
 - Route names: `admin.<plural>.<action>` and `employee.<plural>.<action>`; URL prefix `admin/<singular>` / `employee/<singular>`. Always use named routes.
 - Route verbs are **inconsistent**: older modules (Branch, Department, Employee, Commission) use `POST update` + `POST delete/{id}`; newer ones (Leave, Bonuse, Deduction, Violation, Task, Student) use `POST /{id}` + `DELETE /{id}`. New modules: follow the newer style (proposed).

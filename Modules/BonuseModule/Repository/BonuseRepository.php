@@ -22,4 +22,9 @@ class BonuseRepository extends BaseRepository
                              ->where('month', $month)
                              ->sum('amount');
     }
+
+    public function getByEmployeeAndMonth(int $employeeId, string $month)
+    {
+        return Bonuse::where('employee_id', $employeeId)->where('month', $month)->get();
+    }
 }

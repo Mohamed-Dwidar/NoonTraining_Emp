@@ -4,8 +4,8 @@ namespace Modules\ReportModule\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Modules\EmployeeModule\App\Http\Models\Employee;
-use Modules\StudentModule\App\Http\Models\Student;
+use Modules\EmployeeModule\Repository\EmployeeRepository;
+use Modules\StudentModule\Repository\StudentRepository;
 
 /**
  * Employee performance reporting.
@@ -32,10 +32,13 @@ use Modules\StudentModule\App\Http\Models\Student;
  * always match table totals by construction.
  */
 class ReportService {
-    private const DISTINCT_STUDENT_EXPR = "COUNT(DISTINCT COALESCE(NULLIF(national_id, ''), CONCAT('row-', id)))";
+    protected StudentRepository $studentRepository;
+    protected EmployeeRepository $employeeRepository;
 
-    /** payment_date is a free-text string column; guard against malformed values (e.g. a raw Excel serial) skewing date-range comparisons. */
-    private const VALID_DATE_EXPR = "payment_date REGEXP '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'";
+    public function __construct(StudentRepository $studentRepository, EmployeeRepository $employeeRepository) {
+        $this->studentRepository  = $studentRepository;
+        $this->employeeRepository = $employeeRepository;
+    }
 
     public function resolveDateRange(array $filters): array {
         $period = $filters['period'] ?? 'current_month';
@@ -67,34 +70,14 @@ class ReportService {
         return [$from->format('Y-m-d'), $to->format('Y-m-d')];
     }
 
-    private function baseQuery(array $filters) {
-        [$from, $to] = $this->resolveDateRange($filters);
-
-        return Student::query()
-            ->whereRaw(self::VALID_DATE_EXPR)
-            ->whereBetween('payment_date', [$from, $to])
-            ->whereHas('employee.branch', fn($q) => $q->where('type', 'training'))
-            ->when(!empty($filters['employee_id']), fn($q) => $q->where('employee_id', $filters['employee_id']))
-            ->when(!empty($filters['branch_id']), fn($q) => $q->whereHas('employee', fn($q2) => $q2->where('branch_id', $filters['branch_id'])))
-            ->when(!empty($filters['department_id']), fn($q) => $q->whereHas('employee', fn($q2) => $q2->where('department_id', $filters['department_id'])));
-    }
-
     /**
      * One row per employee with their students/admissions/revenue for the period.
      */
     public function employeePerformance(array $filters): Collection {
-        $rows = $this->baseQuery($filters)
-            ->selectRaw('employee_id,'
-                . self::DISTINCT_STUDENT_EXPR . ' as students_count,'
-                . 'COUNT(*) as admissions_count,'
-                . 'COALESCE(SUM(paid_amount), 0) as revenue')
-            ->groupBy('employee_id')
-            ->get();
+        [$from, $to] = $this->resolveDateRange($filters);
 
-        $employees = Employee::withTrashed()->with('branch', 'department')
-            ->whereIn('id', $rows->pluck('employee_id'))
-            ->get()
-            ->keyBy('id');
+        $rows      = $this->studentRepository->performanceByEmployee($from, $to, $filters);
+        $employees = $this->employeeRepository->findWithTrashedByIds($rows->pluck('employee_id'));
 
         return $rows->map(function ($row) use ($employees) {
             $employee = $employees->get($row->employee_id);
@@ -151,20 +134,12 @@ class ReportService {
             $from = $monthDate->copy()->startOfMonth()->format('Y-m-d');
             $to   = $monthDate->copy()->endOfMonth()->format('Y-m-d');
 
-            $query = Student::whereRaw(self::VALID_DATE_EXPR)
-                ->whereBetween('payment_date', [$from, $to])
-                ->whereHas('employee.branch', fn($q) => $q->where('type', 'training'));
+            // One employee → that employee only; otherwise only the branch filter applies.
+            $scope = $employeeId
+                ? ['employee_id' => $employeeId]
+                : ['branch_id' => $filters['branch_id'] ?? null];
 
-            if ($employeeId) {
-                $query->where('employee_id', $employeeId);
-            } elseif (!empty($filters['branch_id'])) {
-                $query->whereHas('employee', fn($q) => $q->where('branch_id', $filters['branch_id']));
-            }
-
-            $agg = $query->selectRaw(self::DISTINCT_STUDENT_EXPR . ' as students_count,'
-                . 'COUNT(*) as admissions_count,'
-                . 'COALESCE(SUM(paid_amount), 0) as revenue')
-                ->first();
+            $agg = $this->studentRepository->performanceTotals($from, $to, $scope);
 
             $result->push((object) [
                 'month'      => $monthDate->format('Y-m'),
@@ -184,12 +159,7 @@ class ReportService {
         $filters['employee_id'] = $employeeId;
         [$from, $to] = $this->resolveDateRange($filters);
 
-        $students = Student::where('employee_id', $employeeId)
-            ->whereRaw(self::VALID_DATE_EXPR)
-            ->whereBetween('payment_date', [$from, $to])
-            ->whereHas('employee.branch', fn($q) => $q->where('type', 'training'))
-            ->orderByDesc('payment_date')
-            ->get();
+        $students = $this->studentRepository->trainingRecordsByPaymentDate($from, $to, ['employee_id' => $employeeId]);
 
         $uniqueStudents = $students->unique(fn($s) => $s->national_id ?: 'row-' . $s->id)->count();
 

@@ -56,4 +56,10 @@ class ViolationRepository extends BaseRepository
     // {
     //     Violation::findOrFail($id)->delete();
     // }
+
+    /** Penalty tiers of a violation, ordered by repeat_number. */
+    public function getRepeats(int $violationId)
+    {
+        return ViolationRepeat::where('violation_id', $violationId)->orderBy('repeat_number')->get();
+    }
 }

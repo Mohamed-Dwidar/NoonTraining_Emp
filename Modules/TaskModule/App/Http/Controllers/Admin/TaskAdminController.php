@@ -5,7 +5,6 @@ namespace Modules\TaskModule\App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
-use Modules\TaskModule\App\Http\Models\Task;
 use Modules\TaskModule\Services\TaskService;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;

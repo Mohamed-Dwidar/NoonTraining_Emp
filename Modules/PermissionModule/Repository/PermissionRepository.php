@@ -18,4 +18,8 @@ class PermissionRepository extends BaseRepository
         return Permission::filter($request);
     }
 
+    public function idsByNames(array $names): array
+    {
+        return Permission::whereIn('name', $names)->pluck('id')->toArray();
+    }
 }

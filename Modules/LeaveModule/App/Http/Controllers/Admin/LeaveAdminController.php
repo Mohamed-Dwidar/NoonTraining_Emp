@@ -5,7 +5,6 @@ namespace Modules\LeaveModule\App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Validator;
-use Modules\LeaveModule\App\Http\Models\Leave;
 use Modules\LeaveModule\Services\LeaveService;
 use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;

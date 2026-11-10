@@ -3,15 +3,16 @@
 namespace Modules\EmployeeModule\Services;
 
 use Modules\EmployeeModule\Repository\EmployeeRepository;
-use Modules\EmployeeModule\App\Http\Models\EmployeeCommission;
-use Modules\BranchModule\App\Http\Models\Branch;
+use Modules\BranchModule\Repository\BranchRepository;
 
 class EmployeeService {
 
     protected EmployeeRepository $employeeRepository;
+    protected BranchRepository $branchRepository;
 
-    public function __construct(EmployeeRepository $employeeRepository) {
+    public function __construct(EmployeeRepository $employeeRepository, BranchRepository $branchRepository) {
         $this->employeeRepository = $employeeRepository;
+        $this->branchRepository   = $branchRepository;
     }
 
     public function getAllEmployees() {
@@ -93,7 +94,7 @@ class EmployeeService {
     }
 
     public function deleteEmployee($id) {
-        EmployeeCommission::where('employee_id', $id)->delete();
+        $this->employeeRepository->deleteCommissions($id);
         return $this->employeeRepository->delete($id);
     }
 
@@ -102,10 +103,10 @@ class EmployeeService {
     }
 
     private function syncCommissionsForBranch(int $employeeId, $branchId, array $commissions): void {
-        $branch = Branch::find($branchId);
+        $branch = $branchId ? $this->branchRepository->findWhere(['id' => $branchId])->first() : null;
 
         if (!$branch || $branch->type !== 'training') {
-            EmployeeCommission::where('employee_id', $employeeId)->delete();
+            $this->employeeRepository->deleteCommissions($employeeId);
             return;
         }
 
@@ -118,10 +119,7 @@ class EmployeeService {
                 continue;
             }
 
-            EmployeeCommission::updateOrCreate(
-                ['employee_id' => $employeeId, 'commission_id' => $commissionId],
-                ['type' => $row['type'] ?? 'fixed', 'value' => $row['value']]
-            );
+            $this->employeeRepository->saveCommission($employeeId, (int) $commissionId, $row['type'] ?? 'fixed', $row['value']);
         }
     }
 

@@ -2,17 +2,18 @@
 
 namespace Modules\UserModule\Services;
 
-use App\Models\User;
-use Modules\PermissionModule\Entities\Permission;
+use Modules\PermissionModule\Repository\PermissionRepository;
 use Modules\UserModule\Repository\UserRepository;
 
 class UserService
 {
     private $userRepository;
+    private $permissionRepository;
 
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository, PermissionRepository $permissionRepository)
     {
         $this->userRepository = $userRepository;
+        $this->permissionRepository = $permissionRepository;
     }
 
     public function create($data)
@@ -51,9 +52,7 @@ class UserService
         if (!empty($data['permissions'])) {
 
             // Convert permission NAMES to permission IDs
-            $permissionIds = Permission::whereIn('name', $data['permissions'])
-                ->pluck('id')
-                ->toArray();
+            $permissionIds = $this->permissionRepository->idsByNames($data['permissions']);
 
             // Sync same way as create()
             $user->permissions()->sync(

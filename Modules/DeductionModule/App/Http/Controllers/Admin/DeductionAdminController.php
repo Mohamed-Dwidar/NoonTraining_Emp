@@ -10,7 +10,6 @@ use Modules\BranchModule\Services\BranchService;
 use Modules\DepartmentModule\Services\DepartmentService;
 use Modules\EmployeeModule\Services\EmployeeService;
 use Modules\ViolationModule\Services\ViolationService;
-use Modules\ViolationModule\App\Http\Models\Violation;
 
 class DeductionAdminController extends Controller
 {
@@ -242,30 +241,8 @@ class DeductionAdminController extends Controller
         $month       = $request->input('month', now()->format('Y-m'));
         $excludeId   = $request->input('exclude_id') ? (int) $request->input('exclude_id') : null;
 
-        $violation = $violationId ? Violation::find($violationId) : null;
+        $result = $this->deductionService->violationAmount($employeeId, $violationId, $month, $excludeId);
 
-        if (!$violationId || !$violation) {
-            return response()->json(['repeat_number' => 1, 'amount' => 0, 'violation_name' => '']);
-        }
-
-        if (!$employeeId) {
-            // No employee yet — return tier 1 amount as preview
-            $tier = \Modules\ViolationModule\App\Http\Models\ViolationRepeat::where('violation_id', $violationId)
-                ->orderBy('repeat_number')
-                ->first();
-            return response()->json([
-                'repeat_number'  => 1,
-                'amount'         => $tier?->deduction_amount ?? 0,
-                'violation_name' => $violation->name,
-            ]);
-        }
-
-        $result = $this->deductionService->resolveViolationDeduction($employeeId, $violationId, $month, $excludeId);
-
-        return response()->json([
-            'repeat_number'  => $result['repeat_number'],
-            'amount'         => $result['amount'],
-            'violation_name' => $violation->name,
-        ]);
+        return response()->json($result ?? ['repeat_number' => 1, 'amount' => 0, 'violation_name' => '']);
     }
 }

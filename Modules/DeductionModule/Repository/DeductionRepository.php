@@ -36,4 +36,9 @@ class DeductionRepository extends BaseRepository
 
         return $query->count();
     }
+
+    public function getByEmployeeAndMonth(int $employeeId, string $month)
+    {
+        return Deduction::where('employee_id', $employeeId)->where('month', $month)->get();
+    }
 }
