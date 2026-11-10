@@ -106,6 +106,7 @@
                         class="px-2 pt-2" onsubmit="return confirmBulkDelete()">
                         @csrf
                         @method('DELETE')
+                        <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
                         <button type="submit" id="bulkDeleteBtn" class="btn btn-sm btn-danger" disabled>
                             <i class="fa fa-trash"></i> حذف المحدد (<span id="selectedCount">0</span>)
                         </button>
@@ -182,6 +183,7 @@
                                                 class="d-inline" onsubmit="return confirm('هل تريد حذف هذا الطالب؟')">
                                                 @csrf
                                                 @method('DELETE')
+                        <input type="hidden" name="redirect_to" value="{{ request()->fullUrl() }}">
                                                 <button type="submit" class="btn btn-sm btn-danger">
                                                     <i class="fa fa-trash"></i>
                                                 </button>

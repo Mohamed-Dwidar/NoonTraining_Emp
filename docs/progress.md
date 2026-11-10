@@ -94,7 +94,8 @@
 
 ### Student
 - **Last updated:** 2026-11-10
-- **Bulk delete (admin + employee):** checkbox per row + "select all" (current page) on `Admin/index` and `Employee/index` → `DELETE admin|employee/student/bulk` (`*.students.bulk-destroy`, declared before `/{id}`) → `StudentService::deleteMany($ids, ?$employeeId)` → `StudentRepository::deleteByIds` (one `whereIn` delete; Student has no soft deletes/events). Employee side passes its own `employee_id`, so other employees' students are never deleted. Redirects back keeping filters.
+- **Bulk delete (admin + employee):** checkbox per row + "select all" (current page) on `Admin/index` and `Employee/index` → `DELETE admin|employee/student/bulk` (`*.students.bulk-destroy`, declared before `/{id}`) → `StudentService::deleteMany($ids, ?$employeeId)` → `StudentRepository::deleteByIds` (one `whereIn` delete; Student has no soft deletes/events). Employee side passes its own `employee_id`, so other employees' students are never deleted.
+- **Return to same list after delete (single + bulk, both portals):** delete forms post hidden `redirect_to = request()->fullUrl()`; controllers use trait `App/Http/Controllers/Concerns/RedirectsToStudentList` — `redirectToStudentList()` accepts only this portal's `*.students.index` URL (no open redirect, else plain index); `redirectIfPageOutOfRange()` in `index()` sends a now-empty page N to the last page with the same filters (reads the raw `QUERY_STRING`, because the employee index merges forced filters into `$request`).
 - **Import (validate-then-save):** `StudentImport::collection()` only collects rows (sheet title + Excel row number); controllers call `errors()` → if any, `back()->withErrors()` listing «sheet» + row + messages (max 50) and nothing is saved; else `save()` inserts all rows in one `DB::transaction`. Used by both Admin and Employee `importStudents`. Fully empty rows are skipped; required: name, mobile, national_id, course_name, payment_method, payment_date (valid date); amounts integer ≥ 0 (empty → 0). Each error shows the first message per field + a valid example from `StudentImport::EXAMPLES` (based on real data: 9-digit mobile starting 5, 10-digit national ID starting 1, methods كاش/حوالة/تمارا/تابي, date `02/08/2026`).
 - **Decisions:**
   - Validate the whole file before saving anything, all-or-nothing — owner request, 2026-10-18.
@@ -128,6 +129,12 @@
 ---
 
 ## Session log
+
+### 2026-11-10 — Keep filters + page after deleting students
+- **Changed:** new `StudentModule/App/Http/Controllers/Concerns/RedirectsToStudentList.php`; `destroy`/`bulkDestroy`/`index` in `Admin/StudentAdminController` + `Employee/StudentEmployeeController`; hidden `redirect_to` in delete forms of `views/{Admin,Employee}/index.blade.php`
+- **Why:** Owner request — after deleting, stay on the same page with the same filters (single delete used to go to the unfiltered index; deleting the last rows of a page left an empty page).
+- **Affects:** StudentModule only. Verified via HTTP kernel: single/bulk redirect to the filtered URL, foreign `redirect_to` falls back to index, page 999 → last page.
+- **Commit:** — (not committed yet)
 
 ### 2026-11-10 — Bulk delete of students (admin + employee)
 - **Changed:** `StudentModule/routes/web.php` (`admin.students.bulk-destroy`, `employee.students.bulk-destroy`), `bulkDestroy` in `Admin/StudentAdminController` and `Employee/StudentEmployeeController`, `StudentService::deleteMany`, `StudentRepository::deleteByIds` (optional employee scope), `resources/views/{Admin,Employee}/index.blade.php` (checkbox column, select-all with indeterminate state, "حذف المحدد (n)" button + confirm)

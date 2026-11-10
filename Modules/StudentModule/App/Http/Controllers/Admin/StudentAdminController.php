@@ -14,8 +14,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use Modules\StudentModule\App\Imports\StudentImport;
 use Modules\StudentModule\Exports\StudentsExport;
 use Modules\StudentModule\Exports\StudentsTemplateExport;
+use Modules\StudentModule\App\Http\Controllers\Concerns\RedirectsToStudentList;
 
 class StudentAdminController extends Controller {
+    use RedirectsToStudentList;
+
     protected StudentService $studentService;
     protected BranchService $branchService;
     protected DepartmentService $departmentService;
@@ -75,6 +78,9 @@ class StudentAdminController extends Controller {
         }
 
         $students = $students_query->paginate(50);
+        if ($redirect = $this->redirectIfPageOutOfRange($request, $students)) {
+            return $redirect;
+        }
         $duplicateNationalIds = $this->studentService->duplicateNationalIdCounts();
 
         return view('studentmodule::Admin.index', compact(
@@ -215,9 +221,9 @@ class StudentAdminController extends Controller {
         return redirect()->route('admin.students.index')->with('success', 'تم تحديث بيانات الطالب بنجاح');
     }
 
-    public function destroy(int $id) {
+    public function destroy(Request $request, int $id) {
         $this->studentService->delete($id);
-        return redirect()->route('admin.students.index')->with('success', 'تم حذف الطالب بنجاح');
+        return $this->redirectToStudentList($request, 'admin.students.index')->with('success', 'تم حذف الطالب بنجاح');
     }
 
     public function bulkDestroy(Request $request) {
@@ -231,8 +237,7 @@ class StudentAdminController extends Controller {
 
         $count = $this->studentService->deleteMany(array_map('intval', $request->input('ids')));
 
-        // back() keeps the current filters/page
-        return redirect()->back()->with('success', 'تم حذف ' . $count . ' طالب بنجاح');
+        return $this->redirectToStudentList($request, 'admin.students.index')->with('success', 'تم حذف ' . $count . ' طالب بنجاح');
     }
 
     public function importStudents(Request $request) {
