@@ -7,6 +7,8 @@ use Modules\CommissionModule\App\Http\Models\Commission;
 
 class StudentsTemplateExport implements WithMultipleSheets
 {
+    use UniqueSheetTitles;
+
     public function sheets(): array
     {
         $commissions = Commission::get(['id', 'name']);
@@ -25,22 +27,5 @@ class StudentsTemplateExport implements WithMultipleSheets
         }
 
         return $sheets;
-    }
-
-    private function uniqueTitle(string $title, array $usedTitles): string
-    {
-        // Excel sheet names: max 31 chars, no : \ / ? * [ ]
-        $title = preg_replace('/[:\\\\\/\?\*\[\]]/', '-', $title);
-        $title = mb_substr($title, 0, 31);
-
-        $base = $title;
-        $i = 2;
-        while (in_array($title, $usedTitles, true)) {
-            $suffix = ' (' . $i . ')';
-            $title = mb_substr($base, 0, 31 - mb_strlen($suffix)) . $suffix;
-            $i++;
-        }
-
-        return $title;
     }
 }
