@@ -78,6 +78,7 @@
                                     <th>المتبقي</th>
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
+                                    <th>شهر المحاسبة</th>
                                     <th>تاريخ تسجيل الطالب</th>
                                     @canany(['can_edit_students', 'can_delete_students'])
                                         <th>الإجراءات</th>
@@ -118,7 +119,8 @@
                                         </td>
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
-                                        <td>{{ $student->created_at->format('Y-m-d') }}</td>
+                                        <td>{{ $student->month }}</td>
+                                        <td>{{ $student->created_at?->format('Y-m-d') }}</td>
                                         @canany(['can_edit_students', 'can_delete_students'])
                                         <td>
                                             @can('can_edit_students')

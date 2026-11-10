@@ -53,11 +53,17 @@ class Student extends Model {
         if (!empty($request['month'])) {
             $query->where('month', $request['month']);
         }
-        if (!empty($request['date_from'])) {
-            $query->whereDate('created_at', '>=', $request['date_from']);
+        // Period = month range on students.month ('YYYY-MM' strings compare correctly); swapped if reversed.
+        $from = preg_match('/^\d{4}-\d{2}$/', $request['month_from'] ?? '') ? $request['month_from'] : null;
+        $to   = preg_match('/^\d{4}-\d{2}$/', $request['month_to'] ?? '') ? $request['month_to'] : null;
+        if ($from && $to && $from > $to) {
+            [$from, $to] = [$to, $from];
         }
-        if (!empty($request['date_to'])) {
-            $query->whereDate('created_at', '<=', $request['date_to']);
+        if ($from) {
+            $query->where('month', '>=', $from);
+        }
+        if ($to) {
+            $query->where('month', '<=', $to);
         }
 
         return $query;

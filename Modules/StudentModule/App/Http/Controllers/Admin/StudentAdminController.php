@@ -64,11 +64,11 @@ class StudentAdminController extends Controller {
             if ($employeeId != null) {
                 $label = $label . ' موظف ' . ($this->employeeService->findOne($employeeId)->name) . ' - ';
             }
-            if ($request->date_from) {
-                $label = $label . ' من ' . $request->date_from . ' - ';
+            if ($request->month_from) {
+                $label = $label . ' من ' . $request->month_from . ' - ';
             }
-            if ($request->date_to) {
-                $label = $label . ' إلى ' . $request->date_to . ' - ';
+            if ($request->month_to) {
+                $label = $label . ' إلى ' . $request->month_to . ' - ';
             }
 
             $fileName = 'طلاب - ' . $label . now()->format('Y-m-d') . '.xlsx';

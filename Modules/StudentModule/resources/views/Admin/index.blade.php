@@ -43,13 +43,30 @@
                                 <option value="">-- كل الموظفين --</option>
                             </select>
                         </div>
+                        @php
+                            // Period filter on students.month: months 2026-01 → current (like layouts.month_select) + "all"
+                            $filterMonths = [];
+                            for ($m = now()->format('Y-m'); $m >= '2026-01'; $m = date('Y-m', strtotime($m . '-01 -1 month'))) {
+                                $filterMonths[$m] = \Carbon\Carbon::parse($m . '-01')->locale('ar')->translatedFormat('F Y');
+                            }
+                        @endphp
                         <div class="col-md-2">
-                            <label class="d-block mb-1"><strong>تاريخ المحاسبة من</strong></label>
-                            <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                            <label class="d-block mb-1"><strong>شهر المحاسبة من</strong></label>
+                            <select name="month_from" class="form-control">
+                                <option value="">-- الكل --</option>
+                                @foreach ($filterMonths as $value => $text)
+                                    <option value="{{ $value }}" {{ request('month_from') === $value ? 'selected' : '' }}>{{ $text }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="d-block mb-1"><strong>تاريخ المحاسبة إلى</strong></label>
-                            <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                            <label class="d-block mb-1"><strong>شهر المحاسبة إلى</strong></label>
+                            <select name="month_to" class="form-control">
+                                <option value="">-- الكل --</option>
+                                @foreach ($filterMonths as $value => $text)
+                                    <option value="{{ $value }}" {{ request('month_to') === $value ? 'selected' : '' }}>{{ $text }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-1">
                             <label class="d-block mb-1">&nbsp;</label>
@@ -128,6 +145,7 @@
                                     <th>طريقة الدفع</th>
                                     <th>تاريخ الدفع</th>
                                     <th>شهر المحاسبة</th>
+                                    <th>تاريخ تسجيل الطالب</th>
                                     <th>الإجراءات</th>
                                 </tr>
                             </thead>
@@ -173,6 +191,7 @@
                                         <td>{{ $student->payment_method }}</td>
                                         <td>{{ $student->payment_date }}</td>
                                         <td>{{ $student->month }}</td>
+                                        <td>{{ $student->created_at?->format('Y-m-d') }}</td>
                                         <td>
                                             <a href="{{ route('admin.students.edit', $student->id) }}"
                                                 class="btn btn-sm btn-warning">
