@@ -102,3 +102,42 @@ $(document).ready(function () {
 
     ////////////////////
 });
+
+/* ---------- Responsive helpers (mobile / tablet) ---------- */
+$(function () {
+    var $body = $('body');
+
+    // Mobile menu button (header) opens/closes the main menu panel
+    function setMobileNav(open) {
+        $body.toggleClass('mobile-nav-open', open);
+        $('.mobile-nav-toggle').attr('aria-expanded', open ? 'true' : 'false')
+            .find('i').toggleClass('fa-bars', !open).toggleClass('fa-times', open);
+    }
+    $(document).on('click', '.mobile-nav-toggle', function (e) {
+        e.stopPropagation();
+        setMobileNav(!$body.hasClass('mobile-nav-open'));
+    });
+    $(document).on('click', function (e) {
+        if ($body.hasClass('mobile-nav-open') && !$(e.target).closest('#primary-menu, .mobile-nav-toggle').length) {
+            setMobileNav(false);
+        }
+        // Tap outside closes any open menu dropdown
+        if (!$(e.target).closest('.top-menu').length) {
+            $('.top-menu li.open').removeClass('open');
+        }
+    });
+
+    // Menu items with a sub-menu: open on tap (hover doesn't exist on touch screens)
+    $('.top-menu > li').has('> ul.dropdown').addClass('has-dropdown').children('a').on('click', function (e) {
+        e.preventDefault();
+        $(this).parent().toggleClass('open').siblings().removeClass('open');
+    });
+
+    // Every table scrolls sideways inside its card instead of stretching the page
+    $('.content-wrapper table').each(function () {
+        var $t = $(this);
+        if (!$t.hasClass('table-responsive') && !$t.closest('.table-responsive').length) {
+            $t.wrap('<div class="table-responsive"></div>');
+        }
+    });
+});

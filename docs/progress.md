@@ -7,11 +7,12 @@
 ---
 
 ## Current status
-- **Working on:** Payroll salary transfer status (تم التحويل + تاريخ الحوالة) on the admin payroll list — done 2026-11-11. Before that: employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
-- **Branch / working tree:** `main`; through c63ee4b committed. Uncommitted: layering refactor, student bulk delete + redirect, spatie permissions, CLAUDE.md/progress.md updates.
+- **Working on:** Mobile/tablet responsive layout (both portals) — done 2026-11-12. Before that: payroll salary transfer status (تم التحويل + تاريخ الحوالة) on the admin payroll list — done 2026-11-11. Before that: employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
+- **Branch / working tree:** `main`; through 851fca3 committed. Uncommitted: responsive layout (`layouts/header.blade.php`, `custom-rtl.css`, `custom.js`) + this file.
 - **Before deploying permissions:** commit the new PermissionModule files under **both** `Database/...` and `database/...` (git tracks both cases; the provider loads `Database/migrations`, seeders namespace `Database\Seeders`) — e.g. `git add Modules/PermissionModule/Database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php Modules/PermissionModule/database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php` (same for `2026_11_10_000002_rename_student_permissions.php` and the two seeders). Same for `Modules/PayrollModule/{Database,database}/migrations/2026_11_11_000001_add_transfer_status_to_payrolls_table.php`. On the server: `php artisan migrate` → `php artisan permission:cache-reset` → `php artisan optimize:clear`.
 - **Next up:** Answer the date-format question for imports. Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
+  - **Broken pages (found 2026-11-12, not fixed):** `/admin/task` and `/admin/leave/create` throw `Class "...\Controllers\Admin\Task|Leave" not found` — `TaskAdminController.php:42` / `LeaveAdminController` still use the model but its `use` import was dropped in the 2026-11-10 layering refactor. Fix = re-add the `use ...\Models\Task;` / `Leave;` import.
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
   - `app/Http/Kernel.php` is dead (Laravel 12 binds the framework kernel). `app/Http/Middleware/CheckPermission.php` is unused since the spatie switch (2026-11-10) — delete both? (ask owner).
   - ReportModule `user/reports` group uses `auth:user` — no such guard (empty group, harmless for now).
@@ -47,8 +48,11 @@
 - **Pending:** No roles UI (not needed yet). `UserService` + `UserAdminModuleController` (no routes) still have old custom permission code paths (?).
 
 ### Layout
-- **Files:** `Modules/LayoutModule/resources/views/` — `layouts/home_layout` (RTL), `layout_main`, `header`, `footer`, `flash`, `month_select`, `custom_pagination`; `admin/nav`, `admin/modals`, `employee/nav`
-- **How it works:** Shared Blade layout and navigation for both portals; theme assets are static files in `public/admin-assets/` (no Vite/npm build).
+- **Last updated:** 2026-11-12
+- **Files:** `Modules/LayoutModule/resources/views/` — `layouts/home_layout` (RTL), `layout_main`, `header`, `footer`, `flash`, `month_select`, `custom_pagination`; `admin/nav`, `admin/modals`, `employee/nav`; styles `public/admin-assets/css-rtl/custom-rtl.css`, JS `public/admin-assets/js/custom.js`
+- **How it works:** Shared Blade layout and navigation for both portals; theme assets are static files in `public/admin-assets/` (no Vite/npm build). Theme is Robust on **Bootstrap 4.0.0-alpha.4** (`col-xs-*`, `float-xs-*`; `.input-group` is `display: table`). Note: `css/style-admin.css` / `css/colors-admin.css` linked in `layout_main` don't exist (404) — `custom-rtl.css` is the real custom stylesheet.
+- **Responsive (2026-11-12):** one block at the end of `custom-rtl.css` (keep it last). ≤991px: compact fixed 64px header (logo · title · user), tables don't wrap and scroll sideways, inline `style="width:…"` inputs capped at 100%. ≤767px: title hidden, hamburger `.mobile-nav-toggle` (in `header.blade.php`) opens `#primary-menu` as a fixed panel under the header (`body.mobile-nav-open`), sub-menus are a tap accordion (`li.open`). `custom.js`: toggle/close-on-outside-tap, menu items with a sub-menu open on tap at every width (works on tablets too), and **every `.content-wrapper table` without a `.table-responsive` parent is wrapped in one automatically** — new pages don't need the wrapper. Desktop (≥992px) unchanged. Login page (`home_layout`) was already responsive.
+- **Decisions:** Fixed it in the shared layout + CSS/JS, not page by page — owner asked for the whole project; per-page markup untouched.
 
 ### Branch
 - **Files:** `Modules/BranchModule/` — `BranchAdminController`, `Branch` model, views incl. `work_regulations*`
@@ -140,6 +144,12 @@
 
 ## Session log
 
+### 2026-11-12 — Responsive layout for mobile / tablet
+- **Changed:** `LayoutModule/.../layouts/header.blade.php` (hamburger button, `header-title` / `header-user-menu` classes, inline margin moved to CSS), `public/admin-assets/css-rtl/custom-rtl.css` (old nav-only media blocks replaced by one responsive section at the end), `public/admin-assets/js/custom.js` (mobile menu, tap-to-open dropdowns, auto `.table-responsive` wrapper)
+- **Why:** Owner request — make the project usable on phones. Before: page scrolled sideways (up to 452px on a 390px screen), menu took half the screen with hover-only dropdowns, tables squeezed to one word per line.
+- **Affects:** LayoutModule (every page of both portals). Verified with headless Chrome at 390 / 820 / 1440px: all admin + employee index/create pages = no sideways scroll; menu, sub-menu, user dropdown, close-on-outside-tap work; desktop looks the same as before.
+- **Commit:** — (not committed yet)
+
 ### 2026-11-11 — Performance report by accounting month; payroll/student list tweaks
 - **Changed:** `ReportService` (`resolveMonthRange` replaces `resolveDateRange`, trend + drilldown by month), `StudentRepository` (payment-date report queries → month), `ReportAdminController` (`month_from`/`month_to`), `employee_performance` + `employee_drilldown` views (custom period = month lists, drilldown shows «شهر المحاسبة»). Same day: employee payroll list transfer status (green + date / red), transfer popup shows salary, student lists: admin period filter = month lists on `students.month`, «تاريخ تسجيل الطالب» column in admin list, «شهر المحاسبة» column in employee list.
 - **Why:** Owner: performance report showed only part of the employees (Esraa missing) — it grouped by payment date while uploads/payroll use شهر المحاسبة.
@@ -193,9 +203,3 @@
 - **Why:** Owner reviewed the "(?)" items; alias was never active under Laravel 12; Vite/Tailwind were unused (UI uses static `public/admin-assets/`)
 - **Affects:** PermissionModule, ReportModule (`permission:show_reports` group), Layout/all module stub layouts, dev tooling. Run `npm install` again to prune `node_modules` (not tracked) if present.
 - **Commit:** c63ee4b
-
-### 2026-10-17 — Initial project memory setup
-- **Changed:** `CLAUDE.md`, `docs/progress.md` — filled from codebase exploration (no code changes)
-- **Why:** Give each session reliable project context
-- **Affects:** —
-- **Commit:** ca65c0f "CLAUDE.md"

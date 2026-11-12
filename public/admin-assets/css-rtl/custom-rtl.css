@@ -47,6 +47,10 @@ a {
     margin-top: 18px;
 }
 
+.header-navbar .header-user-menu {
+    margin-left: 63px;
+}
+
 
 .dropdown-user.nav-item i {
     float: left;
@@ -509,46 +513,7 @@ body.vertical-layout.vertical-menu.menu-expanded .navbar .navbar-header {
     background-color: #eaeaea;
 }
 
-@media (min-width:768px) and (max-width:991px) {
-    .nav-links {
-        text-align: center;
-        margin-top: 50px;
-    }
-
-    .top-menu i {
-        font-size: 20px;
-    }
-
-    .card-form span.country-code {
-        margin-top: 12px;
-    }
-}
-
-@media (min-width:480px) and (max-width:767px) {
-    .nav-links {
-        text-align: center;
-        margin-top: 50px;
-    }
-
-    .top-menu i {
-        font-size: 20px;
-    }
-
-    .card-form span.country-code {
-        margin-top: 11px;
-    }
-}
-
-@media (max-width:479px) {
-    .nav-links {
-        text-align: center;
-        margin-top: 50px;
-    }
-
-    .top-menu i {
-        font-size: 20px;
-    }
-
+@media (max-width:991px) {
     .card-form span.country-code {
         margin-top: 11px;
     }
@@ -957,4 +922,341 @@ nav.pagination-nav {
     color: #fff;
     border-radius: 12px;
 
+}
+
+/* =====================================================================
+   Responsive (tablet + mobile). Keep this block last so it overrides
+   the desktop rules above. Breakpoints match the theme: md = 768-991,
+   sm/xs = <=767.
+   ===================================================================== */
+
+/* Dropdown menus also open on tap (custom.js toggles li.open) — hover alone doesn't work on touch screens */
+.top-menu li.open > .dropdown {
+    transform: scale(1);
+    visibility: visible;
+}
+
+.mobile-nav-toggle {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    /* The layout puts .row elements straight in <body> (nav) — their negative margins caused sideways scrolling */
+    body > .row,
+    .header-navbar .navbar-wrapper > .row {
+        margin-left: 0;
+        margin-right: 0;
+    }
+
+    /* Compact fixed header: [title] [logo] ......... [user] [menu button] */
+    html body.fixed-navbar {
+        padding-top: 64px;
+    }
+
+    .header-navbar {
+        min-height: 64px;
+    }
+
+    .header-navbar .navbar-wrapper > .row {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        height: 64px;
+        padding: 0 10px;
+    }
+
+    .header-navbar .navbar-wrapper > .row > [class*="col-"] {
+        float: none;
+        width: auto;
+        padding: 0;
+        margin: 0;
+    }
+
+    .header-navbar .header-title {
+        order: 1;
+    }
+
+    .header-navbar .header-title .header-branch {
+        margin: 0 0 0 10px;
+        padding: 0;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .header-navbar .h-logo {
+        order: 0;
+        text-align: right;
+        margin-left: 10px !important;
+    }
+
+    .header-navbar .h-logo img {
+        height: 48px !important;
+    }
+
+    .header-navbar .h-info {
+        order: 2;
+        flex: 1 1 auto;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .header-navbar .header-user-menu {
+        margin: 0;
+        float: none !important;
+        min-width: 0;
+    }
+
+    .header-navbar .header-user {
+        margin: 0;
+        padding: 4px 12px;
+        font-size: 14px;
+        float: none;
+    }
+
+    .header-navbar .header-user .user-name {
+        display: inline-block;
+        max-width: 140px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+
+    .nav-links {
+        margin-top: 10px;
+    }
+
+    .top-menu i {
+        font-size: 22px;
+    }
+
+    /* Content */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Tables: keep columns readable and scroll sideways instead of squeezing */
+    .table-responsive .table th,
+    .table-responsive .table td {
+        white-space: nowrap;
+        padding: 0.55rem 0.6rem;
+    }
+
+    /* Inline fixed widths (e.g. style="width: 400px") must not push the page wider than the screen */
+    input[style*="width"],
+    select[style*="width"],
+    textarea[style*="width"],
+    .select2-container {
+        max-width: 100% !important;
+    }
+
+    .card-header h4.card-title {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    html body .content .content-wrapper {
+        padding: 8px;
+    }
+
+    /* Pages nest .content-wrapper.container-fluid: 8px + 7px = the 15px that .row's negative margins need */
+    html body .content .content-wrapper .content-wrapper {
+        padding: 0 7px;
+    }
+
+    /* User dropdown opens inside the screen */
+    .header-navbar .header-user .dropdown-menu {
+        left: auto;
+        right: 0;
+    }
+
+    .header-navbar .dropdown-user .dropdown-menu.arrow::after,
+    .header-navbar .dropdown-user .dropdown-menu.arrow::before {
+        left: auto;
+        right: 20px;
+    }
+
+    /* Header: the title is in the user menu already; make room */
+    .header-navbar .header-title {
+        display: none;
+    }
+
+    .header-navbar .h-logo img {
+        height: 44px !important;
+    }
+
+    .mobile-nav-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 10px;
+        background: #1A4A22;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    .mobile-nav-toggle:focus {
+        outline: none;
+    }
+
+    /* Main menu: hidden, opens as a panel under the header */
+    .nav-links {
+        margin: 0;
+        padding: 0;
+    }
+
+    #primary-menu {
+        display: none;
+        position: fixed;
+        top: 64px;
+        right: 8px;
+        left: 8px;
+        z-index: 1040;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        padding: 6px;
+    }
+
+    body.mobile-nav-open #primary-menu {
+        display: block;
+    }
+
+    .top-menu {
+        margin: 0;
+        padding: 0;
+        text-align: right;
+    }
+
+    .top-menu > li {
+        display: block;
+        padding: 0;
+    }
+
+    .top-menu > li + li {
+        border-top: 1px solid #f2f2f2;
+    }
+
+    .top-menu > li > a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        line-height: 1.4;
+        border-radius: 8px;
+    }
+
+    .top-menu > li > a i {
+        float: none;
+        width: 26px;
+        font-size: 18px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .top-menu li:hover > a,
+    .top-menu > li:hover > a {
+        box-shadow: none;
+    }
+
+    .top-menu > li.has-dropdown > a::after {
+        content: "\f107";
+        font-family: FontAwesome;
+        margin-right: auto;
+        transition: transform 0.15s ease;
+    }
+
+    .top-menu > li.has-dropdown.open > a::after {
+        transform: rotate(180deg);
+    }
+
+    /* Sub-menus: inline accordion instead of a floating popup */
+    .top-menu li ul.dropdown {
+        display: none;
+        position: static;
+        transform: none;
+        visibility: visible;
+        transition: none;
+        min-width: 0;
+        margin: 0 0 6px;
+        padding: 0 26px 0 0;
+        box-shadow: none;
+        border-radius: 0;
+        background: transparent;
+    }
+
+    .top-menu li.open > ul.dropdown {
+        display: block;
+    }
+
+    .top-menu li ul.dropdown li a {
+        white-space: normal;
+        padding: 10px 14px !important;
+    }
+
+    /* Content headers / cards */
+    .content-header h3 {
+        font-size: 1.3rem;
+    }
+
+    .card-header .row > [class*="col-"] + [class*="col-"] {
+        margin-top: 8px;
+    }
+
+    .card-header .input-group {
+        display: flex; /* table in this Bootstrap version — can't wrap */
+    }
+
+    .card-header .input-group > .form-control {
+        flex: 1 1 100%;
+        width: 100% !important;
+    }
+
+    .card-header .buttoms,
+    .card-header .d-flex,
+    .card-header .input-group {
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: flex-start;
+    }
+
+    .card-header .btn,
+    .card-header .btn-min-width {
+        min-width: 0;
+        margin-right: 0 !important;
+    }
+
+    .card-form {
+        padding: 0 10px;
+    }
+
+    .table .action {
+        width: auto;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+        padding-right: 0;
+        justify-content: center;
+    }
+
+    .modal-dialog {
+        margin: 10px;
+    }
+
+    .footer p {
+        padding: 0 8px !important;
+        font-size: 13px;
+    }
 }

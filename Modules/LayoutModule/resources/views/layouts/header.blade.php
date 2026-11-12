@@ -4,7 +4,7 @@
     <div class="navbar-wrapper">
         {{-- <div class="navbar-header"> --}}
         <div class="row">
-            <div class="col-xl-3 col-lg-2 col-xs-0">
+            <div class="col-xl-3 col-lg-2 col-xs-0 header-title">
                 @if (Auth::guard('employee')->check())
                     <div class="col-xl-12 col-lg-12 col-xs-12 header-branch">
                         <span>
@@ -29,7 +29,7 @@
                 {{-- </a> --}}
             </div>
             <div class="col-xl-3 col-lg-2 col-xs-6 h-info">
-                <ul class="nav navbar-nav float-xs-right" style="margin-left: 63px">
+                <ul class="nav navbar-nav float-xs-right header-user-menu">
                     <li class="dropdown dropdown-user nav-item header-user">
                         <a href="#" data-toggle="dropdown" class="dropdown-toggle nav-link dropdown-user-link">
                             <span class="user-name">{{ (Auth::guard('admin')->check() ? Auth::guard('admin')->user() : Auth::guard('employee')->user())?->userable?->name }}</span>
@@ -47,6 +47,10 @@
                         </div>
                     </li>
                 </ul>
+                {{-- Mobile only: opens the main menu (custom.js toggles body.mobile-nav-open) --}}
+                <button type="button" class="mobile-nav-toggle" aria-label="القائمة" aria-controls="primary-menu" aria-expanded="false">
+                    <i class="fa fa-bars"></i>
+                </button>
             </div>
         </div>
     </div>
