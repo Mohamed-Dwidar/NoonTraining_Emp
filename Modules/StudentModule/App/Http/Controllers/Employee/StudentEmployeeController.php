@@ -111,7 +111,11 @@ class StudentEmployeeController extends Controller {
             return back()->withErrors($errors);
         }
 
-        $import->save();
+        $count = $import->save();
+
+        // Inform the owner by email (never fails the import)
+        $employeeName = auth()->guard('employee')->user()->userable->name;
+        $this->studentService->sendImportAlert($employeeName, $count, $request->input('month'));
 
         return back()->with('success', 'تم الاستيراد بنجاح!');
     }

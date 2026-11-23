@@ -21,10 +21,10 @@ Then suggest a commit message.
 ## Stack
 - Framework: Laravel 12 / PHP ^8.2, modular via `nwidart/laravel-modules` ^12
 - Database: MySQL (`DB_CONNECTION`; `.env.example` still has the sqlite default). Raw SQL uses MySQL `REGEXP`/`CONCAT`.
-- Frontend: Blade + Bootstrap/jQuery admin theme (`public/admin-assets/`, select2 from CDN) loaded by LayoutModule. No build step — Vite/Tailwind were removed (2026-10-18); add JS/CSS as static files under `public/admin-assets/`.
+- Frontend: Blade + Bootstrap/jQuery admin theme (`public/admin-assets/`, select2 from CDN) loaded by LayoutModule. No build step — Vite/Tailwind were removed (2026-10-18); add JS/CSS as static files under `public/admin-assets/`. Theme = Robust on Bootstrap 4.0.0-alpha.4 (`col-xs-*`). Custom styles live in `public/admin-assets/css-rtl/custom-rtl.css` — its responsive block (≤991 / ≤767px) must stay last; tables get a `.table-responsive` wrapper automatically (`custom.js`), so new pages need no extra mobile markup.
 - Auth: custom session guards `admin` / `employee` (+ default `web`), all on one `users` provider (`UserModule` `User` model, polymorphic `userable` → `Admin` | `Employee`)
 - Permissions: `spatie/laravel-permission` v6 (same approach as the owner's Acc_NoonTraining project) — per-employee permissions on guard `employee` (`User::$guard_name`), no roles in use; admins bypass every check (`Gate::before` in `PermissionModuleServiceProvider`). Tables are the older custom PermissionModule ones (spatie-compatible; `permissions.label` = Arabic name, required)
-- Key packages: `prettus/l5-repository` (repositories), `maatwebsite/excel` (student import/export), `niklasravnsborg/laravel-pdf` (payslip / work-regulations PDFs), `laravel/sanctum`
+- Key packages: `prettus/l5-repository` (repositories), `maatwebsite/excel` (student import/export), `niklasravnsborg/laravel-pdf` (payslip / work-regulations PDFs), `laravel/sanctum`, `google/apiclient` (Gmail sending via `app/Helpers/GmailSenderHelper`, token in `storage/app/google/`)
 - Env vars of note: `APP_*`, `DB_*`, `MAIL_*`, `QUEUE_CONNECTION`, `FILESYSTEM_DISK`, `AWS_*`
 
 ## Commands
@@ -45,7 +45,7 @@ Then suggest a commit message.
 - `Modules/LayoutModule/resources/views/` — shared layout: `layouts/home_layout` (RTL master), `admin/nav`, `employee/nav`, `layouts/flash`, `layouts/month_select`, `layouts/custom_pagination`
 - `permission:<name>` middleware = spatie `PermissionMiddleware` (alias in `bootstrap/app.php`, also `role`, `role_or_permission`). Must run after `auth:<guard>` (that sets the default guard). `app/Http/Middleware/CheckPermission.php` is the old custom one — no longer used.
 - `bootstrap/app.php` — middleware aliases live here. `app/Http/Kernel.php` is a Laravel 10 leftover that Laravel 12 never loads; don't register anything there.
-- `app/Helpers/` — `UploaderHelper`, `ApiResponseHelper`
+- `app/Helpers/` — `UploaderHelper`, `ApiResponseHelper`, `GmailSenderHelper`
 - `routes/web.php` — empty; all routes live in modules
 - `resources/views/` — intentionally empty (`.gitkeep`); keep the folder — `view:cache` / `optimize` fail without it
 
