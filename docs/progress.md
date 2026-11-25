@@ -7,13 +7,13 @@
 ---
 
 ## Current status
-- **Working on:** Email alert to the owner when an employee imports students — done 2026-11-23 (no real email sent yet from this project). Before that: Mobile/tablet responsive layout (both portals) — done 2026-11-12. Before that: payroll salary transfer status (تم التحويل + تاريخ الحوالة) on the admin payroll list — done 2026-11-11. Before that: employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
-- **Branch / working tree:** `main`; everything committed through 722e776 (responsive layout). Uncommitted: student import email alert (`StudentEmployeeController`, `StudentService`, email view, `GmailSenderHelper`, `config/google.php`, `composer.json/lock`) + this progress update + CLAUDE.md notes.
+- **Working on:** `/admin/task` crash (missing `Task` import) — fixed 2026-11-25. Before that: Email alert to the owner when an employee imports students — done 2026-11-23 (no real email sent yet from this project). Before that: Mobile/tablet responsive layout (both portals) — done 2026-11-12. Before that: payroll salary transfer status (تم التحويل + تاريخ الحوالة) on the admin payroll list — done 2026-11-11. Before that: employee permissions with spatie like Acc_NoonTraining — done 2026-11-10 (`can_edit_students`, `can_delete_students`, `can_view_work_regulations`; local DB migrated). Employees with `can_edit_students` can now edit their own students. Before that: bulk delete of students + keep filters after delete. Flagged: employee single delete still lacks an ownership check (Student → Pending). Before that: enforcing Controller → Service → Repository in every module. Done: no controller or service queries models directly anymore (rule in CLAUDE.md → Conventions). Still waiting on the owner: should text dates like `02/08/2026` be read as day/month (see Student → Pending)?
+- **Branch / working tree:** `main`; everything committed through 5490850 (student import email alert). Uncommitted: `TaskAdminController` import fix + this progress update.
 - **Before deploying the import email:** `composer install` on the server — the new `composer.lock` (full update) contains symfony 8.1 packages that need **PHP ≥ 8.4.1**; copy `storage/app/google/credentials.json` + `token.json` to the server (gitignored; must be writable — the token is refreshed in place); set `MAIL_FROM_ADDRESS` / `MAIL_FROM_NAME`.
 - **Before deploying permissions:** commit the new PermissionModule files under **both** `Database/...` and `database/...` (git tracks both cases; the provider loads `Database/migrations`, seeders namespace `Database\Seeders`) — e.g. `git add Modules/PermissionModule/Database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php Modules/PermissionModule/database/migrations/2026_11_10_000001_move_employee_permissions_to_spatie.php` (same for `2026_11_10_000002_rename_student_permissions.php` and the two seeders). Same for `Modules/PayrollModule/{Database,database}/migrations/2026_11_11_000001_add_transfer_status_to_payrolls_table.php`. On the server: `php artisan migrate` → `php artisan permission:cache-reset` → `php artisan optimize:clear`.
 - **Next up:** Answer the date-format question for imports. Owner confirmed project name, keep spatie, fix permission alias, drop FcmHelper, drop Vite/Tailwind. Still open: the other "(?)" items, the "(proposed)" conventions, and planned modules (none recorded yet).
 - **Known issues:**
-  - **Broken pages (found 2026-11-12, not fixed):** `/admin/task` and `/admin/leave/create` throw `Class "...\Controllers\Admin\Task|Leave" not found` — `TaskAdminController.php:42` / `LeaveAdminController` still use the model but its `use` import was dropped in the 2026-11-10 layering refactor. Fix = re-add the `use ...\Models\Task;` / `Leave;` import.
+  - **Broken page (found 2026-11-12, not fixed):** `/admin/leave/create` (and leave edit) throw `Class "...\Controllers\Admin\Leave" not found` — `LeaveAdminController.php:58,110` still use the model but its `use` import was dropped in the 2026-11-10 layering refactor. Fix = re-add `use Modules\LeaveModule\App\Http\Models\Leave;`. (Same bug in Task fixed 2026-11-25; no other controller has it.)
   - Git tracks **69 case-variant duplicate paths** (e.g. `ReportModule/app` + `App`, `AdminModule/Database` + `database`, `ReportModule/views/Admin` + `admin`). macOS hides this; on a case-sensitive Linux server, two copies can diverge or the wrong one load. Needs a cleanup decision.
   - `app/Http/Kernel.php` is dead (Laravel 12 binds the framework kernel). `app/Http/Middleware/CheckPermission.php` is unused since the spatie switch (2026-11-10) — delete both? (ask owner).
   - ReportModule `user/reports` group uses `auth:user` — no such guard (empty group, harmless for now).
@@ -146,6 +146,12 @@
 
 ## Session log
 
+### 2026-11-25 — Fix `/admin/task` "Class Task not found"
+- **Changed:** `TaskAdminController` — re-added `use Modules\TaskModule\App\Http\Models\Task;`
+- **Why:** Import dropped in the 2026-11-10 layering refactor while `Task::STATUSES` is still used (index/create/edit all crashed).
+- **Affects:** TaskModule only. Leave has the same bug, not fixed yet (Known issues).
+- **Commit:** — (not committed yet)
+
 ### 2026-11-23 — Email alert when an employee imports students
 - **Changed:** `StudentEmployeeController::importStudents`, `StudentService::sendImportAlert`; owner added `GmailSenderHelper`, `config/google.php`, `google/apiclient`, view `Employee/import_alert_email_temp`
 - **Why:** Owner request — be informed when an employee uploads a students file.
@@ -199,9 +205,3 @@
 - **Why:** Owner wants the same structure in every module: controller calls service, service calls repository.
 - **Affects:** Payroll, Report, Deduction/Violation, Employee/Branch, Student, User/Permission, Setting. No behaviour change intended; verified services/controllers resolve and the new paths return data (payroll details, reports, violation amount, settings).
 - **Commit:** — (not committed yet)
-
-### 2026-10-18 — Student import: validate whole file before saving
-- **Changed:** `StudentModule/App/Imports/StudentImport.php` (collect → `errors()` → `save()`, per-field valid examples in error messages), `Employee/StudentEmployeeController::importStudents`, `Admin/StudentAdminController::importStudents`
-- **Why:** Errors should be reported per sheet/row with nothing saved. Before, partially-filled rows were silently skipped, and an empty payment method/date (NOT NULL columns) threw a SQL error mid-file, leaving earlier rows saved.
-- **Affects:** PayrollModule (only valid rows reach commission calc), ReportModule
-- **Commit:** c63ee4b (follow-up doc update not yet committed)
